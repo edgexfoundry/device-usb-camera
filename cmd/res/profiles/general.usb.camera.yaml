@@ -1,0 +1,108 @@
+name: "USB-Camera-General"
+labels:
+  - "linux"
+  - "v4l2"
+  - "usb"
+  - "camera"
+description: "EdgeX device profile for General USB camera"
+
+deviceResources:
+  - name: "CameraInfo"
+    description: >-
+      Camera information including driver name, device name, bus info, and capabilities.
+      See https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-querycap.html.
+    attributes:
+      { command: "VIDIOC_QUERYCAP" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "GetVideoInputIndex"
+    description: >-
+      Query or select the current video input.
+      See https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-g-input.html.
+    attributes:
+      { command: "VIDIOC_G_INPUT" }
+    properties:
+      valueType: "Int8"
+      readWrite: "R"
+  - name: "CameraStatus"
+    description: >-
+      Video Input Status, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enuminput.html?highlight=v4l2_input#input-status
+      0x00000000 - Ready
+      0x00000001 - No Power
+      0x00000002 - No Signal
+      0x00000003 - No Color
+    attributes:
+      { command: "VIDIOC_ENUMINPUT" }
+    properties:
+      valueType: "Uint32"
+      readWrite: "R"
+  - name: "EnumImageFormats"
+    description: "Enumerate image formats, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enum-fmt.html."
+    attributes:
+      { command: "VIDIOC_ENUM_FMT" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "GetDataFormat"
+    description: "Get data format, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enuminput.html."
+    attributes:
+      { command: "VIDIOC_G_FMT" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "CropCapability"
+    description: "Information about the video cropping and scaling abilities, see https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-cropcap.html."
+    attributes:
+      { command: "VIDIOC_CROPCAP" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "GetStreamingParam"
+    description: "Get streaming parameters, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-g-parm.html."
+    attributes:
+      { command: "VIDIOC_G_PARM" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "StartStreaming"
+    description: "Start streaming process."
+    attributes:
+      { command: "EDGEX_START_STREAMING" }
+    properties:
+      valueType: "Object"
+      readWrite: "W"
+  - name: "StopStreaming"
+    description: "Stop streaming process."
+    attributes:
+      { command: "EDGEX_STOP_STREAMING" }
+    properties:
+      valueType: "Bool"
+      readWrite: "W"
+      defaultValue: "false"
+  - name: "StreamURI"
+    description: "Get video-streaming URI."
+    attributes:
+      { command: "EDGEX_STREAM_URI" }
+    properties:
+      valueType: "String"
+      readWrite: "R"
+  - name: "StreamingStatus"
+    description: "Get streaming status, including FFmpeg options"
+    attributes:
+      { command: "EDGEX_STREAMING_STATUS" }
+    properties:
+      valueType: "Object"
+      readWrite: "RW"
+
+deviceCommands:
+  - name: "GetCameraMetaData"
+    readWrite: "R"
+    isHidden: false
+    resourceOperations:
+      - { deviceResource: "CameraInfo" }
+      - { deviceResource: "GetVideoInputIndex" }
+      - { deviceResource: "GetDataFormat" }
+      - { deviceResource: "EnumImageFormats" }
+      - { deviceResource: "CropCapability" }
+      - { deviceResource: "GetStreamingParam" }

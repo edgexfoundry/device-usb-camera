@@ -1,0 +1,10 @@
+# Pre-define Devices
+# [[DeviceList]]
+#   Name = "hp-w200-01"
+#   ProfileName = "HP-Webcam-w200"
+#   Description = "HP Webcam w200 - 01"
+#   Labels = [ "device-usb-camera-example" ]
+#   [DeviceList.Protocols]
+#     [DeviceList.Protocols.USB]
+#     Path = "/dev/video0"
+#     AutoStreaming = "false"
