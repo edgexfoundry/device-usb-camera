@@ -7,6 +7,12 @@ This service provides the following capabilities:
 - Camera status
 - Video stream reference
 
+## Tested Devices
+The following devices have been tested with EdgeX:
+- HP Web Cam w200
+- Logitech C270 HD Webcam
+- Jinpei JW-01B USB FHD Web Computer Camera 
+
 ## How does the device service work?
 - The device service ONLY works on Linux system.
 - The device service uses V4L2 API to get camera metadata.
