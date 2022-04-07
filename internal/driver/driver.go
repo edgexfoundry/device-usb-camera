@@ -243,7 +243,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
 		case EDGEX_STOP_STREAMING:
-			device.StopStreaming()
+			device.StopStreaming(nil)
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
@@ -262,7 +262,7 @@ func (d *Driver) Stop(force bool) error {
 
 	for _, device := range d.activeDevices {
 		go func(device *Device) {
-			device.StopStreaming()
+			device.StopStreaming(nil)
 			d.wg.Done()
 		}(device)
 	}
@@ -321,7 +321,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if device, ok := d.activeDevices[deviceName]; ok {
-		device.StopStreaming()
+		device.StopStreaming(nil)
 		delete(d.activeDevices, deviceName)
 		d.lc.Debugf("Device %s is removed", deviceName)
 	}
@@ -404,7 +404,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 
 	rtspUri := &url.URL{
 		Scheme: RtspUriScheme,
-		Host:  fmt.Sprintf("%s:%s",d.rtspHostName,d.rtspTcpPort),
+		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
 	rtspUri.Path = path.Join(Stream, name)
 
@@ -521,7 +521,7 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 	go func() {
 		select {
 		case err := <-errChan:
-			device.StopStreaming()
+			device.StopStreaming(err)
 			d.lc.Errorf("the video streaming process for device %s has stopped, error: %s", err)
 			d.wg.Done()
 			return
