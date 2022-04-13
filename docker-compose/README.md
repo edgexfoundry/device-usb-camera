@@ -1,5 +1,7 @@
 The files in this directory are temporary and will be used to add device-usb-camera into [edgex-compose](https://github.com/edgexfoundry/edgex-compose) in the near future.
 
+> **TODO**: Remove these docker-compose files once service accepted into EdgeX Foundry and added to compose builder.
+
 > **Note to Developers**: 
 > *If you want to test the dockerized device-usb-camera in this stage, please download [edgex-compose](https://github.com/edgexfoundry/edgex-compose) and follow the instructions below to generate a compose file including EdgeX Core services and device-usb-camera service.*
 
