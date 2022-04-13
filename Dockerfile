@@ -26,8 +26,10 @@ RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
 WORKDIR /device-usb-camera
 
-COPY . .
+COPY go.mod vendor* ./
 RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
+
+COPY . .
 
 RUN ${MAKE}
 
