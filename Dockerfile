@@ -21,11 +21,6 @@ ARG MAKE="make build"
 ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA="v4l-utils-dev v4l-utils v4l-utils-libs linux-headers"
 
-LABEL name=edgex-device-usb-camera
-
-LABEL license='SPDX-License-Identifier: Apache-2.0' \
-  copyright='Copyright (c) 2022: Intel Corporation'
-
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
@@ -39,6 +34,9 @@ RUN ${MAKE}
 FROM aler9/rtsp-simple-server AS rtsp
 
 FROM alpine:3.15
+
+LABEL license='SPDX-License-Identifier: Apache-2.0' \
+  copyright='Copyright (c) 2022: Intel Corporation'
 
 # dumb-init needed for injected secure bootstrapping entrypoint script when run in secure mode.
 RUN apk add --update --no-cache zeromq dumb-init ffmpeg udev
