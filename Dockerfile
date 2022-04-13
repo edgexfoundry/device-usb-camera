@@ -51,7 +51,7 @@ COPY --from=builder /device-usb-camera/docker-entrypoint.sh /
 COPY --from=rtsp /rtsp-simple-server.yml /
 COPY --from=rtsp /rtsp-simple-server /
 
-EXPOSE 59910
+EXPOSE 59983
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD [ "--configProvider=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res" ]

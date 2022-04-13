@@ -12,7 +12,7 @@ LogLevel = "INFO"
 [Service]
 HealthCheckInterval = "10s"
 Host = "localhost"
-Port = 59910 # Device serivce are assigned the 599xx range
+Port = 59983 # Device serivce are assigned the 599xx range
 ServerBindAddr = ""  # blank value defaults to Service.Host value
 StartupMsg = "device-usb-camera started"
 # MaxRequestSize limit the request body size in byte of put command

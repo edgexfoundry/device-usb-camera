@@ -203,7 +203,7 @@ If there is a mismatch between them, the device service will scan all paths to f
 This check can also be triggered by using the Device Service API `/refreshdevicepaths`.
 For example:
 ```shell
-curl -X POST http://localhost:59910/api/v2/refreshdevicepaths
+curl -X POST http://localhost:59983/api/v2/refreshdevicepaths
 ```
 
 It's recommended to trigger a check after re-plugging cameras.
