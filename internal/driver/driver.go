@@ -75,7 +75,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 		rtspServerHostName = DefaultRtspServerHostName
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspServerHostName, DefaultRtspServerHostName)
 	}
-	d.lc.Debugf("RTSP server hostname: %s", rtspServerHostName)
+	d.lc.Infof("RTSP server hostname: %s", rtspServerHostName)
 	d.rtspHostName = rtspServerHostName
 
 	rtspPort, ok := service.DriverConfigs()[RtspTcpPort]
@@ -83,7 +83,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 		rtspPort = DefaultRtspTcpPort
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspTcpPort, DefaultRtspTcpPort)
 	}
-	d.lc.Debugf("RTSP TCP port: %s", rtspPort)
+	d.lc.Infof("RTSP TCP port: %s", rtspPort)
 	d.rtspTcpPort = rtspPort
 
 	d.lc.Info("Initializing cameras...")
