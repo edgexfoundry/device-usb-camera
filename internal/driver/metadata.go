@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/vladimirvivien/go4vl/v4l2"
-	v4l2device "github.com/vladimirvivien/go4vl/v4l2/device"
+	usbdevice "github.com/vladimirvivien/go4vl/v4l2/device"
 )
 
 type Capability struct {
@@ -63,7 +63,7 @@ type ImageFormat struct {
 	FrameSizes  []v4l2.FrameSize
 }
 
-func getCapability(d *v4l2device.Device) (interface{}, error) {
+func getCapability(d *usbdevice.Device) (interface{}, error) {
 	c, err := d.GetCapability()
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func getCapability(d *v4l2device.Device) (interface{}, error) {
 	return capability, nil
 }
 
-func getInputStatus(d *v4l2device.Device, index string) (uint32, error) {
+func getInputStatus(d *usbdevice.Device, index string) (uint32, error) {
 	i, err := strconv.ParseUint(fmt.Sprintf("%v", index), 10, 32)
 	if err != nil {
 		return 0, fmt.Errorf("could not convert the given %s %s to Uint32", InputIndex, index)
@@ -102,7 +102,7 @@ func getInputStatus(d *v4l2device.Device, index string) (uint32, error) {
 	return info.GetStatus(), nil
 }
 
-func getDataFormat(d *v4l2device.Device) (interface{}, error) {
+func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	fmt, err := d.GetPixFormat()
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func getDataFormat(d *v4l2device.Device) (interface{}, error) {
 	return result, nil
 }
 
-func getCropInfo(d *v4l2device.Device) (interface{}, error) {
+func getCropInfo(d *usbdevice.Device) (interface{}, error) {
 	crop, err := d.GetCropCapability()
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func getCropInfo(d *v4l2device.Device) (interface{}, error) {
 	return crop, nil
 }
 
-func getStreamingParameters(d *v4l2device.Device) (interface{}, error) {
+func getStreamingParameters(d *usbdevice.Device) (interface{}, error) {
 	p, err := d.GetCaptureParam()
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func getStreamingParameters(d *v4l2device.Device) (interface{}, error) {
 	return result, nil
 }
 
-func getImageFormats(d *v4l2device.Device) (interface{}, error) {
+func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 	descs, err := d.GetFormatDescriptions()
 	if err != nil {
 		return nil, err

@@ -25,7 +25,7 @@ import (
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	"github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
 
-	v4l2device "github.com/vladimirvivien/go4vl/v4l2/device"
+	usbdevice "github.com/vladimirvivien/go4vl/v4l2/device"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -123,7 +123,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	if edgexErr != nil {
 		return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 	}
-	cameraDevice, err := v4l2device.Open(device.path)
+	cameraDevice, err := usbdevice.Open(device.path)
 	if err != nil {
 		return responses, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", device.path), err)
@@ -452,7 +452,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		d.lc.Warnf("there is no device resource representing StreamingStatus of the device %s, so the StreamingStatus won't be published automatically", name)
 	}
 
-	cameraDevice, err := v4l2device.Open(fdPath)
+	cameraDevice, err := usbdevice.Open(fdPath)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", fdPath), err)
@@ -570,7 +570,7 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 }
 
 func (d *Driver) isVideoCaptureDevice(path string) bool {
-	cameraDevice, err := v4l2device.Open(path)
+	cameraDevice, err := usbdevice.Open(path)
 	if err != nil {
 		d.lc.Debugf("there is no USB camera at specified path %s, error: %s", path, err.Error())
 		return false
