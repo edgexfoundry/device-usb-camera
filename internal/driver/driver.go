@@ -397,6 +397,17 @@ func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolPropert
 }
 
 func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProperties) (*Device, errors.EdgeX) {
+	device, err := d.ds.GetDeviceByName(name)
+	if err != nil {
+		return nil, errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("device %s not found in core metadata", name), err)
+	}
+	profile, err := d.ds.GetProfileByName(device.ProfileName)
+	if err != nil {
+		return nil, errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("profile %s not found in core metadata", name), err)
+	}
+
 	fdPath, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, Path)
 	if edgexErr != nil {
 		return nil, errors.NewCommonEdgeXWrapper(edgexErr)
@@ -411,7 +422,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	// Create new instance of transcoder
 	trans := new(transcoder.Transcoder)
 	// Initialize transcoder passing the input path and output path
-	err := trans.Initialize(fdPath, rtspUri.String())
+	err = trans.Initialize(fdPath, rtspUri.String())
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to initialize transcoder for device %s", name), err)
@@ -430,16 +441,6 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		}
 	}
 
-	device, err := d.ds.GetDeviceByName(name)
-	if err != nil {
-		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("device %s not found in core metadata", name), err)
-	}
-	profile, err := d.ds.GetProfileByName(device.ProfileName)
-	if err != nil {
-		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("profile %s not found in core metadata", name), err)
-	}
 	var streamingStatusResourceName string
 	for _, r := range profile.DeviceResources {
 		command, ok := r.Attributes[Command]
