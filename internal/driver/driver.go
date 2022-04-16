@@ -132,6 +132,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 
 	var cv *sdkModels.CommandValue
 	var data interface{}
+	errorWrapper := EdgeXErrorWrapper{} 
 	for i, req := range reqs {
 		command, ok := req.Attributes[Command]
 		if !ok {
@@ -139,19 +140,17 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
-		switch command {
+		switch command := fmt.Sprintf("%v", command); command {
 		case VIDIOC_QUERYCAP:
 			data, err = getCapability(cameraDevice)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_INPUT:
 			data, err = cameraDevice.GetVideoInputIndex()
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
 		case VIDIOC_ENUMINPUT:
@@ -166,36 +165,31 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			data, err = getInputStatus(cameraDevice, index)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
 		case VIDIOC_ENUM_FMT:
 			data, err = getImageFormats(cameraDevice)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_FMT:
 			data, err = getDataFormat(cameraDevice)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_CROPCAP:
 			data, err = getCropInfo(cameraDevice)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_PARM:
 			data, err = getStreamingParameters(cameraDevice)
 			if err != nil {
-				return responses, errors.NewCommonEdgeX(errors.KindServerError,
-					fmt.Sprintf("failed to execute %s command", command), err)
+				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case EDGEX_STREAM_URI:
