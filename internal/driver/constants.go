@@ -33,20 +33,18 @@ const (
 	DescTimePerFrame = "time per frame"
 	DescHighQuality  = "high quality"
 
-	// V4L2 commands
-	VIDIOC_QUERYCAP  = "VIDIOC_QUERYCAP"
-	VIDIOC_G_INPUT   = "VIDIOC_G_INPUT"
-	VIDIOC_ENUMINPUT = "VIDIOC_ENUMINPUT"
-	VIDIOC_G_FMT     = "VIDIOC_G_FMT"
-	VIDIOC_CROPCAP   = "VIDIOC_CROPCAP"
-	VIDIOC_G_PARM    = "VIDIOC_G_PARM"
-	VIDIOC_ENUM_FMT  = "VIDIOC_ENUM_FMT"
-
-	// EdgeX commands
-	EDGEX_START_STREAMING  = "EDGEX_START_STREAMING"
-	EDGEX_STOP_STREAMING   = "EDGEX_STOP_STREAMING"
-	EDGEX_STREAM_URI       = "EDGEX_STREAM_URI"
-	EDGEX_STREAMING_STATUS = "EDGEX_STREAMING_STATUS"
+	// Command names
+	MetadataDeviceCapability    = "METADATA_DEVICE_CAPABILITY"
+	MetadataCurrentVideoInput   = "METADATA_CURRENT_VIDEO_INPUT"
+	MetadataCameraStatus        = "METADATA_CAMERA_STATUS"
+	MetadataDataFormat          = "METADATA_DATA_FORMAT"
+	MetadataCroppingAbility     = "METADATA_CROPPING_ABILITY"
+	MetadataStreamingParameters = "METADATA_STREAMING_PARAMETERS"
+	MetadataImageFormats        = "METADATA_IMAGE_FORMATS"
+	VideoStartStreaming         = "VIDEO_START_STREAMING"
+	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
+	VideoStreamUri              = "VIDEO_STREAM_URI"
+	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

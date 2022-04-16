@@ -37,7 +37,7 @@ Each device resource should have a mandatory attribute named `command` to indica
 
 There are two types of `command`:
 
-* The commands start with **VIDIOC_** prefix are used to get camera metadata.
+* The commands start with **METADATA_** prefix are used to get camera metadata.
 
 For example:
 ```yaml
@@ -47,13 +47,13 @@ deviceResources:
       Camera information including driver name, device name, bus info, and capabilities.
       See https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-querycap.html.
     attributes:
-      { command: "VIDIOC_QUERYCAP" }
+      { command: "METADATA_DEVICE_CAPABILITY" }
     properties:
       valueType: "Object"
       readWrite: "R"
 ```
 
-* The commands start with **EDGEX_** prefix are related to video stream.
+* The commands start with **VIDEO_** prefix are related to video stream.
 
 For example:
 ```yaml
@@ -61,7 +61,7 @@ deviceResources:
   - name: "StreamURI"
     description: "Get video-streaming URI."
     attributes:
-      { command: "EDGEX_STREAM_URI" }
+      { command: "VIDEO_STREAM_URI" }
     properties:
       valueType: "String"
       readWrite: "R"
@@ -135,7 +135,7 @@ deviceResources:
   - name: "StartStreaming"
    description: "Start streaming process."
    attributes:
-     { command: "EDGEX_START_STREAMING",    
+     { command: "VIDEO_START_STREAMING",    
        defaultInputFrameSize: "320x240", 
        defaultOutputVideoQuality: "31" 
      }
