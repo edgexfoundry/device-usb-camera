@@ -123,12 +123,12 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	if edgexErr != nil {
 		return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 	}
-	v4l2Device, err := v4l2device.Open(device.path)
+	cameraDevice, err := v4l2device.Open(device.path)
 	if err != nil {
 		return responses, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", device.path), err)
 	}
-	defer v4l2Device.Close()
+	defer cameraDevice.Close()
 
 	var cv *sdkModels.CommandValue
 	var data interface{}
@@ -141,14 +141,14 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 		}
 		switch command {
 		case VIDIOC_QUERYCAP:
-			data, err = getCapability(v4l2Device)
+			data, err = getCapability(cameraDevice)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_INPUT:
-			data, err = v4l2Device.GetVideoInputIndex()
+			data, err = cameraDevice.GetVideoInputIndex()
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
@@ -164,35 +164,35 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			if len(index) == 0 {
 				return responses, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
 			}
-			data, err = getInputStatus(v4l2Device, index)
+			data, err = getInputStatus(cameraDevice, index)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
 		case VIDIOC_ENUM_FMT:
-			data, err = getImageFormats(v4l2Device)
+			data, err = getImageFormats(cameraDevice)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_FMT:
-			data, err = getDataFormat(v4l2Device)
+			data, err = getDataFormat(cameraDevice)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_CROPCAP:
-			data, err = getCropInfo(v4l2Device)
+			data, err = getCropInfo(cameraDevice)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VIDIOC_G_PARM:
-			data, err = getStreamingParameters(v4l2Device)
+			data, err = getStreamingParameters(cameraDevice)
 			if err != nil {
 				return responses, errors.NewCommonEdgeX(errors.KindServerError,
 					fmt.Sprintf("failed to execute %s command", command), err)
@@ -349,7 +349,7 @@ func (d *Driver) RefreshExistingDevicePaths() {
 func (d *Driver) Discover() {
 	var devices []sdkModels.DiscoveredDevice
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
-	cdm := d.cachedDeviceMap()
+	currentDevices := d.cachedDeviceMap()
 	// The file descriptor of video capture device can be /dev/video0 ~ 63
 	// https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L1402-L1406
 	for i := 0; i < 64; i++ {
@@ -360,7 +360,7 @@ func (d *Driver) Discover() {
 				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
 				continue
 			}
-			if _, ok := cdm[cn+sn]; ok {
+			if _, ok := currentDevices[cn+sn]; ok {
 				continue
 			}
 			discovered := sdkModels.DiscoveredDevice{
@@ -452,12 +452,12 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		d.lc.Warnf("there is no device resource representing StreamingStatus of the device %s, so the StreamingStatus won't be published automatically", name)
 	}
 
-	v4l2Device, err := v4l2device.Open(fdPath)
+	cameraDevice, err := v4l2device.Open(fdPath)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", fdPath), err)
 	}
-	defer v4l2Device.Close()
+	defer cameraDevice.Close()
 
 	cn, sn, err := getUSBDeviceIdInfo(fdPath)
 	if err != nil {
@@ -469,7 +469,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	// pre-defined devices may not include serial number information
 	if len(psn) == 0 {
 		device.Protocols[UsbProtocol][SerialNumber] = sn
-		c, err := v4l2Device.GetCapability()
+		c, err := cameraDevice.GetCapability()
 		if err != nil {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError,
 				fmt.Sprintf("failed to get device capability info,path=%s", fdPath), err)
@@ -570,13 +570,13 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 }
 
 func (d *Driver) isVideoCaptureDevice(path string) bool {
-	v4l2Device, err := v4l2device.Open(path)
+	cameraDevice, err := v4l2device.Open(path)
 	if err != nil {
 		d.lc.Debugf("there is no USB camera at specified path %s, error: %s", path, err.Error())
 		return false
 	}
-	defer v4l2Device.Close()
-	c, err := v4l2Device.GetCapability()
+	defer cameraDevice.Close()
+	c, err := cameraDevice.GetCapability()
 	if err != nil {
 		d.lc.Errorf("failed to get device capability, path=%s, error:%s", path, err.Error())
 		return false
