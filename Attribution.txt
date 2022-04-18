@@ -172,3 +172,6 @@ https://github.com/hashicorp/go-multierror/blob/master/LICENSE
 
 xfrr/goffmpeg (MIT) https://github.com/xfrr/goffmpeg
 https://github.com/xfrr/goffmpeg/blob/master/LICENSE
+
+stretchr/testify (MIT) https://github.com/stretchr/testify
+https://github.com/stretchr/testify/blob/master/LICENSE

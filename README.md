@@ -118,6 +118,8 @@ Supported Input options:
 - **InputImageSize**: Specifies the image size of the camera. The format is `wxh`, for example "640x480". (default - automatically selected by FFmpeg)
 - **InputPixelFormat**: Set the preferred pixel format (for raw video). (default - automatically selected by FFmpeg)
 
+> *Note: If the given option value is not supported by the device, FFmpeg will automatically select the best one supported by the device.
+
 Supported Output options:
 - **OutputFrames**: Set the number of video frames to output. (default - no limitation on frames)
 - **OutputFps**: Duplicate or drop input frames to achieve constant output frame rate fps. (default - same as InputFps)
@@ -128,6 +130,8 @@ Supported Output options:
 
 You can also set default values for these options by adding additional attributes to the device resource **StartStreaming**.
 The attribute name consists of a prefix "default" and the option name.
+
+
 
 For example:
 ```yaml

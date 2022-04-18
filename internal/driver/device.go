@@ -32,6 +32,7 @@ type Device struct {
 }
 
 type streamingStatus struct {
+	Error              string
 	IsStreaming        bool
 	OutputFrames       string
 	InputFps           string
@@ -55,9 +56,14 @@ func (dev *Device) StartStreaming(ctx context.Context, cancel context.CancelFunc
 	return errChan, nil
 }
 
-func (dev *Device) StopStreaming() {
+func (dev *Device) StopStreaming(err error) {
 	dev.mutex.Lock()
 	defer dev.mutex.Unlock()
+	if err != nil {
+		dev.streamingStatus.Error = err.Error()
+	} else {
+		dev.streamingStatus.Error = ""
+	}
 	if dev.streamingStatus.IsStreaming {
 		dev.cancelFunc()
 		dev.streamingStatus.IsStreaming = false
