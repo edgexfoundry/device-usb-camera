@@ -132,7 +132,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 
 	var cv *sdkModels.CommandValue
 	var data interface{}
-	errorWrapper := EdgeXErrorWrapper{} 
+	errorWrapper := EdgeXErrorWrapper{}
 	for i, req := range reqs {
 		command, ok := req.Attributes[Command]
 		if !ok {
@@ -140,20 +140,21 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
+
 		switch command := fmt.Sprintf("%v", command); command {
-		case VIDIOC_QUERYCAP:
+		case MetadataDeviceCapability:
 			data, err = getCapability(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VIDIOC_G_INPUT:
+		case MetadataCurrentVideoInput:
 			data, err = cameraDevice.GetVideoInputIndex()
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
-		case VIDIOC_ENUMINPUT:
+		case MetadataCameraStatus:
 			queryParams, edgexErr := getQueryParameters(req)
 			if edgexErr != nil {
 				return responses, errors.NewCommonEdgeXWrapper(edgexErr)
@@ -168,33 +169,33 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
-		case VIDIOC_ENUM_FMT:
+		case MetadataImageFormats:
 			data, err = getImageFormats(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VIDIOC_G_FMT:
+		case MetadataDataFormat:
 			data, err = getDataFormat(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VIDIOC_CROPCAP:
+		case MetadataCroppingAbility:
 			data, err = getCropInfo(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VIDIOC_G_PARM:
+		case MetadataStreamingParameters:
 			data, err = getStreamingParameters(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case EDGEX_STREAM_URI:
+		case VideoStreamUri:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
-		case EDGEX_STREAMING_STATUS:
+		case VideoStreamingStatus:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
 		default:
 			return responses, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
@@ -223,7 +224,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					req.DeviceResourceName), nil)
 		}
 		switch command {
-		case EDGEX_START_STREAMING:
+		case VideoStartStreaming:
 			options, edgexErr := params[i].ObjectValue()
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -236,7 +237,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
-		case EDGEX_STOP_STREAMING:
+		case VideoStopStreaming:
 			device.StopStreaming()
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
@@ -409,7 +410,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 
 	rtspUri := &url.URL{
 		Scheme: RtspUriScheme,
-		Host:  fmt.Sprintf("%s:%s",d.rtspHostName,d.rtspTcpPort),
+		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
 	rtspUri.Path = path.Join(Stream, name)
 
@@ -438,7 +439,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	var streamingStatusResourceName string
 	for _, r := range profile.DeviceResources {
 		command, ok := r.Attributes[Command]
-		if ok && command == EDGEX_STREAMING_STATUS {
+		if ok && command == VideoStreamingStatus {
 			streamingStatusResourceName = r.Name
 			break
 		}
