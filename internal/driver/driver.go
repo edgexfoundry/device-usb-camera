@@ -253,6 +253,9 @@ func (d *Driver) Stop(force bool) error {
 	defer d.mutex.Unlock()
 
 	d.wg.Add(len(d.activeDevices))
+
+	// The wait group is used here as well as in the startStreaming functions.
+	// The call to Wait() waits for StopStreaming to return and startStreaming to end.
 	defer d.wg.Wait()
 
 	for _, device := range d.activeDevices {
