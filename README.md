@@ -107,7 +107,7 @@ For example:
 ```shell
 curl -X PUT -d '{
     "StartStreaming": {
-      "InputFrameSize": "640x480",
+      "InputImageSize": "640x480",
       "OutputVideoQuality": "5"
     }
 }' http://localhost:59882/api/v2/device/name/hp-w200-01/StartStreaming
