@@ -173,7 +173,7 @@ export DEVICE_DISCOVERY_INTERVAL=0
 
 The interval is set to `0` by default, it means that do not run discovery automatically to save computing resources.
 To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).
-If you want the device service to run discovery periodically, use a valid value (ISO 8601) such as `30s` as the interval.
+If you want the device service to run discovery periodically, use a valid [Go duration](https://pkg.go.dev/time#ParseDuration) such as `30s` as the interval.
 
 #### Provision watcher example
 ```shell
