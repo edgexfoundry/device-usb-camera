@@ -37,7 +37,7 @@ Each device resource should have a mandatory attribute named `command` to indica
 
 There are two types of `command`:
 
-* The commands start with **METADATA_** prefix are used to get camera metadata.
+* The commands started with **METADATA_** prefix are used to get camera metadata.
 
 For example:
 ```yaml
