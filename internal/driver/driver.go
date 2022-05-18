@@ -615,10 +615,10 @@ func getQueryParameters(req sdkModels.CommandRequest) (url.Values, errors.EdgeX)
 // getUSBDeviceIdInfo returns the serial number and the card name of the device on the specified path
 func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err error) {
 	cmd := exec.Command("udevadm", "info", "--query=property", path)
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to run command: %s", cmd.String()), err)
+			fmt.Sprintf("failed to run command: %s: %s", cmd.String(), output), err)
 	}
 	props := strings.Split(string(output), "\n")
 	m := make(map[string]string, len(props))
