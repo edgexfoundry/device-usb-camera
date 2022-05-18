@@ -1,0 +1,171 @@
+name: edgex-device-usb-camera
+base: core20
+license: Apache-2.0
+adopt-info: metadata
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+grade: stable
+confinement: strict
+
+epoch: 0
+
+slots:
+  edgex-secretstore-token:
+    interface: content
+    content: edgex-secretstore-token
+    source:
+      write: [$SNAP_DATA/device-usb-camera]
+
+plugs:
+  device-config:
+    interface: content 
+    target: $SNAP_DATA/config/device-usb-camera
+
+apps:
+  rtsp-simple-server:
+    command: bin/rtsp-simple-server $SNAP_DATA/config/rtsp-simple-server.yml
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind]
+
+  device-usb-camera:
+    command: bin/device-usb-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
+    command-chain:
+      - bin/startup-env-var.sh
+    environment:
+      CONFIG_PRO_ARG: "--cp=consul.http://localhost:8500"
+      CONF_ARG: "--confdir=$SNAP_DATA/config/device-usb-camera/res"
+      REGISTRY_ARG: "--registry"
+      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-usb-camera/res/profiles"
+      DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-usb-camera/res/devices"
+      SECRETSTORE_TOKENFILE: $SNAP_DATA/device-usb-camera/secrets-token.json
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind]
+
+
+parts:      
+  hooks:
+    source: snap/local/hooks
+    plugin: make
+    build-snaps:
+      - go/1.17/stable
+    override-build: |
+      cd $SNAPCRAFT_PART_SRC
+      make build
+      install -DT ./cmd/configure/configure "$SNAPCRAFT_PART_INSTALL/snap/hooks/configure"
+      install -DT ./cmd/install/install "$SNAPCRAFT_PART_INSTALL/snap/hooks/install"
+
+  rtsp-simple-server:
+    source:
+      - on amd64:
+          https://github.com/aler9/rtsp-simple-server/releases/download/v0.18.3/rtsp-simple-server_v0.18.3_linux_amd64.tar.gz
+      - on arm64:
+          https://github.com/aler9/rtsp-simple-server/releases/download/v0.18.3/rtsp-simple-server_v0.18.3_linux_arm64v8.tar.gz
+    plugin: dump
+    # stage:
+    #   - rtsp-simple-server
+    organize:
+      rtsp-simple-server: bin/rtsp-simple-server
+      rtsp-simple-server.yml: config/rtsp-simple-server.yml
+
+    
+  device-usb-camera:
+    after: [metadata]
+    source: .
+    plugin: make
+    build-packages: 
+      - git
+      - libzmq3-dev
+      - pkg-config
+      # - libc-dev
+      # - gcc
+      # # - v4l-utils-dev
+      # # - v4l-utils-libs
+      # - v4l-utils
+
+      # - linux-headers
+      # - libv4l-dev
+      # - libv4l-0
+      # - linux-libc-dev
+      # - libvideo-ivtv-perl
+    stage-packages: [libzmq5]
+    build-snaps:
+      - go/1.17/stable
+    override-build: |
+      # The existing header file missed several of the needed definitions
+      # Replace it with one from Ubuntu 22.04
+      cp snap/local/videodev2.h /usr/include/linux/videodev2.h
+
+      cd $SNAPCRAFT_PART_SRC
+
+      # the version is needed for the build
+      cat VERSION
+
+      make tidy
+      make build
+
+      install -DT "./cmd/device-usb-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-usb-camera"
+
+      # mkdir -p $SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res
+      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/"
+      # install -DT "./cmd/res/configuration.toml" \
+      #   "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/configuration.toml"
+
+      RES=$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/
+      mkdir -p $RES
+      cp    cmd/res/configuration.toml $RES
+      cp -r cmd/res/devices $RES
+      cp -r cmd/res/profiles $RES
+      ls $RES
+
+      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/profiles/"
+      # for fpath in ./cmd/res/profiles/*.yaml; do
+      #     fname=$(basename "$fpath")
+      #     install -DT "./cmd/res/profiles/${fname}" \
+      #       "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/profiles/${fname}"
+      # done
+
+      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/devices/"
+      # for fpath in ./cmd/res/devices/*.toml; do
+      #     fname=$(basename "$fpath")
+      #     install -DT "./cmd/res/devices/${fname}" \
+      #       "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/devices/${fname}"
+      # done
+      
+      DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-usb-camera
+      mkdir -p $DOC
+      cp Attribution.txt $DOC/Attribution.txt
+      cp LICENSE $DOC/LICENSE
+
+  runtime-helpers:
+    plugin: dump
+    source: snap/local/runtime-helpers
+
+  metadata:
+    plugin: nil
+    source: https://github.com/canonical/edgex-snap-metadata.git
+    source-branch: appstream
+    source-depth: 1
+    override-build: |
+      # install the icon at the default internal path
+      install -DT edgex-snap-icon.png \
+        $SNAPCRAFT_PART_INSTALL/meta/gui/icon.png
+      
+      # change to this project's repo to get the version
+      cd $SNAPCRAFT_PROJECT_DIR
+      if git describe ; then
+        VERSION=$(git describe --tags --abbrev=0 | sed 's/v//')
+      else
+        VERSION="0.0.0"
+      fi
+      
+      # write version to file for the build
+      echo $VERSION > ./VERSION
+      # set the version of this snap
+      snapcraftctl set-version $VERSION
+    # parse-info: [edgex-device-usb-camera.metainfo.xml]
+    parse-info: [edgex-device-camera.metainfo.xml]

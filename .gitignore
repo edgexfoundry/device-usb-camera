@@ -26,4 +26,14 @@ LintOutput.json
 device-usb-camera
 run
 
-#VERSION
+VERSION
+
+# snap files
+*.snap
+*.assert
+prime/
+stage/
+parts/
+squashfs-root/
+coverage.out
+VERSION
