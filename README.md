@@ -37,7 +37,7 @@ Each device resource should have a mandatory attribute named `command` to indica
 
 There are two types of `command`:
 
-* The commands start with **METADATA_** prefix are used to get camera metadata.
+* The commands started with **METADATA_** prefix are used to get camera metadata.
 
 For example:
 ```yaml
@@ -107,7 +107,7 @@ For example:
 ```shell
 curl -X PUT -d '{
     "StartStreaming": {
-      "InputFrameSize": "640x480",
+      "InputImageSize": "640x480",
       "OutputVideoQuality": "5"
     }
 }' http://localhost:59882/api/v2/device/name/hp-w200-01/StartStreaming
@@ -172,8 +172,8 @@ export DEVICE_DISCOVERY_INTERVAL=0
 ```
 
 The interval is set to `0` by default, it means that do not run discovery automatically to save computing resources.
-To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.0.0#/default/post_discovery).
-If you want the device service to run discovery periodically, use a valid value (ISO 8601) such as `30s` as the interval.
+To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).
+If you want the device service to run discovery periodically, use a valid [Go duration](https://pkg.go.dev/time#ParseDuration) such as `30s` as the interval.
 
 #### Provision watcher example
 ```shell
