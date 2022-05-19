@@ -29,7 +29,7 @@ apps:
     command: bin/rtsp-simple-server $SNAP_DATA/config/rtsp-simple-server.yml
     daemon: simple
     install-mode: disable
-    plugs: [network, network-bind]
+    plugs: [network-bind]
 
   device-usb-camera:
     command: bin/device-usb-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
@@ -46,7 +46,10 @@ apps:
       LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
     daemon: simple
     install-mode: disable
-    plugs: [network, network-bind]
+    plugs: 
+      - network
+      - network-bind
+      - camera
 
 
 parts:      
@@ -58,8 +61,8 @@ parts:
     override-build: |
       cd $SNAPCRAFT_PART_SRC
       make build
-      install -DT ./cmd/configure/configure "$SNAPCRAFT_PART_INSTALL/snap/hooks/configure"
-      install -DT ./cmd/install/install "$SNAPCRAFT_PART_INSTALL/snap/hooks/install"
+      install -DT ./cmd/configure/configure $SNAPCRAFT_PART_INSTALL/snap/hooks/configure
+      install -DT ./cmd/install/install $SNAPCRAFT_PART_INSTALL/snap/hooks/install
 
   rtsp-simple-server:
     source:
@@ -81,12 +84,12 @@ parts:
       - git
       - libzmq3-dev
       - pkg-config
+    build-snaps:
+      - go/1.17/stable
     stage-packages:
       - libzmq5
       - ffmpeg
       - libpulse0
-    build-snaps:
-      - go/1.17/stable
     override-build: |
       # The existing header file misses several of the needed definitions.
       # Replace it with one from Ubuntu 22.04

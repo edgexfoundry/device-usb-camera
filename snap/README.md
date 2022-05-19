@@ -52,6 +52,32 @@ snap start edgexfoundry.security-consul-bootstrapper
 
 Please refer [here][secret-store-token] for further information.
 
+### Connect the camera interface
+The `camera` interface is currently not automatically connected. To connect manually:
+```
+snap connect edgex-device-usb-camera:camera :camera
+```
+
 [edgex-device-usb-camera]: https://snapcraft.io/edgex-device-usb-camera
 [docs]: https://docs.edgexfoundry.org/2.2/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
 [secret-store-token]: https://docs.edgexfoundry.org/2.2/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
+
+# Issues
+The snap is 115 MB, exactly same as the docker image.
+
+It may be possible to reduce the size by removing extra shared library object files.
+
+See:
+```
+./device-usb-camera$ du -a -d 1 squashfs-root/usr/lib/x86_64-linux-gnu/ | sort -n -r | head -n 10
+297884  squashfs-root/usr/lib/x86_64-linux-gnu/
+89352   squashfs-root/usr/lib/x86_64-linux-gnu/libLLVM-12.so.1
+43020   squashfs-root/usr/lib/x86_64-linux-gnu/dri
+27392   squashfs-root/usr/lib/x86_64-linux-gnu/libicudata.so.66.1
+15732   squashfs-root/usr/lib/x86_64-linux-gnu/libx265.so.179
+14208   squashfs-root/usr/lib/x86_64-linux-gnu/libavcodec.so.58.54.100
+14196   squashfs-root/usr/lib/x86_64-linux-gnu/libcodec2.so.0.9
+9380    squashfs-root/usr/lib/x86_64-linux-gnu/librsvg-2.so.2.47.0
+4808    squashfs-root/usr/lib/x86_64-linux-gnu/libflite_cmu_time_awb.so.2.1
+4712    squashfs-root/usr/lib/x86_64-linux-gnu/libflite_cmu_us_rms.so.2.1
+```
