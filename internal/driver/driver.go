@@ -521,7 +521,7 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 		select {
 		case err := <-errChan:
 			device.StopStreaming()
-			d.lc.Errorf("the video streaming process for device %s has stopped, error: %s", err)
+			d.lc.Errorf("the video streaming process for device %s has stopped, error: %s", device.name, err)
 			d.wg.Done()
 			return
 		case <-device.ctx.Done():
