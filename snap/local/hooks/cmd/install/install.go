@@ -18,7 +18,6 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 
 	hooks "github.com/canonical/edgex-snap-hooks/v2"
 	"github.com/canonical/edgex-snap-hooks/v2/env"
@@ -27,69 +26,56 @@ import (
 
 // installProfiles copies the profile configuration.toml files from $SNAP to $SNAP_DATA.
 func installConfig() error {
-	var err error
-
-	// serviceConfig := "/config/device-usb-camera/res/configuration.toml"
-	// destFile := env.SnapData + res + "configuration.toml"
-	// srcFile := env.Snap + path
-
-	// output, err := exec.Command("ls", srcFile).CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("%s: %s", err, output)
-	// }
-	// log.Errorf("%s", output)
-
-	if err = os.MkdirAll(hooks.SnapData+"/config/device-usb-camera/res", 0755); err != nil {
+	resPath := "/config/device-usb-camera/res"
+	err := os.MkdirAll(env.SnapData+resPath, 0755)
+	if err != nil {
 		return err
 	}
 
-	path := "/config/device-usb-camera/res/configuration.toml"
-	if err = hooks.CopyFile(
+	path := resPath + "/configuration.toml"
+	err = hooks.CopyFile(
 		env.Snap+path,
-		env.SnapData+path); err != nil {
+		env.SnapData+path)
+	if err != nil {
 		return err
 	}
 
 	path = "/config/rtsp-simple-server.yml"
-	if err = hooks.CopyFile(
+	err = hooks.CopyFile(
 		env.Snap+path,
-		env.SnapData+path); err != nil {
+		env.SnapData+path)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// func installDevices() error {
-// 	var err error
+func installDevices() error {
+	devicesDir := "/config/device-usb-camera/res/devices"
 
-// 	path := "/config/device-camera/res/devices/camera.toml"
-// 	destFile := hooks.SnapData + path
-// 	srcFile := hooks.Snap + path
-
-// 	if err = os.MkdirAll(filepath.Dir(destFile), 0755); err != nil {
-// 		return err
-// 	}
-
-// 	if err = hooks.CopyFile(srcFile, destFile); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-func installDevProfiles() error {
-	var err error
-
-	path := "/config/device-usb-camera/res/profiles/general.usb.camera.yaml"
-	destFile := hooks.SnapData + path
-	srcFile := hooks.Snap + path
-
-	if err := os.MkdirAll(filepath.Dir(destFile), 0755); err != nil {
+	err := os.MkdirAll(env.SnapData+devicesDir, 0755)
+	if err != nil {
 		return err
 	}
 
-	if err = hooks.CopyFile(srcFile, destFile); err != nil {
+	// no default devices
+
+	return nil
+}
+
+func installDevProfiles() error {
+	profilesDir := "/config/device-usb-camera/res/profiles"
+
+	err := os.MkdirAll(env.SnapData+profilesDir, 0755)
+	if err != nil {
+		return err
+	}
+
+	err = hooks.CopyFile(
+		hooks.Snap+profilesDir+"/general.usb.camera.yaml",
+		hooks.SnapData+profilesDir+"/general.usb.camera.yaml")
+	if err != nil {
 		return err
 	}
 
@@ -105,11 +91,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// err = installDevices()
-	// if err != nil {
-	// 	log.Error(err)
-	// 	os.Exit(1)
-	// }
+	err = installDevices()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
 
 	err = installDevProfiles()
 	if err != nil {

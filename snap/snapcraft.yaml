@@ -42,6 +42,8 @@ apps:
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-usb-camera/res/profiles"
       DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-usb-camera/res/devices"
       SECRETSTORE_TOKENFILE: $SNAP_DATA/device-usb-camera/secrets-token.json
+      # This is needed by ffprobe to open libpulsecommon shared object file
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind]
@@ -66,8 +68,6 @@ parts:
       - on arm64:
           https://github.com/aler9/rtsp-simple-server/releases/download/v0.18.3/rtsp-simple-server_v0.18.3_linux_arm64v8.tar.gz
     plugin: dump
-    # stage:
-    #   - rtsp-simple-server
     organize:
       rtsp-simple-server: bin/rtsp-simple-server
       rtsp-simple-server.yml: config/rtsp-simple-server.yml
@@ -81,22 +81,14 @@ parts:
       - git
       - libzmq3-dev
       - pkg-config
-      # - libc-dev
-      # - gcc
-      # # - v4l-utils-dev
-      # # - v4l-utils-libs
-      # - v4l-utils
-
-      # - linux-headers
-      # - libv4l-dev
-      # - libv4l-0
-      # - linux-libc-dev
-      # - libvideo-ivtv-perl
-    stage-packages: [libzmq5]
+    stage-packages:
+      - libzmq5
+      - ffmpeg
+      - libpulse0
     build-snaps:
       - go/1.17/stable
     override-build: |
-      # The existing header file missed several of the needed definitions
+      # The existing header file misses several of the needed definitions.
       # Replace it with one from Ubuntu 22.04
       cp snap/local/videodev2.h /usr/include/linux/videodev2.h
 
@@ -110,31 +102,11 @@ parts:
 
       install -DT "./cmd/device-usb-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-usb-camera"
 
-      # mkdir -p $SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res
-      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/"
-      # install -DT "./cmd/res/configuration.toml" \
-      #   "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/configuration.toml"
-
       RES=$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/
       mkdir -p $RES
       cp    cmd/res/configuration.toml $RES
       cp -r cmd/res/devices $RES
       cp -r cmd/res/profiles $RES
-      ls $RES
-
-      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/profiles/"
-      # for fpath in ./cmd/res/profiles/*.yaml; do
-      #     fname=$(basename "$fpath")
-      #     install -DT "./cmd/res/profiles/${fname}" \
-      #       "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/profiles/${fname}"
-      # done
-
-      # install -d "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/devices/"
-      # for fpath in ./cmd/res/devices/*.toml; do
-      #     fname=$(basename "$fpath")
-      #     install -DT "./cmd/res/devices/${fname}" \
-      #       "$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/devices/${fname}"
-      # done
       
       DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-usb-camera
       mkdir -p $DOC
