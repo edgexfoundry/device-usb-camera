@@ -77,7 +77,7 @@ parts:
 
     
   device-usb-camera:
-    after: [metadata]
+    after: [metadata, runtime-helpers]
     source: .
     plugin: make
     build-packages: 
@@ -91,10 +91,6 @@ parts:
       - ffmpeg
       - libpulse0
     override-build: |
-      # The existing header file misses several of the needed definitions.
-      # Replace it with one from Ubuntu 22.04
-      cp snap/local/videodev2.h /usr/include/linux/videodev2.h
-
       cd $SNAPCRAFT_PART_SRC
 
       # the version is needed for the build
@@ -119,6 +115,12 @@ parts:
   runtime-helpers:
     plugin: dump
     source: snap/local/runtime-helpers
+    organize:
+      # The existing header file misses several of the definitions
+      # needed for device-usb-camera.
+      # Replace it with one from Ubuntu 22.04
+      include/videodev2.h: /usr/include/linux/videodev2.h
+
 
   metadata:
     plugin: nil
