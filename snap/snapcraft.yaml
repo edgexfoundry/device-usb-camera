@@ -10,8 +10,6 @@ architectures:
 grade: stable
 confinement: strict
 
-epoch: 0
-
 slots:
   edgex-secretstore-token:
     interface: content
@@ -46,18 +44,14 @@ apps:
       LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
     daemon: simple
     install-mode: disable
-    plugs: 
-      - network
-      - network-bind
-      - camera
+    plugs: [network, network-bind, camera]
 
 
 parts:      
   hooks:
     source: snap/local/hooks
     plugin: make
-    build-snaps:
-      - go/1.17/stable
+    build-snaps: [go/1.17/stable]
     override-build: |
       cd $SNAPCRAFT_PART_SRC
       make build
@@ -77,21 +71,19 @@ parts:
 
     
   device-usb-camera:
-    after: [metadata, runtime-helpers]
+    after: [metadata]
     source: .
     plugin: make
-    build-packages: 
-      - git
-      - libzmq3-dev
-      - pkg-config
-    build-snaps:
-      - go/1.17/stable
-    stage-packages:
-      - libzmq5
-      - ffmpeg
-      - libpulse0
+    build-packages: [git, libzmq3-dev, pkg-config]
+    build-snaps: [go/1.17/stable]
+    stage-packages: [libzmq5, ffmpeg, libpulse0]
     override-build: |
       cd $SNAPCRAFT_PART_SRC
+
+      # The existing header file misses several of the definitions needed for
+      # compiling device-usb-camera.
+      # Replace it with one from Ubuntu 22.04:
+      cp snap/local/build-helpers/include/videodev2.h /usr/include/linux/videodev2.h
 
       # the version is needed for the build
       cat VERSION
@@ -115,12 +107,6 @@ parts:
   runtime-helpers:
     plugin: dump
     source: snap/local/runtime-helpers
-    organize:
-      # The existing header file misses several of the definitions
-      # needed for device-usb-camera.
-      # Replace it with one from Ubuntu 22.04
-      include/videodev2.h: /usr/include/linux/videodev2.h
-
 
   metadata:
     plugin: nil
