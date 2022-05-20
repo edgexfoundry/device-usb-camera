@@ -33,7 +33,7 @@ COPY . .
 
 RUN ${MAKE}
 
-FROM aler9/rtsp-simple-server AS rtsp
+FROM aler9/rtsp-simple-server:v0.18.4 AS rtsp
 
 FROM alpine:3.15
 
