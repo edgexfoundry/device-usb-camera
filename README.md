@@ -155,6 +155,9 @@ Take the camera Logitech C270 as an example, its Card Name is "C270 HD WEBCAM" a
 > *Note: Card Name and Serial number are used by the device service to uniquely identify a camera, although those cheaply mass-produced cameras may have the same serial number.
 
 #### Enable the Dynamic Discovery function
+Dynamic discovery is disabled by default to save computing resources.
+If you want the device service to run the discovery periodically, enable it and set a desired interval.
+The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration).
 
 [Option 1] Enable from the configuration.toml
 ```yaml
@@ -162,18 +165,16 @@ Take the camera Logitech C270 as an example, its Card Name is "C270 HD WEBCAM" a
 ...
     [Device.Discovery]
     Enabled = true
-    Interval = "0"
+    Interval = "1h"
 ```
 
 [Option 2] Enable from the env
 ```shell
 export DEVICE_DISCOVERY_ENABLED=true
-export DEVICE_DISCOVERY_INTERVAL=0
+export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
-The interval is set to `0` by default, it means that do not run discovery automatically to save computing resources.
 To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).
-If you want the device service to run discovery periodically, use a valid [Go duration](https://pkg.go.dev/time#ParseDuration) such as `30s` as the interval.
 
 #### Provision watcher example
 ```shell
