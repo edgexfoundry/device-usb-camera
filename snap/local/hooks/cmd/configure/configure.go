@@ -25,50 +25,13 @@ import (
 	"github.com/canonical/edgex-snap-hooks/v2/snapctl"
 )
 
-// var cli *hooks.CtlCli = hooks.NewSnapCtl()
-
 func main() {
-	// var debug = false
-	// // var err error
-	// var envJSON string
-
-	// status, err := cli.Config("debug")
-	// if err != nil {
-	// 	fmt.Println(fmt.Sprintf("edgex-device-camera:configure: can't read value of 'debug': %v", err))
-	// 	os.Exit(1)
-	// }
-	// if status == "true" {
-	// 	debug = true
-	// }
-
-	// if err = hooks.Init(debug, "edgex-device-camera"); err != nil {
-	// 	fmt.Println(fmt.Sprintf("edgex-device-camera:configure: initialization failure: %v", err))
-	// 	os.Exit(1)
-
-	// }
-
 	log.SetComponentName("configure")
 	err := options.ProcessAppConfig("device-usb-camera")
 	if err != nil {
 		log.Errorf("could not process options: %v", err)
 		os.Exit(1)
 	}
-
-	// cli := hooks.NewSnapCtl()
-	// envJSON, err = cli.Config(hooks.EnvConfig)
-	// if err != nil {
-	// 	log.Errorf("Reading config 'env' failed: %v", err)
-	// 	os.Exit(1)
-	// }
-
-	// if envJSON != "" {
-	// 	log.Debugf("envJSON: %s", envJSON)
-	// 	err = hooks.HandleEdgeXConfig("device-camera", envJSON, local.ConfToEnv)
-	// 	if err != nil {
-	// 		log.Errorf("HandleEdgeXConfig failed: %v", err)
-	// 		os.Exit(1)
-	// 	}
-	// }
 
 	// If autostart is not explicitly set, default to "no"
 	// as only example service configuration and profiles
@@ -85,10 +48,10 @@ func main() {
 	autostart = strings.ToLower(autostart)
 	log.Debugf("autostart=%s", autostart)
 
-	// service is stopped/disabled by default in the install hook
+	// services are stopped/disabled by default in the install hook
 	switch autostart {
 	case "true", "yes":
-		err = snapctl.Start("device-usb-camera").Enable().Run()
+		err = snapctl.Start("rtsp-simple-server", "device-usb-camera").Enable().Run()
 		if err != nil {
 			log.Errorf("Can't start service: %s", err)
 			os.Exit(1)
