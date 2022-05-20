@@ -21,11 +21,13 @@ sudo snap install --dangerous <snap-file>
 The [snapcraft overview](https://snapcraft.io/docs/snapcraft-overview) provides additional details.
 
 ### Obtain a Secret Store token
-<!-- The `edgex-secretstore-token` snap slot makes it possible to automatically receive a token from a locally installed platform snap.
+<!-- The `edgex-secretstore-token` snap slot makes it possible to automatically receive a token from a locally installed platform snap.-->
 
-If the snap is built and installed locally, the interface will not auto-connect. You can check the status of the connections by running the `snap connections edgex-device-usb-camera` command. -->
+If the snap is built and installed locally, the interface will not auto-connect. You can check the status of the connections by running the `snap connections edgex-device-usb-camera` command.
 
-The service isn't yet included in the secrets list of the platform snap.
+Notes:
+- The auto connection will not happen right now because the snap publisher isn't same as the `edgexfoundry` platrform snap (i.e. Canonical).
+- The service isn't yet included in the secrets list of the platform snap.
 Add the device service to list of services which have tokens generated for them:
 ```
 # Additional secret store tokens
@@ -39,15 +41,15 @@ snap set edgexfoundry apps.security-secretstore-setup.config.add-known-secrets="
 # Additional registry ACL roles
 EXISTING=$(snap get edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles)
 snap set edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles="$EXISTING,device-usb-camera"
+
+# Run the bootstrappers:
+snap start edgexfoundry.security-secretstore-setup
+snap start edgexfoundry.security-consul-bootstrapper 
 ```
 
 To manually connect and obtain a token:
 ```bash
 sudo snap connect edgexfoundry:edgex-secretstore-token edgex-device-usb-camera:edgex-secretstore-token
-
-Start bootstrappers:
-snap start edgexfoundry.security-secretstore-setup
-snap start edgexfoundry.security-consul-bootstrapper 
 ```
 
 Please refer [here][secret-store-token] for further information.
