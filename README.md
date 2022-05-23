@@ -89,7 +89,7 @@ For example:
     Path = "/dev/video0"
     AutoStreaming = "false"
 ```
-See the sample at [cmd/res/devices/hp.w200.toml.example](cmd/res/devices/hp.w200.toml)
+See the examples at [cmd/res/devices](cmd/res/devices)
 
 > *Note: When a new device is created in Core Metadata, an callback function of the device service will be called to add the device card name and serial number to protocol properties for identification purposes.
 > These two pieces of information are obtained through `V4L2` API and `udev` utility.
