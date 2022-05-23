@@ -102,8 +102,8 @@ EnableAsyncReadings = true
 Labels = []
 UseMessageBus = true
   [Device.Discovery]
-  Enabled = true
-  Interval = "0"
+  Enabled = false
+  Interval = "1h"
 
 [Driver]
 RtspServerHostName = "localhost"
