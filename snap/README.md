@@ -62,7 +62,8 @@ sudo snap start edgexfoundry.security-consul-bootstrapper
 ```
 
 ### Connect the camera interface
-The `camera` interface is currently not automatically connected. To connect manually:
+The [`camera`](https://snapcraft.io/docs/camera-interface) interface is currently not automatically connected as it is pending auto-connection permissions from the store.
+To connect manually:
 ```
 snap connect edgex-device-usb-camera:camera :camera
 ```
