@@ -76,7 +76,12 @@ parts:
     plugin: make
     build-packages: [git, libzmq3-dev, pkg-config]
     build-snaps: [go/1.17/stable]
-    stage-packages: [libzmq5, ffmpeg, libpulse0]
+    stage-packages: 
+      - libzmq5
+      - ffmpeg
+      # libpulsecommon shared object file is needed by ffprobe
+      # The path to the lib is added to LD_LIBRARY_PATH in the corresponding app
+      - libpulse0
     override-build: |
       cd $SNAPCRAFT_PART_SRC
 
