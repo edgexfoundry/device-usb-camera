@@ -199,3 +199,6 @@ https://github.com/go-yaml/yaml/blob/v2/LICENSE
 
 github.com/rcrowley/go-metrics (Unspecified) https://github.com/rcrowley/go-metrics
 https://github.com/rcrowley/go-metrics/blob/master/LICENSE
+
+stretchr/testify (MIT) https://github.com/stretchr/testify
+https://github.com/stretchr/testify/blob/master/LICENSE

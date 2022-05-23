@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/errors"
+
+	"github.com/vladimirvivien/go4vl/v4l2"
 )
 
 type FFmpeg struct {
@@ -104,10 +106,10 @@ func setupFFmpegOptions(dev *Device, opts interface{}, attr map[string]interface
 	ffmpeg := &FFmpeg{}
 	// obtain FFmpeg options defined in request body
 	for optName, value := range options {
-		optVal, ok := value.(string)
-		if !ok {
+		optVal, err := parseOptionValue(optName, value)
+		if err != nil {
 			return errors.NewCommonEdgeX(errors.KindContractInvalid,
-				"argument should be a string", nil)
+				"failed to parse option value", err)
 		}
 		if ffmpeg.setOptions(optName, optVal) {
 			dev.updateFFmpegOptions(optName, optVal)
@@ -126,10 +128,10 @@ func setupFFmpegOptions(dev *Device, opts interface{}, attr map[string]interface
 		if _, ok := options[optName]; ok {
 			continue
 		}
-		optVal, ok := value.(string)
-		if !ok {
+		optVal, err := parseOptionValue(optName, value)
+		if err != nil {
 			return errors.NewCommonEdgeX(errors.KindContractInvalid,
-				"argument should be a string", nil)
+				"failed to parse option value", err)
 		}
 		if ffmpeg.setOptions(optName, optVal) {
 			dev.updateFFmpegOptions(optName, optVal)
@@ -146,4 +148,32 @@ func setupFFmpegOptions(dev *Device, opts interface{}, attr map[string]interface
 		dev.transcoder.MediaFile().SetRawOutputArgs(ffmpeg.outputOptions)
 	}
 	return nil
+}
+
+func parseOptionValue(name string, value interface{}) (string, error) {
+	stringValue, ok := value.(string)
+	if !ok {
+		return stringValue, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			"value should be a string", nil)
+	}
+
+	if name == InputPixelFormat {
+		switch value {
+		case v4l2.PixelFormats[v4l2.PixFmtRGB24], FFmpegPixFmtRGB24:
+			return FFmpegPixFmtRGB24, nil
+		case v4l2.PixelFormats[v4l2.PixFmtGrey], FFmpegPixFmtGray:
+			return FFmpegPixFmtGray, nil
+		case v4l2.PixelFormats[v4l2.PixelFmtYUYV], FFmpegPixelFmtYUYV:
+			return FFmpegPixelFmtYUYV, nil
+		case v4l2.PixelFormats[v4l2.PixelFmtMJPEG], FFmpegPixelFmtMJPEG:
+			// mjpeg is not in the list of available FFmpeg pixel formats, but it does work.
+			return FFmpegPixelFmtMJPEG, nil
+		default:
+			// No corresponding pixel formats of FFmpeg for the following v4l2.PixelFormats:
+			// v4l2.PixelFmtJPEG, v4l2.PixelFmtMPEG, v4l2.PixelFmtH264, and v4l2.PixelFmtMPEG4
+			// For a full list of available FFmpeg pixel formats, use this command "ffmpeg -pix_fmts" with FFmpeg command-line tool
+			return stringValue, fmt.Errorf(`invalid value "%s" for %s option`, value, name)
+		}
+	}
+	return stringValue, nil
 }
