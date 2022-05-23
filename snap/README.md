@@ -25,34 +25,41 @@ The [snapcraft overview](https://snapcraft.io/docs/snapcraft-overview) provides 
 
 If the snap is built and installed locally, the interface will not auto-connect. You can check the status of the connections by running the `snap connections edgex-device-usb-camera` command.
 
-Notes:
-- The auto connection will not happen right now because the snap publisher isn't same as the `edgexfoundry` platrform snap (i.e. Canonical).
-- The service isn't yet included in the secrets list of the platform snap.
-Add the device service to list of services which have tokens generated for them:
-```
-# Additional secret store tokens
-EXISTING=$(snap get edgexfoundry apps.security-secretstore-setup.config.add-secretstore-tokens)
-snap set edgexfoundry apps.security-secretstore-setup.config.add-secretstore-tokens="$EXISTING,device-usb-camera"
-
-# Additional known secrets
-EXISTING=$(snap get edgexfoundry apps.security-secretstore-setup.config.add-known-secrets)
-snap set edgexfoundry apps.security-secretstore-setup.config.add-known-secrets="$EXISTING,redisdb[device-usb-camera]"
-
-# Additional registry ACL roles
-EXISTING=$(snap get edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles)
-snap set edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles="$EXISTING,device-usb-camera"
-
-# Run the bootstrappers:
-snap start edgexfoundry.security-secretstore-setup
-snap start edgexfoundry.security-consul-bootstrapper 
-```
-
 To manually connect and obtain a token:
 ```bash
 sudo snap connect edgexfoundry:edgex-secretstore-token edgex-device-usb-camera:edgex-secretstore-token
 ```
 
 Please refer [here][secret-store-token] for further information.
+
+Notes:
+- The auto connection will not happen right now because the snap publisher isn't same as the `edgexfoundry` platrform snap (i.e. Canonical).
+- The service isn't yet included in the secrets list of the platform snap.
+Add the device service to list of services which have tokens generated for them:
+```
+# Enable app options
+sudo snap set edgexfoundry app-options=true
+
+# Additional secret store tokens
+EXISTING=$(snap get edgexfoundry apps.security-secretstore-setup.config.add-secretstore-tokens)
+sudo snap set edgexfoundry apps.security-secretstore-setup.config.add-secretstore-tokens="$EXISTING,device-usb-camera"
+
+# Additional known secrets
+EXISTING=$(snap get edgexfoundry apps.security-secretstore-setup.config.add-known-secrets)
+sudo snap set edgexfoundry apps.security-secretstore-setup.config.add-known-secrets="$EXISTING,redisdb[device-usb-camera]"
+
+# Additional registry ACL roles
+EXISTING=$(snap get edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles)
+sudo snap set edgexfoundry apps.security-bootstrapper.config.add-registry-acl-roles="$EXISTING,device-usb-camera"
+
+# Run the bootstrappers:
+sudo snap start edgexfoundry.security-secretstore-setup
+sudo snap start edgexfoundry.security-consul-bootstrapper 
+
+# Verify that the token has been generated and the service has been added to ADD_REGISTRY_ACL_ROLES environment variable by inspecting the following files:
+# /var/snap/edgexfoundry/current/secrets/device-usb-camera/secrets-token.json
+# /var/snap/edgexfoundry/current/config/security-bootstrapper/res/security-bootstrapper.env
+```
 
 ### Connect the camera interface
 The `camera` interface is currently not automatically connected. To connect manually:
