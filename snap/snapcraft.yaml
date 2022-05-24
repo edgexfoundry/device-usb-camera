@@ -41,7 +41,7 @@ apps:
       DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-usb-camera/res/devices"
       SECRETSTORE_TOKENFILE: $SNAP_DATA/device-usb-camera/secrets-token.json
       # This is needed by ffprobe to open libpulsecommon shared object file
-      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind, camera]
@@ -135,5 +135,4 @@ parts:
       echo $VERSION > ./VERSION
       # set the version of this snap
       snapcraftctl set-version $VERSION
-    # parse-info: [edgex-device-usb-camera.metainfo.xml]
-    parse-info: [edgex-device-camera.metainfo.xml]
+    parse-info: [edgex-device-usb-camera.metainfo.xml]
