@@ -1,5 +1,5 @@
 name: edgex-device-usb-camera
-base: core20
+base: core22
 license: Apache-2.0
 adopt-info: metadata
 
@@ -40,8 +40,9 @@ apps:
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-usb-camera/res/profiles"
       DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-usb-camera/res/devices"
       SECRETSTORE_TOKENFILE: $SNAP_DATA/device-usb-camera/secrets-token.json
-      # This is needed by ffprobe to open libpulsecommon shared object file
-      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+      # Add shared library object file to path for ffprobe/ffmpeg
+      LD_LIB: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$LD_LIB/blas:$LD_LIB/lapack:$LD_LIB/pulseaudio
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind, camera]
@@ -79,16 +80,8 @@ parts:
     stage-packages: 
       - libzmq5
       - ffmpeg
-      # libpulsecommon shared object file is needed by ffprobe
-      # The path to the lib is added to LD_LIBRARY_PATH in the corresponding app
-      - libpulse0
     override-build: |
       cd $SNAPCRAFT_PART_SRC
-
-      # The existing header file misses several of the definitions needed for
-      # compiling device-usb-camera.
-      # Replace it with one from Ubuntu 22.04:
-      cp snap/local/build-helpers/include/videodev2.h /usr/include/linux/videodev2.h
 
       # the version is needed for the build
       cat VERSION
@@ -109,6 +102,8 @@ parts:
       cp Attribution.txt $DOC/Attribution.txt
       cp LICENSE $DOC/LICENSE
 
+      cp --dereference /usr/bin/which $SNAPCRAFT_PART_INSTALL/bin/which
+    
   runtime-helpers:
     plugin: dump
     source: snap/local/runtime-helpers
