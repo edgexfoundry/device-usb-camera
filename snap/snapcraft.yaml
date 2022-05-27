@@ -109,6 +109,8 @@ parts:
       cp Attribution.txt $DOC/Attribution.txt
       cp LICENSE $DOC/LICENSE
 
+      # The "which" command is used by goffmpeg package.
+      # Copy it to local bins to bypass apparmor protection
       cp --dereference /usr/bin/which $SNAPCRAFT_PART_INSTALL/bin/which
     
   runtime-helpers:
