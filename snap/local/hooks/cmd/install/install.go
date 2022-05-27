@@ -59,7 +59,12 @@ func installDevices() error {
 		return err
 	}
 
-	// no default devices
+	err = hooks.CopyFile(
+		hooks.Snap+devicesDir+"/general.usb.camera.toml.example",
+		hooks.SnapData+devicesDir+"/general.usb.camera.toml.example")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -87,19 +92,19 @@ func main() {
 
 	err := installConfig()
 	if err != nil {
-		log.Error(err)
+		log.Errorf("error installing config file: %s", err)
 		os.Exit(1)
 	}
 
 	err = installDevices()
 	if err != nil {
-		log.Error(err)
+		log.Errorf("error installing devices config: %s", err)
 		os.Exit(1)
 	}
 
 	err = installDevProfiles()
 	if err != nil {
-		log.Error(err)
+		log.Errorf("error installing device profiles config: %s", err)
 		os.Exit(1)
 	}
 }
