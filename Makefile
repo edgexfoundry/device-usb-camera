@@ -14,11 +14,17 @@ CGO_LDFLAGS="-Wl,-O1,–sort-common,–as-needed,-z,relro,-z,now"
 MICROSERVICES=cmd/device-usb-camera
 .PHONY: $(MICROSERVICES)
 
+# VERSION file is not needed for local development, In the CI/CD pipeline, a temporary VERSION file is written
 VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
 
+# This pulls the version of the SDK from the go.mod file
+SDKVERSION=$(shell cat ./go.mod | grep 'github.com/edgexfoundry/device-sdk-go/v2 v' | awk '{print $$2}')
+
 GIT_SHA=$(shell git rev-parse HEAD)
-GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-usb-camera.Version=$(VERSION)" -trimpath -mod=readonly
-CGOFLAGS=-ldflags "-linkmode=external -X github.com/edgexfoundry/device-usb-camera.Version=$(VERSION)" -trimpath -mod=readonly -buildmode=pie
+CGOFLAGS=-ldflags "-linkmode=external \
+                   -X github.com/edgexfoundry/device-usb-camera.Version=$(VERSION) \
+                   -X github.com/edgexfoundry/device-sdk-go/v2/internal/common.SDKVersion=$(SDKVERSION)" \
+                   -trimpath -mod=readonly -buildmode=pie
 
 ARCH=$(shell uname -m)
 
