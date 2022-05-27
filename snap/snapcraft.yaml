@@ -69,6 +69,13 @@ parts:
     organize:
       rtsp-simple-server: bin/rtsp-simple-server
       rtsp-simple-server.yml: config/rtsp-simple-server.yml
+    override-build: |
+      DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/rtsp-simple-server
+      mkdir -p $DOC
+      curl --silent --show-err https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE \
+        -o $DOC/LICENSE
+
+      snapcraftctl build
 
     
   device-usb-camera:
