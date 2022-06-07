@@ -14,7 +14,7 @@ The following devices have been tested with EdgeX:
 - Jinpei JW-01B USB FHD Web Computer Camera 
 
 ## How does the device service work?
-- The device service ONLY works on Linux system.
+- The device service ONLY works on Linux with kernel v5.10 or higher.
 - The device service uses V4L2 API to get camera metadata.
 - The device service uses FFmpeg framework to capture video frames and stream them to an RTSP server.
 - An [RTSP server](https://github.com/aler9/rtsp-simple-server) is embedded in the dockerized device service. 
