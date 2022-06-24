@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strconv"
 
+	usbdevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
-	usbdevice "github.com/vladimirvivien/go4vl/v4l2/device"
 )
 
 type Capability struct {
@@ -60,14 +60,11 @@ type ImageFormat struct {
 	Description string
 	PixelFormat string
 	MbusCode    uint32
-	FrameSizes  []v4l2.FrameSize
+	FrameSizes  []v4l2.FrameSizeEnum
 }
 
 func getCapability(d *usbdevice.Device) (interface{}, error) {
-	c, err := d.GetCapability()
-	if err != nil {
-		return nil, err
-	}
+	c := d.Capability()
 	verVal := c.Version
 	version := fmt.Sprintf("%d.%d.%d", verVal>>16, (verVal>>8)&0xff, verVal&0xff)
 	var driverCapDescs []string
@@ -151,26 +148,27 @@ func getCropInfo(d *usbdevice.Device) (interface{}, error) {
 }
 
 func getStreamingParameters(d *usbdevice.Device) (interface{}, error) {
-	p, err := d.GetCaptureParam()
+	sp, err := d.GetStreamParam()
+
 	if err != nil {
 		return nil, err
 	}
 	result := StreamingParameters{}
 
 	tpf := DescNotSpecified
-	if p.Capability == v4l2.StreamParamTimePerFrame {
+	if sp.Capture.Capability == v4l2.StreamParamTimePerFrame {
 		tpf = DescTimePerFrame
 	}
-	result.Capability = StreamingCapability{tpf, p.Capability}
+	result.Capability = StreamingCapability{tpf, sp.Capture.Capability}
 
 	hiqual := DescNotSpecified
-	if p.CaptureMode == v4l2.StreamParamModeHighQuality {
+	if sp.Capture.CaptureMode == v4l2.StreamParamModeHighQuality {
 		hiqual = DescHighQuality
 	}
-	result.CaptureMode = CaptureMode{hiqual, p.CaptureMode}
+	result.CaptureMode = CaptureMode{hiqual, sp.Capture.CaptureMode}
 
-	result.TimePerFrame = p.TimePerFrame
-	result.ReadBuffers = p.ReadBuffers
+	result.TimePerFrame = sp.Capture.TimePerFrame
+	result.ReadBuffers = sp.Capture.ReadBuffers
 	return result, nil
 }
 
@@ -184,7 +182,7 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 	}
 	var r result
 	for _, desc := range descs {
-		fss, err := v4l2.GetFormatFrameSizes(d.GetFileDescriptor(), desc.PixelFormat)
+		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
 			return nil, err
 		}

@@ -25,7 +25,7 @@ import (
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	"github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
 
-	usbdevice "github.com/vladimirvivien/go4vl/v4l2/device"
+	usbdevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -468,11 +468,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	// pre-defined devices may not include serial number information
 	if len(psn) == 0 {
 		device.Protocols[UsbProtocol][SerialNumber] = sn
-		c, err := cameraDevice.GetCapability()
-		if err != nil {
-			return nil, errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to get device capability info,path=%s", fdPath), err)
-		}
+		c := cameraDevice.Capability()
 		device.Protocols[UsbProtocol][CardName] = c.Card
 		if err := d.ds.UpdateDevice(device); err != nil {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError,
@@ -575,11 +571,7 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 		return false
 	}
 	defer cameraDevice.Close()
-	c, err := cameraDevice.GetCapability()
-	if err != nil {
-		d.lc.Errorf("failed to get device capability, path=%s, error:%s", path, err.Error())
-		return false
-	}
+	c := cameraDevice.Capability()
 	return isVideoCaptureSupported(c) && isStreamingSupported(c)
 }
 
