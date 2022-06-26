@@ -33,6 +33,24 @@ make build
 make docker
 ```
 
+### Run device-usb-camera
+- Docker
+  - Use [compose-builder](https://github.com/edgexfoundry/edgex-compose/tree/main/compose-builder)
+  - For non secure mode
+    ```
+    make gen ds-usb-camera no-secty
+    ```
+  - For secure mode 
+    ```
+    make gen ds-usb-camera
+    ```
+  - docker-compose -p edgex up -d
+
+- Native
+  ```
+  cd cmd && EDGEX_SECURITY_SECRET_STORE=false ./device-usb-camera
+  ```
+
 ### Define the device profile
 
 Each device resource should have a mandatory attribute named `command` to indicate what action the device service should take for it.
