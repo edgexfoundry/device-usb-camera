@@ -73,11 +73,11 @@ func (dev *Device) updateFFmpegOptions(optName, optVal string) {
 	}
 }
 
-func isVideoCaptureSupported(caps *v4l2.Capability) bool {
+func isVideoCaptureSupported(caps v4l2.Capability) bool {
 	return (caps.DeviceCapabilities & v4l2.CapVideoCapture) != 0
 }
 
-func isStreamingSupported(caps *v4l2.Capability) bool {
+func isStreamingSupported(caps v4l2.Capability) bool {
 	return (caps.DeviceCapabilities & v4l2.CapStreaming) != 0
 }
 
