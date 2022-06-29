@@ -10,7 +10,7 @@ For usage instructions, please refer to Device Camera section in [Getting Starte
 ## Build from source
 Execute the following command from the top-level directory of this repo:
 ```
-snapcraft
+snapcraft -v
 ```
 
 This will create a snap package file with `.snap` extension. It can be installed locally by setting the `--dangerous` flag:
@@ -21,7 +21,7 @@ sudo snap install --dangerous <snap-file>
 The [snapcraft overview](https://snapcraft.io/docs/snapcraft-overview) provides additional details.
 
 ### Obtain a Secret Store token
-The `edgex-secretstore-token` snap slot makes it possible to automatically receive a token from a locally installed platform snap. Note that the **auto connection does NOT happen right** now because the snap publisher isn't same as the `edgexfoundry` platrform snap (i.e. Canonical).
+The `edgex-secretstore-token` snap slot makes it possible to automatically receive a token from a locally installed platform snap.
 
 If the snap is built and installed locally, the interface will not auto-connect. You can check the status of the connections by running the `snap connections edgex-device-usb-camera` command.
 

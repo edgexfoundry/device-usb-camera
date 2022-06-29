@@ -32,7 +32,7 @@ apps:
   device-usb-camera:
     command: bin/device-usb-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
     command-chain:
-      - bin/startup-env-var.sh
+      - bin/source-env-file.sh
     environment:
       CONFIG_PRO_ARG: "--cp=consul.http://localhost:8500"
       CONF_ARG: "--confdir=$SNAP_DATA/config/device-usb-camera/res"
@@ -49,22 +49,12 @@ apps:
 
 
 parts:      
-  hooks:
-    source: snap/local/hooks
-    plugin: make
-    build-snaps: [go/1.17/stable]
-    override-build: |
-      cd $SNAPCRAFT_PART_SRC
-      make build
-      install -DT ./cmd/configure/configure $SNAPCRAFT_PART_INSTALL/snap/hooks/configure-go
-      install -DT ./cmd/install/install $SNAPCRAFT_PART_INSTALL/snap/hooks/install-go
-
   rtsp-simple-server:
     source:
       - on amd64:
-          https://github.com/aler9/rtsp-simple-server/releases/download/v0.18.3/rtsp-simple-server_v0.18.3_linux_amd64.tar.gz
+          https://github.com/aler9/rtsp-simple-server/releases/download/v0.19.2/rtsp-simple-server_v0.19.2_linux_amd64.tar.gz
       - on arm64:
-          https://github.com/aler9/rtsp-simple-server/releases/download/v0.18.3/rtsp-simple-server_v0.18.3_linux_arm64v8.tar.gz
+          https://github.com/aler9/rtsp-simple-server/releases/download/v0.19.2/rtsp-simple-server_v0.19.2_linux_arm64v8.tar.gz
     plugin: dump
     organize:
       rtsp-simple-server: bin/rtsp-simple-server
@@ -77,7 +67,7 @@ parts:
         -o $DOC/LICENSE
 
       snapcraftctl build
-    
+
   device-usb-camera:
     after: [metadata]
     source: .
@@ -112,10 +102,6 @@ parts:
       # The "which" command is used by goffmpeg package.
       # Copy it to local bins to bypass apparmor protection
       cp --dereference /usr/bin/which $SNAPCRAFT_PART_INSTALL/bin/which
-    
-  runtime-helpers:
-    plugin: dump
-    source: snap/local/runtime-helpers
 
   metadata:
     plugin: nil
@@ -140,3 +126,18 @@ parts:
       # set the version of this snap
       snapcraftctl set-version $VERSION
     parse-info: [edgex-device-usb-camera.metainfo.xml]
+
+  helper-go:
+    source: snap/local/helper-go
+    plugin: make
+    build-snaps: [go/1.17/stable]
+    override-build: |
+      cd $SNAPCRAFT_PART_SRC
+      make build
+      install -DT ./helper-go $SNAPCRAFT_PART_INSTALL/bin/helper-go
+
+  local-bin:
+    source: snap/local/bin
+    plugin: dump
+    organize:
+      source-env-file.sh: bin/source-env-file.sh

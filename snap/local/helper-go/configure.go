@@ -17,7 +17,6 @@
 package main
 
 import (
-	"os"
 	"strings"
 
 	"github.com/canonical/edgex-snap-hooks/v2/log"
@@ -25,12 +24,18 @@ import (
 	"github.com/canonical/edgex-snap-hooks/v2/snapctl"
 )
 
-func main() {
+func configure() {
 	log.SetComponentName("configure")
-	err := options.ProcessAppConfig("device-usb-camera")
+
+	// config options are always enabled for this service
+	err := snapctl.Set("app-options", "true").Run()
 	if err != nil {
-		log.Errorf("could not process options: %v", err)
-		os.Exit(1)
+		log.Fatalf("could not enable config options: %v", err)
+	}
+
+	err = options.ProcessAppConfig("device-usb-camera")
+	if err != nil {
+		log.Fatalf("could not process options: %v", err)
 	}
 
 	// If autostart is not explicitly set, default to "no"
@@ -38,8 +43,7 @@ func main() {
 	// are provided by default.
 	autostart, err := snapctl.Get("autostart").Run()
 	if err != nil {
-		log.Errorf("Reading config 'autostart' failed: %v", err)
-		os.Exit(1)
+		log.Fatalf("Reading config 'autostart' failed: %v", err)
 	}
 	if autostart == "" {
 		log.Debug("autostart is NOT set, initializing to 'no'")
@@ -53,13 +57,11 @@ func main() {
 	case "true", "yes":
 		err = snapctl.Start("rtsp-simple-server", "device-usb-camera").Enable().Run()
 		if err != nil {
-			log.Errorf("Can't start service: %s", err)
-			os.Exit(1)
+			log.Fatalf("Can't start service: %s", err)
 		}
 	case "false", "no":
 		// no action necessary
 	default:
-		log.Errorf("Invalid value for 'autostart': %s", autostart)
-		os.Exit(1)
+		log.Fatalf("Invalid value for 'autostart': %s", autostart)
 	}
 }
