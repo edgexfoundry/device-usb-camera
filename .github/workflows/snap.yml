@@ -1,0 +1,30 @@
+name: Snap Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and upload snap
+        id: build
+        uses: canonical/edgex-snap-testing/build@main # TODO: change to v2 once released
+    outputs:
+      snap: ${{steps.build.outputs.snap}}
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download and test snap
+        uses: canonical/edgex-snap-testing/test@main # TODO: change to v2 once released
+        with:
+          name: device-usb-camera
+          snap: ${{needs.build.outputs.snap}}
+
