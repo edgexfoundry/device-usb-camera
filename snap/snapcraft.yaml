@@ -81,7 +81,7 @@ parts:
       cd $SNAPCRAFT_PART_SRC
 
       # the version is needed for the build
-      cat VERSION
+      cp $SNAPCRAFT_STAGE/version.txt VERSION
 
       make tidy
       make build
@@ -122,7 +122,8 @@ parts:
       fi
       
       # write version to file for the build
-      echo $VERSION > ./VERSION
+      echo $VERSION > $SNAPCRAFT_STAGE/version.txt
+
       # set the version of this snap
       snapcraftctl set-version $VERSION
     parse-info: [edgex-device-usb-camera.metainfo.xml]
