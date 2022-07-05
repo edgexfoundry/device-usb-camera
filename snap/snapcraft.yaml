@@ -1,6 +1,5 @@
 name: edgex-device-usb-camera
 base: core22
-license: Apache-2.0
 adopt-info: metadata
 
 architectures:
