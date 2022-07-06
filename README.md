@@ -11,9 +11,13 @@ This service provides the following capabilities:
 
 ## Tested Devices
 The following devices have been tested with EdgeX:
-- HP Web Cam w200
+<!-- sorted alphabetically -->
+- AUKEY PC-LM1E Webcam
+- HP w200 Webcam
+- Jinpei JW-01B USB FHD Web Computer Camera
+- Logitech Brio 4K
 - Logitech C270 HD Webcam
-- Jinpei JW-01B USB FHD Web Computer Camera 
+- Logitech StreamCam
 
 ## How does the device service work?
 - The device service ONLY works on Linux with kernel v5.10 or higher.
