@@ -24,6 +24,13 @@ plugs:
 apps:
   rtsp-simple-server:
     command: bin/rtsp-simple-server $SNAP_DATA/config/rtsp-simple-server.yml
+    environment:
+      RTSP_RTSPADDRESS: 127.0.0.1:8554
+      RTSP_RTSPSADDRESS: 127.0.0.1:8322
+      RTSP_RTPADDRESS: 127.0.0.1:8000
+      RTSP_RTCPADDRESS: 127.0.0.1:8001
+      RTSP_RTMPDISABLE: true
+      RTSP_HLSDISABLE: true
     daemon: simple
     install-mode: disable
     plugs: [network-bind]
