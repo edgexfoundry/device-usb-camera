@@ -1,11 +1,7 @@
-module github.com/edgexfoundry/device-camera-go/hooks
+module github.com/edgexfoundry/device-usb-camera/snap/local/helper-go
 
 require github.com/canonical/edgex-snap-hooks/v2 v2.3.0
 
-require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/stretchr/testify v1.7.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-)
+replace github.com/canonical/edgex-snap-hooks/v2 => github.com/farshidtz/edgex-snap-hooks/v2 v2.0.6-0.20220714112554-027cc49df5a3
 
 go 1.17
