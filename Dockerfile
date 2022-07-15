@@ -52,6 +52,8 @@ COPY --from=rtsp /rtsp-simple-server.yml /
 COPY --from=rtsp /rtsp-simple-server /
 
 EXPOSE 59983
+# RTSP port of rtsp-simple-server:
+EXPOSE 8554
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD [ "--configProvider=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res" ]
