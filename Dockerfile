@@ -21,7 +21,7 @@ ARG MAKE="make build"
 ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA="v4l-utils-dev v4l-utils v4l-utils-libs linux-headers"
 
-RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
+RUN sed -e 's/dl-cdn[.]alpinelinux.org/dl-4.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
 WORKDIR /device-usb-camera
@@ -52,6 +52,8 @@ COPY --from=rtsp /rtsp-simple-server.yml /
 COPY --from=rtsp /rtsp-simple-server /
 
 EXPOSE 59983
+# RTSP port of rtsp-simple-server:
+EXPOSE 8554
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD [ "--configProvider=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res" ]
