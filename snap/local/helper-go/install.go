@@ -40,14 +40,6 @@ func installConfig() error {
 		return err
 	}
 
-	path = "/config/rtsp-simple-server.yml"
-	err = hooks.CopyFile(
-		env.Snap+path,
-		env.SnapData+path)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -87,6 +79,24 @@ func installDevProfiles() error {
 	return nil
 }
 
+func installRTSPConfig() error {
+	confPath := "/config/rtsp-simple-server"
+	err := os.MkdirAll(env.SnapData+confPath, 0755)
+	if err != nil {
+		return err
+	}
+
+	path := confPath + "/config.yml"
+	err = hooks.CopyFile(
+		env.Snap+path,
+		env.SnapData+path)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func install() {
 	log.SetComponentName("install")
 
@@ -103,5 +113,10 @@ func install() {
 	err = installDevProfiles()
 	if err != nil {
 		log.Fatalf("error installing device profiles config: %s", err)
+	}
+
+	err = installRTSPConfig()
+	if err != nil {
+		log.Fatalf("error installing rtsp server config file: %s", err)
 	}
 }

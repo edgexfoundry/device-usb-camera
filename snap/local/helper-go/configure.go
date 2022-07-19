@@ -33,7 +33,7 @@ func configure() {
 		log.Fatalf("could not enable config options: %v", err)
 	}
 
-	err = options.ProcessAppConfig("device-usb-camera")
+	err = options.ProcessAppConfig("device-usb-camera", "rtsp-simple-server")
 	if err != nil {
 		log.Fatalf("could not process options: %v", err)
 	}
