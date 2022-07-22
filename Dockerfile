@@ -18,7 +18,7 @@ ARG BASE=golang:1.17-alpine3.15
 FROM ${BASE} AS builder
 
 ARG MAKE="make build"
-ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev"
+ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev curl"
 ARG ALPINE_PKG_EXTRA="v4l-utils-dev v4l-utils v4l-utils-libs linux-headers"
 
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/dl-4.alpinelinux.org/g' -i~ /etc/apk/repositories
@@ -30,6 +30,8 @@ COPY go.mod vendor* ./
 RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 COPY . .
+
+RUN curl -o LICENSE-rtsp-simple-server https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE
 
 RUN ${MAKE}
 
@@ -46,6 +48,7 @@ RUN apk add --update --no-cache zeromq dumb-init ffmpeg udev
 WORKDIR /
 COPY --from=builder /device-usb-camera/cmd /
 COPY --from=builder /device-usb-camera/LICENSE /
+COPY --from=builder /device-usb-camera/LICENSE-rtsp-simple-server /
 COPY --from=builder /device-usb-camera/Attribution.txt /
 COPY --from=builder /device-usb-camera/docker-entrypoint.sh /
 COPY --from=rtsp /rtsp-simple-server.yml /
