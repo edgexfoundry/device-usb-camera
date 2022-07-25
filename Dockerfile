@@ -54,6 +54,11 @@ COPY --from=builder /device-usb-camera/docker-entrypoint.sh /
 COPY --from=rtsp /rtsp-simple-server.yml /
 COPY --from=rtsp /rtsp-simple-server /
 
+# disable unused rtsp-simple-server listeners
+RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g' rtsp-simple-server.yml
+RUN sed -i 's/hlsDisable: no/hlsDisable: yes/g' rtsp-simple-server.yml
+RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' rtsp-simple-server.yml
+
 EXPOSE 59983
 # RTSP port of rtsp-simple-server:
 EXPOSE 8554
