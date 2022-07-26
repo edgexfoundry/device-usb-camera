@@ -59,16 +59,19 @@ parts:
       rtsp-simple-server: bin/rtsp-simple-server
       rtsp-simple-server.yml: config/rtsp-simple-server/config.yml
     build-packages: [curl]
+    build-snaps: [yq/v4/stable]
     override-build: |
       DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/rtsp-simple-server
       mkdir -p $DOC
       curl --silent --show-err https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE \
         -o $DOC/LICENSE
 
-      sed -i -e 's/rtmpDisable: no/rtmpDisable: yes/g' \
-             -e 's/hlsDisable: no/hlsDisable: yes/g' \
-             -e 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' \
-             -e 's/rtspAddress: :8554/rtspAddress: 127.0.0.1:8554/g' rtsp-simple-server.yml
+      yq -i '
+        .rtmpDisable = "yes" |
+        .hlsDisable = "yes" |
+        .protocols = ["tcp"] |
+        .rtspAddress = "127.0.0.1:8554"
+        ' rtsp-simple-server.yml
       
       snapcraftctl build
 
