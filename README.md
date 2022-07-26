@@ -32,7 +32,21 @@ The following devices have been tested with EdgeX:
 make build
 ```
 
+Note if your build fails with errors like:
+
+```
+.../go4vl@v0.0.2/v4l2/capability.go:48:33: could not determine kind of name for C.V4L2_CAP_IO_MC
+.../go4vl@v0.0.2/v4l2/capability.go:46:33: could not determine kind of name for C.V4L2_CAP_META_OUTPUT
+```
+
+Try running the following in your Linux terminal
+
+```
+sudo dpkg -i linux-libc-dev_5.10.0-14.15_amd64.deb
+```
+
 ### Build docker image
+
 ```shell
 make docker
 ```
