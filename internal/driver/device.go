@@ -10,11 +10,17 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
+)
+
+var (
+	// this is an inverted match of the unreserved characters per https://tools.ietf.org/html/rfc3986#section-2.3
+	rFC3986ReservedCharsRegexString = regexp.MustCompile("[^a-zA-Z0-9-_.~]+")
 )
 
 type Device struct {
@@ -88,7 +94,8 @@ func isStreamingSupported(caps v4l2.Capability) bool {
 }
 
 func buildDeviceName(cardName, serialNumber string) string {
-	cardName = strings.ReplaceAll(strings.ReplaceAll(cardName, " ", "_"), ":", "_")
-	serialNumber = strings.ReplaceAll(strings.ReplaceAll(serialNumber, ":", "_"), ".", "_")
-	return fmt.Sprintf("%s-%s", cardName, serialNumber)
+	return fmt.Sprintf("%s-%s",
+		// replace all the reserved chars with an underscore, and trim any leftovers
+		strings.Trim(rFC3986ReservedCharsRegexString.ReplaceAllString(cardName, "_"), "_"),
+		strings.Trim(rFC3986ReservedCharsRegexString.ReplaceAllString(serialNumber, "_"), "_"))
 }
