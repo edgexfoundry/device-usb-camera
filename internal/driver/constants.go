@@ -55,6 +55,15 @@ const (
 	FFmpegVCodec      = "-vcodec"
 	FFmpegInputFormat = "-input_format"
 
+	// FFmpeg option values
+	FFmpegPixFmtRGB24   = "rgb24"
+	FFmpegPixFmtGray    = "gray"
+	FFmpegPixelFmtYUYV  = "yuyv422"
+	FFmpegPixelFmtMJPEG = "mjpeg"
+
+	// Input option names
+	InputPixelFormat = "InputPixelFormat"
+
 	// udev device properties
 	UdevSerialShort = "ID_SERIAL_SHORT"
 	UdevSerial      = "ID_SERIAL"
