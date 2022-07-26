@@ -88,7 +88,16 @@ func isStreamingSupported(caps v4l2.Capability) bool {
 }
 
 func buildDeviceName(cardName, serialNumber string) string {
-	cardName = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(cardName, " ", "_"), ":", "_"), "(", ""), ")", "")
+	cardName = strings.ReplaceAll(
+		strings.ReplaceAll(
+			strings.ReplaceAll(
+				strings.ReplaceAll(
+					strings.ReplaceAll(cardName, " ", "_"),
+					":", "_"),
+				"(", "_"),
+			")", "_"),
+		"__", "_")
 	serialNumber = strings.ReplaceAll(strings.ReplaceAll(serialNumber, ":", "_"), ".", "_")
-	return fmt.Sprintf("%s-%s", cardName, serialNumber)
+	return strings.ReplaceAll(fmt.Sprintf("%s-%s", cardName, serialNumber), "_-", "-")
+
 }
