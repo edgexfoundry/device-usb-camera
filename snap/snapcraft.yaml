@@ -24,11 +24,6 @@ plugs:
 apps:
   rtsp-simple-server:
     command: bin/source-env-file.sh $SNAP/bin/rtsp-simple-server $SNAP_DATA/config/rtsp-simple-server/config.yml
-    environment:
-      RTSP_PROTOCOLS: tcp
-      RTSP_RTSPADDRESS: 127.0.0.1:8554
-      RTSP_RTMPDISABLE: true
-      RTSP_HLSDISABLE: true
     daemon: simple
     install-mode: disable
     plugs: [network-bind]
@@ -64,12 +59,20 @@ parts:
       rtsp-simple-server: bin/rtsp-simple-server
       rtsp-simple-server.yml: config/rtsp-simple-server/config.yml
     build-packages: [curl]
+    build-snaps: [yq/v4/stable]
     override-build: |
       DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/rtsp-simple-server
       mkdir -p $DOC
       curl --silent --show-err https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE \
         -o $DOC/LICENSE
 
+      yq -i '
+        .rtmpDisable = "yes" |
+        .hlsDisable = "yes" |
+        .protocols = ["tcp"] |
+        .rtspAddress = "127.0.0.1:8554"
+        ' rtsp-simple-server.yml
+      
       snapcraftctl build
 
   device-usb-camera:
