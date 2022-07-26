@@ -10,11 +10,25 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
+)
+
+const (
+	// Per https://tools.ietf.org/html/rfc3986#section-2.3, unreserved characters = ALPHA / DIGIT / "-" / "." / "_" / "~"
+	// Also due to names used in topics for Redis Pub/Sub, "." are not allowed
+	// see: https://github.com/edgexfoundry/go-mod-core-contracts/blob/main/common/validator.go
+	//
+	// Note: this is an inverted match of the unreserved characters from above, as we want to remove the reserved ones
+	rFC3986ReservedCharsRegexString = "[^a-zA-Z0-9-_~]+"
+)
+
+var (
+	rFC3986ReservedCharsRegex = regexp.MustCompile(rFC3986ReservedCharsRegexString)
 )
 
 type Device struct {
@@ -88,7 +102,8 @@ func isStreamingSupported(caps v4l2.Capability) bool {
 }
 
 func buildDeviceName(cardName, serialNumber string) string {
-	cardName = strings.ReplaceAll(strings.ReplaceAll(cardName, " ", "_"), ":", "_")
-	serialNumber = strings.ReplaceAll(strings.ReplaceAll(serialNumber, ":", "_"), ".", "_")
-	return fmt.Sprintf("%s-%s", cardName, serialNumber)
+	return fmt.Sprintf("%s-%s",
+		// replace all the reserved chars with an underscore, and trim any leftovers
+		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(cardName, "_"), "_"),
+		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(serialNumber, "_"), "_"))
 }
