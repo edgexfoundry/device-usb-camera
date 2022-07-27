@@ -15,4 +15,4 @@
 
 ## [v2.2.0] Kamakura - 2022-07-26
 
-This is the initial release of this ONVIF camera device service. Refer to the [README](https://github.com/edgexfoundry/device-onvif-camera/blob/v2.2.0/README.md) for details about this service.
+This is the initial release of this USB camera device service. Refer to the [README](https://github.com/edgexfoundry/device-usb-camera/blob/v2.2.0/README.md) for details about this service.
