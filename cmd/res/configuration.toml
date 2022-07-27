@@ -102,9 +102,11 @@ EnableAsyncReadings = true
 Labels = []
 UseMessageBus = true
   [Device.Discovery]
-  Enabled = false
+  Enabled = true
   Interval = "1h"
 
 [Driver]
 RtspServerHostName = "localhost"
 RtspTcpPort = "8554"
+# The location of Provision Watcher json files to import when using auto-discovery
+ProvisionWatcherDir = "res/provision_watchers"
