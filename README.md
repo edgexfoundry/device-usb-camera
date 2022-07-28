@@ -270,6 +270,7 @@ Use the following query to determine the status of the camera.
 
 Query parameter:
 - **DeviceName**: The name of the camera
+- **InputIndex**: indicates the current index of the video input (if a camera only has one source for video, the index needs to be set to '0')
 
 ```
 curl -X GET http://localhost:59882/api/v2/device/name/[DeviceName]/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
@@ -283,10 +284,10 @@ curl -X GET http://localhost:59882/api/v2/device/name/[DeviceName]/CameraStatus?
    **Response meanings**:
 | Response   | Description |
 | ---------- | ----------- |
-| 0x00000000 | Ready |
-| 0x00000001 | No Power |
-| 0x00000002 | No Signal |
-| 0x00000003 | No Color |  
+| 0 | Ready |
+| 1 | No Power |
+| 2 | No Signal |
+| 3 | No Color |  
 
 ## License
 [Apache-2.0](LICENSE)
