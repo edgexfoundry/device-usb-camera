@@ -264,5 +264,24 @@ For example:
   RtspTcpPort = "8554"
 ```
 
+### CameraStatus Command
+Use the following query to determine the status of the camera.
+URL parameter:
+- **DeviceName**: The name of the camera
+- **InputIndex**: indicates the current index of the video input (if a camera only has one source for video, the index needs to be set to '0')
+```
+curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
+```
+   Example Output: 
+   ```
+    CameraStatus: 0
+   ```
+   **Response meanings**:
+| Response   | Description |
+| ---------- | ----------- |
+| 0 | Ready |
+| 1 | No Power |
+| 2 | No Signal |
+| 3 | No Color |  
 ## License
 [Apache-2.0](LICENSE)
