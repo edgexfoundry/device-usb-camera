@@ -273,7 +273,7 @@ URL parameter:
 - **InputIndex**: indicates the current index of the video input (if a camera only has one source for video, the index needs to be set to '0')
 
 ```
-curl -X GET http://localhost:59882/api/v2/device/name/[DeviceName]/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
+curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
 ```
 
    Example Output: 
