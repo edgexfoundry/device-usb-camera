@@ -265,7 +265,7 @@ For example:
 ```
 
 
-### GetStatus REST API Endpoint
+### CameraStatus REST API Endpoint
 Use the following query to determine the status of the camera.
 
 Query parameter:
