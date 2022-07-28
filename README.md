@@ -264,5 +264,29 @@ For example:
   RtspTcpPort = "8554"
 ```
 
+
+### GetStatus REST API Endpoint
+Use the following query to determine the status of the camera.
+
+Query parameter:
+- **DeviceName**: The name of the camera
+
+```
+curl -X GET http://localhost:59882/api/v2/device/name/[DeviceName]/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
+```
+
+   Example Output: 
+   ```
+    CameraStatus: 0
+   ```
+
+   **Response meanings**:
+| Response   | Description |
+| ---------- | ----------- |
+| 0x00000000 | Ready |
+| 0x00000001 | No Power |
+| 0x00000002 | No Signal |
+| 0x00000003 | No Color |  
+
 ## License
 [Apache-2.0](LICENSE)
