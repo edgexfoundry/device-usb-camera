@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-ARG BASE=golang:1.17-alpine3.15
+ARG BASE=golang:1.18-alpine3.16
 FROM ${BASE} AS builder
 
 ARG MAKE="make build"
@@ -37,7 +37,7 @@ RUN ${MAKE}
 
 FROM aler9/rtsp-simple-server:v0.18.4 AS rtsp
 
-FROM alpine:3.15
+FROM alpine:3.16
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2022: Intel Corporation'
