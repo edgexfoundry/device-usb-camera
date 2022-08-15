@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/edgexfoundry/device-sdk-go/v2 v2.3.0-dev.19
-	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.13
+	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.14
 	github.com/stretchr/testify v1.8.0
 	github.com/vladimirvivien/go4vl v0.0.2
 	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
