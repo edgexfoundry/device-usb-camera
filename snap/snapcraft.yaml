@@ -73,7 +73,7 @@ parts:
           -e 's/rtmpDisable: no/rtmpDisable: yes/g' \
           -e 's/hlsDisable: no/hlsDisable: yes/g' \
           -e 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' \
-          -e 's/rtspAddress: :8554/rtspAddress = 127.0.0.1:8554/g' \
+          -e 's/rtspAddress: :8554/rtspAddress: 127.0.0.1:8554/g' \
           rtsp-simple-server.yml
 
       install -DT rtsp-simple-server \
