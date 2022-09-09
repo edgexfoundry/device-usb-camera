@@ -49,31 +49,39 @@ apps:
 
 parts:      
   rtsp-simple-server:
-    source:
-      - on amd64:
-          https://github.com/aler9/rtsp-simple-server/releases/download/v0.19.2/rtsp-simple-server_v0.19.2_linux_amd64.tar.gz
-      - on arm64:
-          https://github.com/aler9/rtsp-simple-server/releases/download/v0.19.2/rtsp-simple-server_v0.19.2_linux_arm64v8.tar.gz
-    plugin: dump
-    organize:
-      rtsp-simple-server: bin/rtsp-simple-server
-      rtsp-simple-server.yml: config/rtsp-simple-server/config.yml
-    build-packages: [curl]
-    build-snaps: [yq/v4/stable]
-    override-build: |
-      DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/rtsp-simple-server
-      mkdir -p $DOC
-      curl --silent --show-err https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE \
-        -o $DOC/LICENSE
+    plugin: nil
+    build-packages: [wget]
+    override-pull: |
+      VERSION=v0.19.2
 
-      yq -i '
-        .rtmpDisable = "yes" |
-        .hlsDisable = "yes" |
-        .protocols = ["tcp"] |
-        .rtspAddress = "127.0.0.1:8554"
-        ' rtsp-simple-server.yml
-      
-      snapcraftctl build
+      ARCH=$(dpkg --print-architecture)      
+      if [ $ARCH == 'arm64' ]; then
+        ARCH=arm64v8
+      fi
+
+      FILE=$(printf 'rtsp-simple-server_%s_linux_%s.tar.gz' "$VERSION" "$ARCH")
+      URL=https://github.com/aler9/rtsp-simple-server/releases/download/$VERSION/$FILE
+
+      # Download and extract archive
+      wget --no-verbose $URL
+      tar -xvf $FILE
+
+      # Download license
+      wget --no-verbose https://github.com/aler9/rtsp-simple-server/raw/main/LICENSE
+    override-build: |
+      sed --in-place \
+          -e 's/rtmpDisable: no/rtmpDisable: yes/g' \
+          -e 's/hlsDisable: no/hlsDisable: yes/g' \
+          -e 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' \
+          -e 's/rtspAddress: :8554/rtspAddress = 127.0.0.1:8554/g' \
+          rtsp-simple-server.yml
+
+      install -DT rtsp-simple-server \
+        $SNAPCRAFT_PART_INSTALL/bin/rtsp-simple-server
+      install -DT rtsp-simple-server.yml \
+        $SNAPCRAFT_PART_INSTALL/config/rtsp-simple-server/config.yml
+      install -DT LICENSE \
+        $SNAPCRAFT_PART_INSTALL/usr/share/doc/rtsp-simple-server/LICENSE
 
   device-usb-camera:
     after: [metadata]
@@ -90,7 +98,6 @@ parts:
       # the version is needed for the build
       cp $SNAPCRAFT_STAGE/version.txt VERSION
 
-      make tidy
       make build
 
       install -DT "./cmd/device-usb-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-usb-camera"
