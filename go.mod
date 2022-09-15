@@ -6,7 +6,7 @@ require (
 	github.com/edgexfoundry/device-sdk-go/v2 v2.3.0-dev.21
 	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.16
 	github.com/stretchr/testify v1.8.0
-	github.com/vladimirvivien/go4vl v0.0.2
+	github.com/vladimirvivien/go4vl v0.0.3
 	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
 )
 
