@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/edgexfoundry/device-sdk-go/v2 v2.3.0-dev.21
-	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.16
+	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.17
 	github.com/stretchr/testify v1.8.0
 	github.com/vladimirvivien/go4vl v0.0.2
 	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
@@ -28,7 +28,7 @@ require (
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.0 // indirect
+	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
