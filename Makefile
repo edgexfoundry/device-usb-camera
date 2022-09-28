@@ -30,14 +30,21 @@ ARCH=$(shell uname -m)
 
 build: $(MICROSERVICES)
 
+build-nats:
+	make -e ADD_BUILD_TAGS=include_nats_messaging build
+
 cmd/device-usb-camera:
-	$(GOCGO) build $(CGOFLAGS) -o $@ ./cmd
+	$(GOCGO) build -tags "$(ADD_BUILD_TAGS)" $(CGOFLAGS) -o $@ ./cmd
 
 docker:
 	docker build . \
+		--build-arg ADD_BUILD_TAGS=$(ADD_BUILD_TAGS) \
 		--label "git_sha=$(GIT_SHA)" \
 		-t edgexfoundry/device-usb-camera:$(GIT_SHA) \
 		-t edgexfoundry/device-usb-camera:$(VERSION)-dev
+
+docker-nats:
+	make -e ADD_BUILD_TAGS=include_nats_messaging docker
 
 tidy:
 	go mod tidy
