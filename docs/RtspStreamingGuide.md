@@ -6,6 +6,7 @@
 [System Requirements](#system-requirements)  
 [How It Works](#how-it-works)  
 [Tested Devices](#tested-devices)  
+[Tested USB Functions](#tested-usb-functions)   
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
 [Deploy the Service](#deploy-edgex-and-usb-device-camera-microservice)  
@@ -51,6 +52,22 @@ Note: Results may vary based on camera hardware/firmware version and operating s
 - Logitech Brio 4K
 - Logitech C270 HD Webcam
 - Logitech StreamCam
+
+## Tested USB Functions
+The following functions have been tested with Edgex USB Camera Device Service:
+- Get Camera Info 
+- Get Video Input Index
+- Get Camera Status
+- Get Video Data Format
+- Get Supported Image Formats
+- Get Video Crop Capability
+- Get Streaming Parameters
+- Start Streaming
+- Stop Streaming
+- Get Stream URI
+- Get Streaming Status
+- Get Camera MetaData
+
 
 ## Dependencies
 The software has dependencies, including Git, Docker, Docker Compose, and assorted command line tools. Follow the instructions linked here to install any dependency that is not already installed [see here](setup.md).
