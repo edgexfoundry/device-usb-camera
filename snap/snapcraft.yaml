@@ -12,11 +12,15 @@ confinement: strict
 slots:
   edgex-secretstore-token:
     interface: content
-    content: edgex-secretstore-token
     source:
       write: [$SNAP_DATA/device-usb-camera]
 
 plugs:
+  device-usb-camera-config:
+    interface: content
+    target: $SNAP_DATA/config/device-usb-camera
+
+  # deprecated
   device-config:
     interface: content 
     target: $SNAP_DATA/config/device-usb-camera
