@@ -3,7 +3,7 @@ module github.com/edgexfoundry/device-usb-camera
 go 1.18
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v2 v2.3.0-dev.37
+	github.com/edgexfoundry/device-sdk-go/v2 v2.3.0-dev.40
 	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0-dev.18
 	github.com/stretchr/testify v1.8.0
 	github.com/vladimirvivien/go4vl v0.0.2
@@ -18,7 +18,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.1 // indirect
-	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.3.0-dev.17 // indirect
+	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.3.0-dev.21 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v2 v2.2.0 // indirect
 	github.com/edgexfoundry/go-mod-messaging/v2 v2.3.0-dev.20 // indirect
 	github.com/edgexfoundry/go-mod-registry/v2 v2.2.0 // indirect
