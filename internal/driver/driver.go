@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -21,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
@@ -633,23 +634,29 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
+	startErrs := make(chan errors.EdgeX)
 	d.wg.Add(1)
 	go func() {
 		select {
 		case err := <-errChan:
 			device.StopStreaming(err)
-			d.lc.Errorf("the video streaming process for device %s has stopped, error: %s", device.name, err)
+			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
+			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
 			d.wg.Done()
 			return
 		case <-device.ctx.Done():
 			if err := device.transcoder.Stop(); err != nil {
 				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
 			}
+			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to stop video streaming for device %s, error: %s", device.name, err), err)
 			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
 			d.wg.Done()
 			return
 		}
 	}()
+	if startErrs != nil {
+		return <-startErrs
+	}
 	d.lc.Infof("start video streaming for device %s", device.name)
 	return nil
 }
