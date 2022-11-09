@@ -640,15 +640,17 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 		select {
 		case err := <-errChan:
 			device.StopStreaming(err)
-			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
 			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
+			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
 			d.wg.Done()
 			return
 		case <-device.ctx.Done():
 			if err := device.transcoder.Stop(); err != nil {
 				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
+				startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to stop video streaming for device %s, error: %s", device.name, err), err)
+				d.wg.Done()
+				return
 			}
-			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to stop video streaming for device %s, error: %s", device.name, err), err)
 			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
 			d.wg.Done()
 			return
