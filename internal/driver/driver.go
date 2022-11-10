@@ -634,20 +634,19 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
-	startErrs := make(chan errors.EdgeX)
+	startErrs := make(chan errors.EdgeX, 1)
 	d.wg.Add(1)
 	go func() {
 		select {
 		case err := <-errChan:
 			device.StopStreaming(err)
-			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
+			d.lc.Errorf("the video streaming process for device %s has stopped", device.name)
 			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
 			d.wg.Done()
 			return
 		case <-device.ctx.Done():
 			if err := device.transcoder.Stop(); err != nil {
 				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
-				startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to stop video streaming for device %s, error: %s", device.name, err), err)
 				d.wg.Done()
 				return
 			}
@@ -656,11 +655,15 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 			return
 		}
 	}()
-	if startErrs != nil {
-		return <-startErrs
+	for {
+		select {
+		case <-time.After(time.Second):
+			d.lc.Infof("start video streaming for device %s", device.name)
+			return nil
+		case startErr := <-startErrs:
+			return startErr
+		}
 	}
-	d.lc.Infof("start video streaming for device %s", device.name)
-	return nil
 }
 
 // publishStreamingStatus asynchronously sends an event of StreamingStatus to the Core Metadata service.
