@@ -144,22 +144,6 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    git clone https://github.com/edgexfoundry/device-usb-camera.git
    ```
 
-## Additional Installs
-If you get an error like this:
-```
-.../go4vl@v0.0.2/v4l2/capability.go:48:33: could not determine kind of name for C.V4L2_CAP_IO_MC
-.../go4vl@v0.0.2/v4l2/capability.go:46:33: could not determine kind of name for C.V4L2_CAP_META_OUTPUT
-```
-
-You are missing the appropriate kernel headers needed by the `github.com/vladimirvivien/go4vl` module
-One possible solution is to manually download and install a more recent version of the libc-dev for your OS.
-
-In the case of Ubuntu 20.04, one is not available in the normal repositories, so you can get it via these steps:
-
-```
-wget https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/bootstrap/+build/20950478/+files/linux-libc-dev_5.10.0-14.15_amd64.deb
-sudo dpkg -i linux-libc-dev_5.10.0-14.15_amd64.deb
-```      
 
 ## Next Steps
 [Build and run the software](./general-usage.md)  
