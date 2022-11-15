@@ -1,4 +1,4 @@
-# USB Camera Device Service RTSP Streaming Guide
+# USB Camera Device Service Custom Start Up Guide
 
 ## Contents
 
@@ -22,11 +22,11 @@
 The EdgeX usb device service is designed for communicating with USB cameras attached to Linux OS platforms. This guide will help configure and build the usb device service and start streaming video from the USB camera.
 
 This service provides the following capabilities:
-- V4L2 API to get camera metadata
+- API to get camera metadata
 - Camera status
 - Video stream reference
-- FFmpeg framework to capture video frames and stream them to an RTSP server
-- An embedded [RTSP server](https://github.com/aler9/rtsp-simple-server) server
+- Capture video frames and stream them to an RTSP server
+- An embedded [RTSP server](https://github.com/aler9/rtsp-simple-server)
 ## System Requirements
 
 - Intel&#8482; Core&#174; processor
@@ -52,21 +52,111 @@ Note: Results may vary based on camera hardware/firmware version and operating s
 - Logitech C270 HD Webcam
 - Logitech StreamCam
 
-## Dependencies
-The software has dependencies, including Git, Docker, Docker Compose, and assorted command line tools. Follow the instructions linked here to install any dependency that is not already installed [see here](setup.md).
 
-### Install additional Tools
+## Dependencies
+The software has dependencies, including Git, Docker, Docker Compose, and assorted tools. Follow the instructions below to install any dependency that is not already installed. 
+
+### Install Git
+Install Git from the official repository as documented on the [Git SCM](https://git-scm.com/download/linux) site.
+
+1. Update installation repositories:
+   ```bash
+   sudo apt update
+   ```
+
+2. Add the Git repository:
+   ```bash
+   sudo add-apt-repository ppa:git-core/ppa -y
+   ```
+
+3. Install Git:
+   ```bash
+   sudo apt install git
+   ```
+
+### Install Docker
+Install Docker from the official repository as documented on the [Docker](https://docs.docker.com/engine/install/ubuntu/) site.
+
+### Verify Docker
+To enable running Docker commands without the preface of sudo, add the user to the Docker group. Then run Docker with the `hello-world` test.
+
+1. Create Docker group:
+   ```bash
+   sudo groupadd docker
+   ```
+   >**NOTE:** If the group already exists, `groupadd` outputs a message: **groupadd: group `docker` already exists**. This is OK.
+
+2. Add User to group:
+   ```bash
+   sudo usermod -aG docker $USER
+   ```
+
+3. Refresh the group:
+   ```bash
+   newgrp docker 
+   ```
+
+4. To verify the Docker installation, run `hello-world`:
+
+   ```bash
+   docker run hello-world
+   ```
+   A **Hello from Docker!** greeting indicates successful installation.
+
+   ```bash
+   Unable to find image 'hello-world:latest' locally
+   latest: Pulling from library/hello-world
+   2db29710123e: Pull complete 
+   Digest: sha256:10d7d58d5ebd2a652f4d93fdd86da8f265f5318c6a73cc5b6a9798ff6d2b2e67
+   Status: Downloaded newer image for hello-world:latest
+
+   Hello from Docker!
+   This message shows that your installation appears to be working correctly.
+   ...
+   ```
+
+### Install Docker Compose
+Install Docker from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site. See the Linux tab. 
+
+1. Download current stable Docker Compose:
+   ```bash
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   ```
+   >**NOTE:** When this guide was created, version 1.29.2 was current.
+
+2. Set permissions:
+   ```bash
+   sudo chmod +x /usr/local/bin/docker-compose
+   ```
+
+###  Download EdgeX Compose
+Clone the EdgeX compose repository
+
+   ```bash
+   git clone https://github.com/edgexfoundry/edgex-compose.git
+   ```
+
+### Install Tools
 Install the media utility tool:
 
    ```bash
-   sudo apt install ffmpeg v4l-utils
+   sudo apt install build-essential jq curl mplayer v4l-utils
    ```
 
-- `ffmpeg` is used to view the video stream
-- `v4l-utils` is used to determine the video stream path of a usb camera
+### Tool Descriptions
+The table below lists command line tools this guide uses to help with EdgeX configuration and device setup.
 
+| Tool        | Description | Note |
+| ----------- | ----------- |----------- |
+| **curl**     | Allows the user to connect to services such as EdgeX. |Use curl to get transfer information either to or from this service. In the tutorial, use `curl` to communicate with the EdgeX API. The call will return a JSON object.|
+| **jq**   |Parses the JSON object returned from the `curl` requests. |The `jq` command includes parameters that are used to parse and format data. In this tutorial, the `jq` command has been configured to return and format appropriate data for each `curl` command that is piped into it. |
+| **base64**   | Converts data into the Base64 format.| |
+| **mplayer** |  used to view the video stream | |
+| **v4l-utils** | used to determine the video stream path of a usb camera | |
+
+>Table 1: Command Line Tools
 ## Get the Source Code
-###  Download EdgeX Compose Repository (if not already downloaded)
+###  Download EdgeX Compose Repository
 
 1. Create a directory for the EdgeX compose repository:
    ```bash
@@ -84,7 +174,7 @@ Install the media utility tool:
    ```
 
 
-### Get the Device USB Camera Source Code (if not already downloaded)
+### Get the Device USB Camera Source Code
 
 1. Change into the edgex directory:
    ```bash
@@ -211,28 +301,28 @@ Devices can either be added to the service by defining them in a static configur
    * `Path` is a file descriptor of camera created by the OS. Use the `Path` determined in the previous step.
    * `AutoStreaming` indicates whether the device service should automatically start video streaming for cameras. Default value is false.
    
-   ```bash
-   curl -X POST -H 'Content-Type: application/json'  \
+```bash
+curl -X POST -H 'Content-Type: application/json'  \
    http://localhost:59881/api/v2/device \
    -d '[
-            {
-               "apiVersion": "v2",
-               "device": {
-                  "name":"Camera001",
-                  "serviceName": "device-usb-camera",
-                  "profileName": "USB-Camera-General",
-                  "description": "My test camera",
-                  "adminState": "UNLOCKED",
-                  "operatingState": "UP",
-                  "protocols": {
-                	  "USB": {
-                    	"CardName": "NexiGo N930AF FHD Webcam: NexiG",
-                    	"Path": "/dev/video6",
- 			                "AutoStreaming": "false"
-                     }
-                  }
-               }
+      {
+      "apiVersion": "v2",
+      "device": {
+         "name": "Camera001",
+         "serviceName": "device-usb-camera",
+         "profileName": "USB-Camera-General",
+         "description": "My test camera",
+         "adminState": "UNLOCKED",
+         "operatingState": "UP",
+         "protocols": {
+            "USB": {
+            "CardName": "NexiGo N930AF FHD Webcam: NexiG",
+            "Path": "/dev/video6",
+            "AutoStreaming": "false"
             }
+         }
+      }
+      }
    ]'
    ```
 
@@ -293,21 +383,20 @@ The response to the above call should look similar to the following:
 StreamURI: rtsp://localhost:8554/stream/NexiGo_N930AF_FHD_Webcam__NexiG-20201217010
 ```
 
-### Stream the RTSP stream. 
+### Play the RTSP stream. 
 
-   ffplay can be used to stream. The command follows this format: 
+   mplayer can be used to stream. The command follows this format: 
    
-   `ffplay -rtsp_transport tcp rtsp://<IP address>:<port>/<streamname>`.
+   `mplayer rtsp://<IP address>:<port>/<streamname>`.
 
-   Using the `streamURI` returned from the previous step, run ffplay:
+   Using the `streamURI` returned from the previous step, run mplayer:
    
    ```bash
-   ffplay -rtsp_transport tcp rtsp://localhost:8554/stream/Camera001
+   mplayer rtsp://localhost:8554/stream/NexiGo_N930AF_FHD_Webcam__NexiG-20201217010
    ```
 
-  - To shut down ffplay, use the ctrl-c command.
-
-  ### Stop Video Streaming
+  - To shut down mplayer, use the ctrl-c command.
+### Stop Video Streaming
 To stop the usb camera from live streaming, use the following command:
 
 Query parameter:
@@ -338,7 +427,7 @@ To stop all EdgeX services (containers), execute the `make down` command:
 ## Optional
 ### Configuration Options
 ### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the [/cmd/res/configuration.toml](../cmd/res/configuration.toml). The default vaules can be used for this guide.
+The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default vaules can be used for this guide.
 
 For example:
 ```yaml
@@ -362,6 +451,3 @@ curl http://localhost:59882/api/v2/device/name/<device name>/StreamingStatus | j
 ```
 
 If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again.
-
-## License
-[Apache-2.0](LICENSE)
