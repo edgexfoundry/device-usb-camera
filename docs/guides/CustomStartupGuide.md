@@ -1,4 +1,4 @@
-# USB Camera Device Service Custom Start Up Guide
+# USB Camera Device Service Custom Startup Guide
 
 ## Contents
 
