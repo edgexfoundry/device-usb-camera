@@ -47,11 +47,13 @@ For a full walkthrough of using the default images, use this [guide.](./doc/guid
 
 For a full walktrhough of building custom images, use this [guide.](./doc/guides/CustomStartupGuide.md)  
 
-# Learn More 
+# Learn More
+[General Usage](./docs/general-usage.md)  
+[Device Discovery](./docs/discovery.md)  
+[Advanced Options](./docs/advanced-usage.md)  
 ## Testing
-[Postman Collection](./doc/USB-Camera-Collection.postman_collection.json)
-[Postman Collection Environment](./doc/USB_camera_env.postman_environment.json)
-
+[Postman Collection](./doc/USB-Camera-Collection.postman_collection.json)  
+[Postman Collection Environment](./doc/USB_camera_env.postman_environment.json)  
 ## References
 - EdgeX Foundry Project Wiki: https://wiki.edgexfoundry.org/
 - EdgeX Source Code: https://github.com/edgexfoundry
