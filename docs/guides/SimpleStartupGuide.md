@@ -148,9 +148,9 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 | Tool        | Description | Note |
 | ----------- | ----------- |----------- |
-| **curl**     | Allows the user to connect to services such as EdgeX. |Use curl to get transfer information either to or from this service. In the tutorial, use `curl` to communicate with the EdgeX API. The call will return a JSON object.|
+| **build-essential** |  Developer tools such as libc, gcc, g++ and make. | |
 | **jq**   |Parses the JSON object returned from the `curl` requests. |The `jq` command includes parameters that are used to parse and format data. In this tutorial, the `jq` command has been configured to return and format appropriate data for each `curl` command that is piped into it. |
-| **base64**   | Converts data into the Base64 format.| |
+| **curl**     | Allows the user to connect to services such as EdgeX. |Use curl to get transfer information either to or from this service. In the tutorial, use `curl` to communicate with the EdgeX API. The call will return a JSON object.|
 | **mplayer** |  used to view the video stream | |
 | **v4l-utils** | used to determine the video stream path of a usb camera | |
 
