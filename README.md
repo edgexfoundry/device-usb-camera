@@ -41,11 +41,11 @@ The figure below illustrates the software flow through the architecture componen
 
 # Getting Started
 
-Learn how to configure and run the service by following these [instructions](./doc/setup.md). 
+Learn how to configure and run the service by following these [instructions](./docs/setup.md). 
 
-For a full walkthrough of using the default images, use this [guide.](./doc/guides/SimpleStartupGuide.md)  
+For a full walkthrough of using the default images, use this [guide.](./docs/guides/SimpleStartupGuide.md)  
 
-For a full walktrhough of building custom images, use this [guide.](./doc/guides/CustomStartupGuide.md)  
+For a full walktrhough of building custom images, use this [guide.](./docs/guides/CustomStartupGuide.md)  
 
 # Learn More
 [General Usage](./docs/general-usage.md)  
