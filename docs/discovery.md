@@ -8,7 +8,7 @@ Take the camera Logitech C270 as an example, it's Card Name is "C270 HD WEBCAM" 
 > NOTE: Card Name and Serial number are used by the device service to uniquely identify a camera. Some manufactures, however, may not support unique serial numbers for their cameras. Please check with your camera manufacturer.
 
 ### Enable the Dynamic Discovery function
-Dynamic discovery is disabled by default to save computing resources.
+Dynamic discovery is enabled by default to save computing resources.
 If you want the device service to run the discovery periodically, enable it and set a desired interval.
 The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration).
 
@@ -31,7 +31,7 @@ To manually trigger a Dynamic Discovery, use this [device service API](https://a
 
 ### Configure the Provision Watchers
 
-The provision watcher sets up parameters for EdgeX to automatically add devices to core-metadata. They can be configured to look for certain features, as well as block features. The default provision watcher is sufficient unless you plan on having multiple different cameras with different profiles and resources. Learn more about provision watchers [here](https://docs.edgexfoundry.org/2.2/microservices/core/metadata/Ch-Metadata/#provision-watcher).
+The provision watcher sets up parameters for EdgeX to automatically add devices to core-metadata. They can be configured to look for certain features, as well as block features. The default provision watcher is sufficient unless you plan on having multiple different cameras with different profiles and resources. Learn more about provision watchers [here](https://docs.edgexfoundry.org/2.2/microservices/core/metadata/Ch-Metadata/#provision-watcher). The provision watchers are located at `./cmd/res/provision_watchers`.
 
 
 ```shell

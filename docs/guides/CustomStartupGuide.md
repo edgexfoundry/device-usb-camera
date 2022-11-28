@@ -3,8 +3,7 @@
 ## Contents
 
 [Overview](#overview)  
-[System Requirements](#system-requirements)  
-[How It Works](#how-it-works)  
+[System Requirements](#system-requirements)   
 [Tested Devices](#tested-devices)  
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
@@ -15,7 +14,6 @@
 [Shutting Down](#shutting-down)  
 [Optional](#optional)  
 [Troubleshooting](#troubleshooting)  
-[License](#license)
 
 
 ## Overview

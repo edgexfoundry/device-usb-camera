@@ -3,19 +3,16 @@
 ## Contents
 
 [Overview](#overview)  
-[System Requirements](#system-requirements)  
-[How It Works](#how-it-works)  
+[System Requirements](#system-requirements)   
 [Tested Devices](#tested-devices)  
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
-[Deploy the Service](#deploy-edgex-and-usb-device-camera-microservice)  
+[Run the Service](#run-the-service)  
 [Verify the Service](#verify-service-and-device-profiles)   
 [Adding Devices using REST API](#adding-devices-using-rest-api)  
 [Start Video Streaming](#start-video-streaming)  
 [Shutting Down](#shutting-down)  
-[Optional](#optional)  
 [Troubleshooting](#troubleshooting)  
-[License](#license)
 
 
 ## Overview
@@ -174,7 +171,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    ```
 
 
-### Run the Service
+## Run the Service
 
 1. Navigate to the Edgex compose directory.
 
@@ -257,34 +254,34 @@ Devices can either be added to the service by defining them in a static configur
    For this example, the `Path` is `/dev/video6`.
 
 
-1. Edit the information to appropriately match the camera. The device's protocol properties contain:
+1. Edit the information to appropriately match the camera and run the following command. The device's protocol properties contain:
    * `name` is the name of the device. For this example, the name is `Camera001`
    * `Path` is a file descriptor of camera created by the OS. Use the `Path` determined in the previous step.
    * `AutoStreaming` indicates whether the device service should automatically start video streaming for cameras. Default value is false.
    
 ```bash
-curl -X POST -H 'Content-Type: application/json'  \
-   http://localhost:59881/api/v2/device \
-   -d '[
-      {
-      "apiVersion": "v2",
-      "device": {
-         "name": "Camera001",
-         "serviceName": "device-usb-camera",
-         "profileName": "USB-Camera-General",
-         "description": "My test camera",
-         "adminState": "UNLOCKED",
-         "operatingState": "UP",
-         "protocols": {
-            "USB": {
-            "CardName": "NexiGo N930AF FHD Webcam: NexiG",
-            "Path": "/dev/video6",
-            "AutoStreaming": "false"
+   curl -X POST -H 'Content-Type: application/json'  \
+      http://localhost:59881/api/v2/device \
+      -d '[
+         {
+         "apiVersion": "v2",
+         "device": {
+            "name": "Camera001",
+            "serviceName": "device-usb-camera",
+            "profileName": "USB-Camera-General",
+            "description": "My test camera",
+            "adminState": "UNLOCKED",
+            "operatingState": "UP",
+            "protocols": {
+               "USB": {
+               "CardName": "NexiGo N930AF FHD Webcam: NexiG",
+               "Path": "/dev/video6",
+               "AutoStreaming": "false"
+               }
             }
          }
-      }
-      }
-   ]'
+         }
+      ]'
    ```
 
    Example Output: 
@@ -385,21 +382,6 @@ To stop all EdgeX services (containers), execute the `make down` command:
    ```bash
    make clean
    ```
-## Optional
-### Configuration Options
-### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default vaules can be used for this guide.
-
-For example:
-```yaml
-[Driver]
-  RtspServerHostName = "localhost"
-  RtspTcpPort = "8554"
-```
-<p align="left">
-      <i>Sample: Snippet from configuration.toml</i>
-</p>
-
 ## Troubleshooting
 ### StreamingStatus
 To verify the usb camera is set to stream video, use the command below. 
