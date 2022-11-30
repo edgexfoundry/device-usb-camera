@@ -50,72 +50,16 @@ The following devices have been tested with EdgeX USB Camera Device Service:
 
 
 ## Dependencies
-The software has dependencies, including Git, Docker, Docker Compose, and assorted tools. Follow the instructions below to install any dependency that is not already installed. 
+The software has dependencies, including Git, Docker, Docker Compose, and assorted tools. 
 
-### Install Git
-Install Git from the official repository as documented on the [Git SCM](https://git-scm.com/download/linux) site.
-
-1. Update installation repositories:
-   ```bash
-   sudo apt update
-   ```
-
-2. Add the Git repository:
-   ```bash
-   sudo add-apt-repository ppa:git-core/ppa -y
-   ```
-
-3. Install Git:
-   ```bash
-   sudo apt install git
-   ```
-
-### Install Docker
-Install Docker from the official repository as documented on the [Docker](https://docs.docker.com/engine/install/ubuntu/) site.
-
-### Verify Docker
-To enable running Docker commands without the preface of sudo, add the user to the Docker group. Then run Docker with the `hello-world` test.
-
-1. Create Docker group:
-   ```bash
-   sudo groupadd docker
-   ```
-   >**NOTE:** If the group already exists, `groupadd` outputs a message: **groupadd: group `docker` already exists**. This is OK.
-
-2. Add User to group:
-   ```bash
-   sudo usermod -aG docker $USER
-   ```
-
-3. Please logout or reboot for the changes to take effect.
-
-4. To verify the Docker installation, run `hello-world`:
-
-   ```bash
-   docker run hello-world
-   ```
-   A **Hello from Docker!** greeting indicates successful installation.
-
-   ```bash
-   Unable to find image 'hello-world:latest' locally
-   latest: Pulling from library/hello-world
-   2db29710123e: Pull complete 
-   Digest: sha256:10d7d58d5ebd2a652f4d93fdd86da8f265f5318c6a73cc5b6a9798ff6d2b2e67
-   Status: Downloaded newer image for hello-world:latest
-
-   Hello from Docker!
-   This message shows that your installation appears to be working correctly.
-   ...
-   ```
-
-### Install Docker Compose
-Install Docker compose from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site.
+### Install Dependencies 
+Follow the instructions from the following [link](../setup.md) to install any dependency that are not already installed. 
 
 ### Install Tools
 Install the media utility tool:
 
    ```bash
-   sudo apt install build-essential jq curl mplayer v4l-utils
+   sudo apt install mplayer v4l-utils
    ```
 
 ### Tool Descriptions
@@ -123,9 +67,6 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 | Tool        | Description | Note |
 | ----------- | ----------- |----------- |
-| **build-essential** |  Developer tools such as libc, gcc, g++ and make. | |
-| **jq**   |Parses the JSON object returned from the `curl` requests. |The `jq` command includes parameters that are used to parse and format data. In this tutorial, the `jq` command has been configured to return and format appropriate data for each `curl` command that is piped into it. |
-| **curl**     | Allows the user to connect to services such as EdgeX. |Use curl to get transfer information either to or from this service. In the tutorial, use `curl` to communicate with the EdgeX API. The call will return a JSON object.|
 | **mplayer** |  used to view the video stream | |
 | **v4l-utils** | used to determine the video stream path of a usb camera | |
 
@@ -213,8 +154,8 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 Unless the device service is configured to stream video from the camera automatically, a `StartStreaming` command must be sent to the device service.
 
 There are two types of options:
-- The options that start with 'Input' as a prefix are used for camera configuration, such as specifying the image size and pixel format.
-- The options that start with "Output" as a prefix are used for video output configuration, such as specifying aspect ratio and quality.
+- The options that start with `Input` as a prefix are used for camera configuration, such as specifying the image size and pixel format.
+- The options that start with `Output` as a prefix are used for video output configuration, such as specifying aspect ratio and quality.
 
 These options can be passed in through Object value when calling StartStreaming.
 
