@@ -269,6 +269,9 @@ For example:
    }
    ```
 ## OPTIONAL: Adding Devices using REST API
+
+> NOTE: This section only needs to be performed if discovery is disabled.
+
 Devices can either be added to the service by defining them in a static configuration file, discovering devices dynamically, or with the REST API. For this example, the device will be added using the REST API.
 
 1. Run the following command to determine the `Path` to the usb camera for video streaming:

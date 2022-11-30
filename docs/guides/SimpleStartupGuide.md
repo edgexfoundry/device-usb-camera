@@ -134,7 +134,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 >Table 1: Command Line Tools
 ## Get the Source Code
-> Note: This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired directory.
+> Note: This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired working directory.
 ###  Download EdgeX Compose Repository
 
 1. Create a directory for the EdgeX compose repository:
@@ -290,7 +290,6 @@ curl -X PUT -d '{
 }' http://localhost:59882/api/v2/device/name/<device name>/StopStreaming
 ```
 ## Optional: Shutting Down
-> Warning: This will delete all Edgex related data.  
 
 To stop all EdgeX services (containers), execute the `make down` command:
 
@@ -304,6 +303,9 @@ To stop all EdgeX services (containers), execute the `make down` command:
    make down
    ```
 1. To shut down and delete all volumes, run this command
+
+> Warning: This will delete all edgex-related data.  
+
    ```bash
    make clean
    ```
@@ -318,4 +320,4 @@ Query parameter:
 curl http://localhost:59882/api/v2/device/name/<device name>/StreamingStatus | jq -r '"StreamingStatus: " + (.event.readings[].objectValue.IsStreaming|tostring)'
 ```
 
-If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again.
+If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again [here](#start-video-streaming).
