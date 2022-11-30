@@ -153,7 +153,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 For a full walkthrough of using the default images, use this [guide.](./guides/SimpleStartupGuide.md)  
 
-For a full walktrhough of building custom images, use this [guide.](./guides/CustomStartupGuide.md)  
+For a full walkthrough of building custom images, use this [guide.](./guides/CustomStartupGuide.md)  
 
 ## License
 [Apache-2.0](LICENSE)
