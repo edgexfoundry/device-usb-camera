@@ -12,7 +12,6 @@
 [Adding Devices using REST API](#adding-devices-using-rest-api)  
 [Start Video Streaming](#start-video-streaming)  
 [Shutting Down](#shutting-down)  
-[Optional](#optional)  
 [Troubleshooting](#troubleshooting)  
 
 
@@ -28,7 +27,7 @@ This service provides the following capabilities:
 ## System Requirements
 
 - Intel&#8482; Core&#174; processor
-- Ubuntu 20.04.4 LTS
+- Ubuntu 22.04 LTS
 - USB-compliant Camera
 
 **Time to Complete**
@@ -41,7 +40,7 @@ You must have administrator (sudo) privileges to execute the user guide commands
 
 ## Tested Devices
 The following devices have been tested with EdgeX USB Camera Device Service:  
-Note: Results may vary based on camera hardware/firmware version and operating system support.
+> Note: Results may vary based on camera hardware/firmware version and operating system support.
 <!-- sorted alphabetically -->
 - AUKEY PC-LM1E Webcam
 - HP w200 Webcam
@@ -89,10 +88,7 @@ To enable running Docker commands without the preface of sudo, add the user to t
    sudo usermod -aG docker $USER
    ```
 
-3. Refresh the group:
-   ```bash
-   newgrp docker 
-   ```
+3. Please logout or reboot for the changes to take effect.
 
 4. To verify the Docker installation, run `hello-world`:
 
@@ -114,25 +110,7 @@ To enable running Docker commands without the preface of sudo, add the user to t
    ```
 
 ### Install Docker Compose
-Install Docker from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site. See the Linux tab. 
-
-1. Download current stable Docker Compose:
-   ```bash
-   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-   ```
-   >**NOTE:** When this guide was created, version 1.29.2 was current.
-
-2. Set permissions:
-   ```bash
-   sudo chmod +x /usr/local/bin/docker-compose
-   ```
-
-###  Download EdgeX Compose
-Clone the EdgeX compose repository
-
-   ```bash
-   git clone https://github.com/edgexfoundry/edgex-compose.git
-   ```
+Install Docker Compose from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site. 
 
 ### Install Tools
 Install the media utility tool:
@@ -184,6 +162,21 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    ```bash
    git clone https://github.com/edgexfoundry/device-usb-camera.git
    ```
+
+## OPTIONAL: Configuration Options
+### Configurable RTSP server hostname and port
+The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default values can be used for this guide.
+
+For example:
+```yaml
+[Driver]
+  RtspServerHostName = "localhost"
+  RtspTcpPort = "8554"
+```
+<p align="left">
+      <i>Sample: Snippet from configuration.toml</i>
+</p>
+
 ## Deploy EdgeX and USB Device Camera Microservice
 ### Building the docker image
 1. Change into newly created directory:
@@ -275,7 +268,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
       "statusCode": 404
    }
    ```
-## Adding Devices using REST API
+## OPTIONAL: Adding Devices using REST API
 Devices can either be added to the service by defining them in a static configuration file, discovering devices dynamically, or with the REST API. For this example, the device will be added using the REST API.
 
 1. Run the following command to determine the `Path` to the usb camera for video streaming:
@@ -422,20 +415,6 @@ To stop all EdgeX services (containers), execute the `make down` command:
    ```bash
    make clean
    ```
-## Optional
-### Configuration Options
-### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default values can be used for this guide.
-
-For example:
-```yaml
-[Driver]
-  RtspServerHostName = "localhost"
-  RtspTcpPort = "8554"
-```
-<p align="left">
-      <i>Sample: Snippet from configuration.toml</i>
-</p>
 
 ## Troubleshooting
 ### StreamingStatus

@@ -112,25 +112,7 @@ To enable running Docker commands without the preface of sudo, add the user to t
    ```
 
 ### Install Docker Compose
-Install Docker from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site. See the Linux tab. 
-
-1. Download current stable Docker Compose:
-   ```bash
-   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-   ```
-   >**NOTE:** When this guide was created, version 1.29.2 was current.
-
-2. Set permissions:
-   ```bash
-   sudo chmod +x /usr/local/bin/docker-compose
-   ```
-
-###  Download EdgeX Compose
-Clone the EdgeX compose repository
-
-   ```bash
-   git clone https://github.com/edgexfoundry/edgex-compose.git
-   ```
+Install Docker compose from the official repository as documented on the [Docker Compose](https://docs.docker.com/compose/install/#install-compose) site.
 
 ### Install Tools
 Install the media utility tool:
@@ -152,6 +134,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 >Table 1: Command Line Tools
 ## Get the Source Code
+> Note: This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired directory.
 ###  Download EdgeX Compose Repository
 
 1. Create a directory for the EdgeX compose repository:
@@ -239,8 +222,8 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 Unless the device service is configured to stream video from the camera automatically, a `StartStreaming` command must be sent to the device service.
 
 There are two types of options:
-- The options start with `Input` prefix are used for the camera, such as specifying the image size and pixel format.
-- The options start with `Output` prefix are used for the output video, such as specifying aspect ratio and quality.
+- The options that start with `Input` prefix are used for the camera, such as specifying the image size and pixel format.
+- The options that start with `Output` prefix are used for the output video, such as specifying aspect ratio and quality.
 
 These options can be passed in through Object value when calling StartStreaming.
 
@@ -312,7 +295,9 @@ curl -X PUT -d '{
     "StopStreaming": "true"
 }' http://localhost:59882/api/v2/device/name/<device name>/StopStreaming
 ```
-## Shutting Down
+## Optional: Shutting Down
+> Warning: This will delete all Edgex related data.  
+
 To stop all EdgeX services (containers), execute the `make down` command:
 
 1. Navigate to the `edgex-compose/compose-builder` directory.
