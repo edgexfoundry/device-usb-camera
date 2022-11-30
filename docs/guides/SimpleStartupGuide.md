@@ -155,13 +155,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 ## Run the Service
 
-1. Navigate to the Edgex compose directory.
-
-   ```shell
-   cd ~/edgex/edgex-compose/compose-builder
-   ```
-
-2. Run EdgeX with the microservice:  
+1. Run EdgeX with the microservice:  
   - For non secure mode
     ```
     make run ds-usb-camera no-secty
