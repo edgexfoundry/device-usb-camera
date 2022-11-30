@@ -132,6 +132,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 >Table 1: Command Line Tools
 ## Get the Source Code
+> Note: This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired working directory.
 ###  Download EdgeX Compose Repository
 
 1. Create a directory for the EdgeX compose repository:
@@ -227,7 +228,7 @@ For example:
 1. Check the status of the container:
 
    ```bash 
-   docker ps
+   docker ps -f name=device-usb-camera
    ```
 
    The status column will indicate if the container is running and how long it has been up.
@@ -329,8 +330,8 @@ curl -X POST -H 'Content-Type: application/json'  \
 Unless the device service is configured to stream video from the camera automatically, a `StartStreaming` command must be sent to the device service.
 
 There are two types of options:
-- The options start with `Input` prefix are used for the camera, such as specifying the image size and pixel format.
-- The options start with `Output` prefix are used for the output video, such as specifying aspect ratio and quality.
+- The options that start with `Input` prefix are used for the camera, such as specifying the image size and pixel format.
+- The options that start with `Output` prefix are used for the output video, such as specifying aspect ratio and quality.
 
 These options can be passed in through Object value when calling StartStreaming.
 
@@ -402,7 +403,8 @@ curl -X PUT -d '{
     "StopStreaming": "true"
 }' http://localhost:59882/api/v2/device/name/<device name>/StopStreaming
 ```
-## Shutting Down
+## Optional: Shutting Down
+
 To stop all EdgeX services (containers), execute the `make down` command:
 
 1. Navigate to the `edgex-compose/compose-builder` directory.
@@ -415,6 +417,9 @@ To stop all EdgeX services (containers), execute the `make down` command:
    make down
    ```
 1. To shut down and delete all volumes, run this command
+
+> Warning: This will delete all edgex-related data.  
+
    ```bash
    make clean
    ```
@@ -430,4 +435,4 @@ Query parameter:
 curl http://localhost:59882/api/v2/device/name/<device name>/StreamingStatus | jq -r '"StreamingStatus: " + (.event.readings[].objectValue.IsStreaming|tostring)'
 ```
 
-If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again [here.](#start-video-streaming)
+If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again [here](#start-video-streaming).

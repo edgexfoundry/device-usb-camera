@@ -26,7 +26,7 @@ This service provides the following capabilities:
 ## System Requirements
 
 - Intel&#8482; Core&#174; processor
-- Ubuntu 20.04.4 LTS
+- Ubuntu 22.04 LTS
 - USB-compliant Camera
 
 **Time to Complete**
@@ -39,7 +39,7 @@ You must have administrator (sudo) privileges to execute the user guide commands
 
 ## Tested Devices
 The following devices have been tested with EdgeX USB Camera Device Service:  
-Note: Results may vary based on camera hardware/firmware version and operating system support.
+> Note: Results may vary based on camera hardware/firmware version and operating system support.
 <!-- sorted alphabetically -->
 - AUKEY PC-LM1E Webcam
 - HP w200 Webcam
@@ -87,10 +87,7 @@ To enable running Docker commands without the preface of sudo, add the user to t
    sudo usermod -aG docker $USER
    ```
 
-3. Refresh the group:
-   ```bash
-   newgrp docker 
-   ```
+3. Please logout or reboot for the changes to take effect.
 
 4. To verify the Docker installation, run `hello-world`:
 

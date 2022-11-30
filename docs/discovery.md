@@ -65,7 +65,8 @@ The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration
 
 > NOTE: This section is for manually adding provision watchers, one is already added by default.
 
-The provision watcher sets up parameters for EdgeX to automatically add devices to core-metadata. They can be configured to look for certain features, as well as block features. The default provision watcher is sufficient unless you plan on having multiple different cameras with different profiles and resources. Learn more about provision watchers [here](https://docs.edgexfoundry.org/2.2/microservices/core/metadata/Ch-Metadata/#provision-watcher). The provision watchers can be edited manually in the folder located at `/cmd/res/provision_watchers`
+The provision watcher sets up parameters for EdgeX to automatically add devices to core-metadata. They can be configured to look for certain features, as well as block features. The default provision watcher is sufficient unless you plan on having multiple different cameras with different profiles and resources. Learn more about provision watchers [here](https://docs.edgexfoundry.org/latest/microservices/core/metadata/Ch-Metadata/#provision-watcher). The provision watchers are located at `./cmd/res/provision_watchers`.
+
 
 
 ```shell
