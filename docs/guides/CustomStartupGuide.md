@@ -425,7 +425,7 @@ To stop all EdgeX services (containers), execute the `make down` command:
 ## Optional
 ### Configuration Options
 ### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default vaules can be used for this guide.
+The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default values can be used for this guide.
 
 For example:
 ```yaml
@@ -448,4 +448,4 @@ Query parameter:
 curl http://localhost:59882/api/v2/device/name/<device name>/StreamingStatus | jq -r '"StreamingStatus: " + (.event.readings[].objectValue.IsStreaming|tostring)'
 ```
 
-If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again.
+If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again [here.](#start-video-streaming)

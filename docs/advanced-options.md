@@ -56,7 +56,7 @@ deviceResources:
      readWrite: "W"
 ```
 
-> NOTE: It's NOT recommended to set default video options in the [cmd/res/profiles/general.usb.camera.yaml](cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
+> NOTE: It's NOT recommended to set default video options in the [../cmd/res/profiles/general.usb.camera.yaml](../cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
 
 
 ## Keep the paths of existing camera up to date

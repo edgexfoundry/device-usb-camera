@@ -8,8 +8,7 @@
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
 [Run the Service](#run-the-service)  
-[Verify the Service](#verify-service-and-device-profiles)   
-[Adding Devices using REST API](#adding-devices-using-rest-api)  
+[Verify the Service](#verify-service-and-device-profiles)    
 [Start Video Streaming](#start-video-streaming)  
 [Shutting Down](#shutting-down)  
 [Troubleshooting](#troubleshooting)  
@@ -194,7 +193,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 1. Check the status of the container:
 
    ```bash 
-   docker ps
+   docker ps -f name=device-usb-camera
    ```
 
    The status column will indicate if the container is running and how long it has been up.
@@ -234,59 +233,6 @@ The table below lists command line tools this guide uses to help with EdgeX conf
       "message": "fail to query device service by name device-usb-camera",
       "statusCode": 404
    }
-   ```
-## Adding Devices using REST API
-Devices can either be added to the service by defining them in a static configuration file, discovering devices dynamically, or with the REST API. For this example, the device will be added using the REST API.
-
-1. Run the following command to determine the `Path` to the usb camera for video streaming:
-   ```bash
-   v4l2-ctl --list-devices
-   ```
-
-   The output should look similar to this:
-   ```
-   NexiGo N930AF FHD Webcam: NexiG (usb-0000:00:14.0-1):
-        /dev/video6
-        /dev/video7
-        /dev/media2
-   ```
-
-   For this example, the `Path` is `/dev/video6`.
-
-
-1. Edit the information to appropriately match the camera and run the following command. The device's protocol properties contain:
-   * `name` is the name of the device. For this example, the name is `Camera001`
-   * `Path` is a file descriptor of camera created by the OS. Use the `Path` determined in the previous step.
-   * `AutoStreaming` indicates whether the device service should automatically start video streaming for cameras. Default value is false.
-   
-```bash
-   curl -X POST -H 'Content-Type: application/json'  \
-      http://localhost:59881/api/v2/device \
-      -d '[
-         {
-         "apiVersion": "v2",
-         "device": {
-            "name": "Camera001",
-            "serviceName": "device-usb-camera",
-            "profileName": "USB-Camera-General",
-            "description": "My test camera",
-            "adminState": "UNLOCKED",
-            "operatingState": "UP",
-            "protocols": {
-               "USB": {
-               "CardName": "NexiGo N930AF FHD Webcam: NexiG",
-               "Path": "/dev/video6",
-               "AutoStreaming": "false"
-               }
-            }
-         }
-         }
-      ]'
-   ```
-
-   Example Output: 
-   ```bash
-   [{"apiVersion":"v2","statusCode":201,"id":"fb5fb7f2-768b-4298-a916-d4779523c6b5"}]
    ```
 
 ## Start Video Streaming

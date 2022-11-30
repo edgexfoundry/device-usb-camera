@@ -45,7 +45,7 @@ Learn how to configure and run the service by following these [instructions](./d
 
 For a full walkthrough of using the default images, use this [guide.](./docs/guides/SimpleStartupGuide.md)  
 
-For a full walktrhough of building custom images, use this [guide.](./docs/guides/CustomStartupGuide.md)  
+For a full walkthrough of building custom images, use this [guide.](./docs/guides/CustomStartupGuide.md)  
 
 # Learn More
 [General Usage](./docs/general-usage.md)  
