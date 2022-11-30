@@ -213,8 +213,8 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 Unless the device service is configured to stream video from the camera automatically, a `StartStreaming` command must be sent to the device service.
 
 There are two types of options:
-- The options that start with `Input` prefix are used for the camera, such as specifying the image size and pixel format.
-- The options that start with `Output` prefix are used for the output video, such as specifying aspect ratio and quality.
+- The options that start with 'Input' as a prefix are used for camera configuration, such as specifying the image size and pixel format.
+- The options that start with "Output" as a prefix are used for video output configuration, such as specifying aspect ratio and quality.
 
 These options can be passed in through Object value when calling StartStreaming.
 
