@@ -103,7 +103,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
     make run ds-usb-camera
     ```
 
-## Verify Service and Device Profiles
+## Verify Service, Device Profiles, and Device
 
 1. Check the status of the container:
 
