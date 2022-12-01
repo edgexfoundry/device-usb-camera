@@ -26,21 +26,6 @@ export DEVICE_DISCOVERY_ENABLED=false
 export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
-[Option 3] Disable discovery from a curl command.
-
-//TODO: add discovery command
-To stop the usb camera from live streaming, use the following command:
-
-Query parameter:
-- `device name`: The name of the camera
-
-For example:
-```shell
-curl -X PUT -d '{
-    "StopStreaming": "true"
-}' http://localhost:59882/api/v2/device/name/<device name>/Discovery
-```
-
 ### Enable discovery  
 [Option 1] Enable discovery from the [configuration.toml](../cmd/res/configuration.toml) file.
 ```yaml
@@ -57,8 +42,12 @@ export DEVICE_DISCOVERY_ENABLED=true
 export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
-
 To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).  
+
+```shell
+ curl -X POST http://<service-host>:59983/api/v2/discovery`
+```
+
 The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration).  
 
 ## Configure the Provision Watchers
