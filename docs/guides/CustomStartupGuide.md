@@ -164,7 +164,7 @@ For example:
     make run no-secty ds-usb-camera 
    ```
 
-## Verify Service and Device Profiles
+## Verify Service, Device Profiles, and Device
 
 1. Check the status of the container:
 
@@ -210,9 +210,22 @@ For example:
       "statusCode": 404
    }
    ```
+ 
+   1. Verify device(s) have been successfully added to core-metadata.
+
+   ```bash
+   curl -s http://localhost:59881/api/v2/device/all | jq -r '"deviceName: " + '.devices[].name''
+   ```
+
+   Example Output: 
+   ```bash
+   deviceName: NexiGo_N930AF_FHD_Webcam_NexiG-20201217010
+   ```
+   >**NOTE:** The `jq -r` option is used to reduce the size of the displayed response. The entire device with all information can be seen by removing `-r '"deviceName: " + '.devices[].name'', and replacing it with '.'`
+
 ## OPTIONAL: Adding Devices using REST API
 
-> NOTE: This section only needs to be performed if discovery is disabled.
+> **NOTE**: This section only needs to be performed if discovery is disabled.
 
 Devices can either be added to the service by defining them in a static configuration file, discovering devices dynamically, or with the REST API. For this example, the device will be added using the REST API.
 

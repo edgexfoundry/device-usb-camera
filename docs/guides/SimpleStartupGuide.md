@@ -93,11 +93,6 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 ## Run the Service
 
-1. Change into newly created directory:
-   ```bash
-   cd ~/edgex/edgex-compose/compose-builder
-   ```
-
 1. Run EdgeX with the microservice:  
   - For non secure mode
     ```
@@ -154,7 +149,18 @@ The table below lists command line tools this guide uses to help with EdgeX conf
       "statusCode": 404
    }
    ```
+ 
+   1. Verify device(s) have been successfully added to core-metadata.
 
+   ```bash
+   curl -s http://localhost:59881/api/v2/device/all | jq -r '"deviceName: " + '.devices[].name''
+   ```
+
+   Example Output: 
+   ```bash
+   deviceName: NexiGo_N930AF_FHD_Webcam_NexiG-20201217010
+   ```
+   >**NOTE:** The `jq -r` option is used to reduce the size of the displayed response. The entire device with all information can be seen by removing `-r '"deviceName: " + '.devices[].name'', and replacing it with '.'`
 ## Start Video Streaming
 Unless the device service is configured to stream video from the camera automatically, a `StartStreaming` command must be sent to the device service.
 
@@ -252,6 +258,7 @@ To stop all EdgeX services (containers), execute the `make down` command:
    ```bash
    make clean
    ```
+
 ## Troubleshooting
 ### StreamingStatus
 To verify the usb camera is set to stream video, use the command below. 
