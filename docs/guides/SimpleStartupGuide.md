@@ -93,6 +93,11 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 ## Run the Service
 
+1. Change into newly created directory:
+   ```bash
+   cd ~/edgex/edgex-compose/compose-builder
+   ```
+
 1. Run EdgeX with the microservice:  
   - For non secure mode
     ```
