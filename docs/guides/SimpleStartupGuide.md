@@ -150,7 +150,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    }
    ```
  
-   1. Verify device(s) have been successfully added to core-metadata.
+1. Verify device(s) have been successfully added to core-metadata.
 
    ```bash
    curl -s http://localhost:59881/api/v2/device/all | jq -r '"deviceName: " + '.devices[].name''
@@ -253,7 +253,7 @@ To stop all EdgeX services (containers), execute the `make down` command:
    ```
 1. To shut down and delete all volumes, run this command
 
-> Warning: This will delete all edgex-related data.  
+   > Warning: This will delete all edgex-related data.  
 
    ```bash
    make clean
