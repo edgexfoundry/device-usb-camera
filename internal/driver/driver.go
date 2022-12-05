@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -21,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
@@ -159,7 +160,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 
 	device, edgexErr := d.getDevice(deviceName)
 	if edgexErr != nil {
-		return responses, errors.NewCommonEdgeXWrapper(edgexErr)
+		return responses, edgexErr
 	}
 	cameraDevice, err := usbdevice.Open(device.path)
 	if err != nil {
@@ -251,7 +252,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	reqs []sdkModels.CommandRequest, params []*sdkModels.CommandValue) error {
 	device, edgexErr := d.getDevice(deviceName)
 	if edgexErr != nil {
-		return errors.NewCommonEdgeXWrapper(edgexErr)
+		return edgexErr
 	}
 
 	for i, req := range reqs {
@@ -311,30 +312,36 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]models.Protoc
 	adminState models.AdminState) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
+	_, err := d.addDeviceInternal(deviceName, protocols)
+	return err
+}
+
+// addDeviceInternal attempts to add a device to the device service's active devices
+func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]models.ProtocolProperties) (*Device, error) {
 	_, sn, err := getUSBDeviceIdInfo(protocols[UsbProtocol][Path])
 	if err != nil {
-		return errors.NewCommonEdgeX(errors.KindServerError,
+		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
 	}
 	for _, ad := range d.activeDevices {
 		if ad.serialNumber == sn {
-			return errors.NewCommonEdgeX(errors.KindServerError,
+			return nil, errors.NewCommonEdgeX(errors.KindServerError,
 				fmt.Sprintf("the serial number %s conflicts with existing device %s", sn, ad.name), nil)
 		}
 	}
 	activeDevice, edgexErr := d.newDevice(deviceName, protocols)
 	if edgexErr != nil {
-		return errors.NewCommonEdgeXWrapper(edgexErr)
+		return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 	}
 	d.activeDevices[deviceName] = activeDevice
 	d.lc.Debugf("a new Device is added: %s", deviceName)
 	if activeDevice.autoStreaming {
 		edgexErr = d.startStreaming(activeDevice)
 		if edgexErr != nil {
-			return errors.NewCommonEdgeXWrapper(edgexErr)
+			return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
 	}
-	return nil
+	return activeDevice, nil
 }
 
 // UpdateDevice is a callback function that is invoked
@@ -623,7 +630,18 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 	if ok {
 		return device, nil
 	} else {
-		return nil, errors.NewCommonEdgeX(errors.KindEntityDoesNotExist, fmt.Sprintf("device %s not found", name), nil)
+		// lookup device to find protocol properties
+		edgeXDevice, err := d.ds.GetDeviceByName(name)
+		if err != nil {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("device %s not found in core metadata", name), err)
+		}
+		// try to add device
+		device, err = d.addDeviceInternal(name, edgeXDevice.Protocols)
+		if err != nil {
+			return nil, errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("device service unable to communicate with device %s", name), err)
+		}
+		return device, nil
 	}
 }
 
@@ -634,25 +652,36 @@ func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
+	startErrs := make(chan errors.EdgeX, 1)
 	d.wg.Add(1)
 	go func() {
 		select {
 		case err := <-errChan:
 			device.StopStreaming(err)
-			d.lc.Errorf("the video streaming process for device %s has stopped, error: %s", device.name, err)
+			d.lc.Errorf("the video streaming process for device %s has stopped", device.name)
+			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
 			d.wg.Done()
 			return
 		case <-device.ctx.Done():
 			if err := device.transcoder.Stop(); err != nil {
 				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
+				d.wg.Done()
+				return
 			}
 			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
 			d.wg.Done()
 			return
 		}
 	}()
-	d.lc.Infof("start video streaming for device %s", device.name)
-	return nil
+	for {
+		select {
+		case <-time.After(time.Second):
+			d.lc.Infof("start video streaming for device %s", device.name)
+			return nil
+		case startErr := <-startErrs:
+			return startErr
+		}
+	}
 }
 
 // publishStreamingStatus asynchronously sends an event of StreamingStatus to the Core Metadata service.
