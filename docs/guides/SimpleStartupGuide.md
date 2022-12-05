@@ -120,7 +120,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    f0a1c646f324   edgexfoundry/device-usb-camera:0.0.0-dev                        "/docker-entrypoint.…"   26 hours ago   Up 20 hours   127.0.0.1:8554->8554/tcp, 127.0.0.1:59983->59983/tcp                         edgex-device-usb-camera                                                                   edgex-device-onvif-camera
    ```
 
-2. Check that the device service is added to EdgeX:
+1. Check that the device service is added to EdgeX:
 
    ```bash
    curl -s http://localhost:59881/api/v2/deviceservice/name/device-usb-camera | jq .

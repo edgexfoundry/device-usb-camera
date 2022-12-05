@@ -107,7 +107,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 ## OPTIONAL: Configuration Options
 ### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `/cmd/res/configuration.toml` file. The default values can be used for this guide.
+The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `device-usb-camera/cmd/res/configuration.toml` file. The default values can be used for this guide.
 
 For example:
 ```yaml
@@ -265,9 +265,9 @@ curl -X POST -H 'Content-Type: application/json'  \
          "operatingState": "UP",
          "protocols": {
             "USB": {
-            "CardName": "NexiGo N930AF FHD Webcam: NexiG",
-            "Path": "/dev/video6",
-            "AutoStreaming": "false"
+               "CardName": "NexiGo N930AF FHD Webcam: NexiG",
+               "Path": "/dev/video6",
+               "AutoStreaming": "false"
             }
          }
       }
@@ -390,3 +390,20 @@ curl http://localhost:59882/api/v2/device/name/<device name>/StreamingStatus | j
 ```
 
 If the StreamingStatus is false, the camera is not configured to stream video. Please try the Start Video Streaming section again [here](#start-video-streaming).
+
+### V4L2 error
+If you get an error like this:
+```
+.../go4vl@v0.0.2/v4l2/capability.go:48:33: could not determine kind of name for C.V4L2_CAP_IO_MC
+.../go4vl@v0.0.2/v4l2/capability.go:46:33: could not determine kind of name for C.V4L2_CAP_META_OUTPUT
+```
+
+You are missing the appropriate kernel headers needed by the `github.com/vladimirvivien/go4vl` module.
+One possible solution is to manually download and install a more recent version of the libc-dev for your OS.
+
+In the case of Ubuntu 20.04, one is not available in the normal repositories, so you can get it via these steps:
+
+```
+wget https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/bootstrap/+build/20950478/+files/linux-libc-dev_5.10.0-14.15_amd64.deb
+sudo dpkg -i linux-libc-dev_5.10.0-14.15_amd64.deb
+```    
