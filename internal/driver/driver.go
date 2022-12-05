@@ -450,6 +450,7 @@ func (d *Driver) addProvisionWatchers() error {
 // Discover triggers protocol specific device discovery, which is an asynchronous operation.
 // Devices found as part of this discovery operation are written to the channel devices.
 func (d *Driver) Discover() {
+	d.lc.Info("Discovery is triggered")
 	if registerProvisionWatchers {
 		d.watchersMu.Lock()
 		if !d.addedWatchers {
