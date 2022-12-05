@@ -26,7 +26,7 @@ export DEVICE_DISCOVERY_ENABLED=false
 export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
-### Enable discovery  
+### Configure discovery interval
 [Option 1] Enable discovery from the [configuration.toml](../cmd/res/configuration.toml) file.
 ```yaml
 [Device] 
