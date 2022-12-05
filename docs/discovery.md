@@ -36,7 +36,7 @@ export DEVICE_DISCOVERY_INTERVAL=1h
     Interval = "1h"
 ```
 
-[Option 2] Enable discovery from environment variables.
+[Option 2] Configure discovery from environment variables.
 ```shell
 export DEVICE_DISCOVERY_ENABLED=true
 export DEVICE_DISCOVERY_INTERVAL=1h
