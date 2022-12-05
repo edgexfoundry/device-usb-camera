@@ -45,7 +45,7 @@ export DEVICE_DISCOVERY_INTERVAL=1h
 To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).  
 
 ```shell
- curl -X POST http://<service-host>:59983/api/v2/discovery`
+ curl -X POST http://<service-host>:59983/api/v2/discovery
 ```
 
 The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration).  
