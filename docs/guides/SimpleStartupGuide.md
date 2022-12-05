@@ -186,7 +186,7 @@ curl -X PUT -d '{
 Supported Input options:
 - `InputFps`: Ignore original timestamps and instead generate timestamps assuming constant frame rate fps. (default - same as source)
 - `InputImageSize`: Specifies the image size of the camera. The format is `wxh`, for example "640x480". (default - automatically selected by FFmpeg)
-- `InputPixelFormat`: Set the preferred pixel format (for raw video). (default - automatically selected by FFmpeg)
+- `InputPixelFormat`: Set the preferred pixel format (for raw video). (default - automatically selected by FFmpeg). For more information, please visit this [link.](https://ffmpeg.org/doxygen/trunk/pixfmt_8h.html#a9a8e335cf3be472042bc9f0cf80cd4c5)  
 
 Supported Output options:
 - `OutputFrames`: Set the number of video frames to output. (default - no limitation on frames)
