@@ -7,7 +7,7 @@ Take the camera Logitech C270 as an example, it's Card Name is "C270 HD WEBCAM" 
 > NOTE: Card Name and Serial number are used by the device service to uniquely identify a camera. Some manufactures, however, may not support unique serial numbers for their cameras. Please check with your camera manufacturer.
 
 ## Dynamic Discovery function
-Dynamic discovery is enabled by default to make setup easier. It can be disable by changing the `Enabled` option to `false` as shown below.
+Dynamic discovery is enabled by default to make setup easier. It can be disabled by changing the `Enabled` option to `false` as shown below.
 
 ### Disable discovery
 
