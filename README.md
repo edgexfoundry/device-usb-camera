@@ -41,28 +41,27 @@ The figure below illustrates the software flow through the architecture componen
 
 # Getting Started
 
-To set up your system, follow [this guide.](./docs/setup.md)  
-For a full walkthrough on how to use this service and RTSP streaming, follow [this guide.](./docs/general-usage.md)  
+Learn how to configure and run the service by following these [instructions](./docs/setup.md). 
+
+For a full walkthrough of using the default images, use this [guide.](./docs/guides/SimpleStartupGuide.md)  
+
+For a full walkthrough of building custom images, use this [guide.](./docs/guides/CustomStartupGuide.md)  
+
+# Learn More
+[General Usage](./docs/general-usage.md)  
+[Device Discovery](./docs/discovery.md)  
+[Advanced Options](./docs/advanced-options.md)  
+## Testing
+[Postman Collection](./docs/USB-Camera-Collection.postman_collection.json)  
+[Postman Collection Environment](./docs/USB_camera_env.postman_environment.json)  
+## References
+- EdgeX Foundry Project Wiki: https://wiki.edgexfoundry.org/
+- EdgeX Source Code: https://github.com/edgexfoundry
+- Edgex Developer Guide: https://docs.edgexfoundry.org/2.1/
+- Docker Repos
+   - Docker https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+   - Docker Compose https://docs.docker.com/compose/install/#install-compose
 
 
-### CameraStatus Command
-Use the following query to determine the status of the camera.
-URL parameter:
-- **DeviceName**: The name of the camera
-- **InputIndex**: indicates the current index of the video input (if a camera only has one source for video, the index needs to be set to '0')
-```
-curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
-```
-   Example Output: 
-   ```
-    CameraStatus: 0
-   ```
-   **Response meanings**:
-| Response   | Description |
-| ---------- | ----------- |
-| 0 | Ready |
-| 1 | No Power |
-| 2 | No Signal |
-| 3 | No Color |  
-## License
+# License
 [Apache-2.0](LICENSE)
