@@ -8,10 +8,10 @@
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
 [Deploy the Service](#deploy-edgex-and-usb-device-camera-microservice)  
-[Verify the Service](#verify-service-and-device-profiles)   
-[Adding Devices using REST API](#adding-devices-using-rest-api)  
+[Verify the Service](#verify-service-device-profiles-and-device)   
+[Adding Devices using REST API](#optional-adding-devices-using-rest-api)  
 [Start Video Streaming](#start-video-streaming)  
-[Shutting Down](#shutting-down)  
+[Shutting Down](#optional-shutting-down)  
 [Troubleshooting](#troubleshooting)  
 
 

@@ -8,9 +8,9 @@
 [Dependencies](#dependencies)  
 [Get the Source Code](#get-the-source-code)  
 [Run the Service](#run-the-service)  
-[Verify the Service](#verify-service-and-device-profiles)    
+[Verify the Service](#verify-service-device-profiles-and-device)    
 [Start Video Streaming](#start-video-streaming)  
-[Shutting Down](#shutting-down)  
+[Shutting Down](#optional-shutting-down)  
 [Troubleshooting](#troubleshooting)  
 
 
