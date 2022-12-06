@@ -1,9 +1,12 @@
 # Advanced Options
 
 ## Contents
-[Video Options](#video-options)   
-[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date) 
-[RTSP Server](#configurable-rtsp-server-hostname-and-port)   
+[Video Options](#video-options)  
+[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
+[RTSP Server](#configurable-rtsp-server-hostname-and-port)  
+[CameraStatus Command](#camerastatus-command)  
+[License](#license)  
+
 
 ## Video options
 There are two types of options:
