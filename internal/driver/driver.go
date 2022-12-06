@@ -318,7 +318,18 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]models.Protoc
 
 // addDeviceInternal attempts to add a device to the device service's active devices
 func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]models.ProtocolProperties) (*Device, error) {
-	_, sn, err := getUSBDeviceIdInfo(protocols[UsbProtocol][Path])
+
+	usb, ok := protocols[UsbProtocol]
+	if !ok {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("Device %s is missing required %s protocol info.", deviceName, UsbProtocol), nil)
+	}
+
+	path, ok := usb[Path]
+	if !ok || path == "" {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("The path is missing for %s.", deviceName), nil)
+	}
+
+	_, sn, err := getUSBDeviceIdInfo(path)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
