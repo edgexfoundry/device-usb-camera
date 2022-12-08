@@ -145,7 +145,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 		}
 	}
 
-	// Make sure the paths of existing devices are up to date.
+	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshExistingDevicePaths()
 
 	return nil
@@ -488,6 +488,9 @@ func (d *Driver) Discover() {
 				continue
 			}
 			if _, ok := currentDevices[cn+sn]; ok {
+				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][Path] {
+					go d.updateDevicePath(currentDevices[cn+sn])
+				}
 				continue
 			}
 			discovered := sdkModels.DiscoveredDevice{
