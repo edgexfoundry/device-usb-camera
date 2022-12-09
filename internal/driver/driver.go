@@ -487,9 +487,13 @@ func (d *Driver) Discover() {
 				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
 				continue
 			}
+			// Update existing device if it's path has changed
 			if _, ok := currentDevices[cn+sn]; ok {
 				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][Path] {
-					go d.updateDevicePath(currentDevices[cn+sn])
+					currentDevices[cn+sn].Protocols[UsbProtocol][Path] = fdPath
+					if err := d.ds.UpdateDevice(currentDevices[cn+sn]); err != nil {
+						d.lc.Errorf("failed to update path for the device %s", currentDevices[cn+sn].Name)
+					}
 				}
 				continue
 			}
