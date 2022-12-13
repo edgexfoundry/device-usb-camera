@@ -24,10 +24,8 @@
 
 ### Bug Fixes 🐛
 - improve error messaging on read and write commands ([#116](https://github.com/edgexfoundry/device-usb-camera/issues/116)) ([#a13c0d8](https://github.com/edgexfoundry/device-usb-camera/commits/a13c0d8))
-- address pr comments and add timer ([#81c0ea8](https://github.com/edgexfoundry/device-usb-camera/commits/81c0ea8))
-- return if stop error ([#679fd9a](https://github.com/edgexfoundry/device-usb-camera/commits/679fd9a))
-- startStreaming now returns all errors ([#50aed43](https://github.com/edgexfoundry/device-usb-camera/commits/50aed43))
-- update command request and response topic ([#345b3c5](https://github.com/edgexfoundry/device-usb-camera/commits/345b3c5))
+- error forwarding in startStreaming ([#113](https://github.com/edgexfoundry/device-usb-camera/issues/113)) ([#02bc335](https://github.com/edgexfoundry/device-usb-camera/commit/02bc3351eb583ffe88737b5638435757cc287900)) ([#81c0ea8](https://github.com/edgexfoundry/device-usb-camera/commits/81c0ea8)) ([#679fd9a](https://github.com/edgexfoundry/device-usb-camera/commits/679fd9a)) ([#50aed43](https://github.com/edgexfoundry/device-usb-camera/commits/50aed43fc5ea9f2235be704591a04f41aa30b17f))
+- update command request and response topic ([#345b3c5](https://github.com/edgexfoundry/device-usb-camera/commits/345b3c5)) 
 - Correction in config field syntax ([#ae041b2](https://github.com/edgexfoundry/device-usb-camera/commits/ae041b2))
 
 ### Documentation 📖
