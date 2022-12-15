@@ -4,7 +4,7 @@
 [Video Options](#video-options)  
 [Dynamic Discovery](#dynamic-discovery)  
 [Camera Paths](#keep-the-paths-of-existing-camera-up-to-date) 
-[RTSP Server](#configurable-rtsp-server-hostname-and-port)   
+[RTSP Server](#configurable-rtsp-server-hostname-and-port)
 
 ## Video options
 There are two types of options:
@@ -88,6 +88,12 @@ export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
 To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).
+
+### Rediscovery
+The device service is able to rediscover and update devices that have been discovered previously.
+Nothing additional is needed to enable this. It will run whenever the discover call is sent, regardless
+of whether it is a manual or automated call to discover. The steps to configure discovery or to 
+manually trigger discovery is explained [here](#enable-the-dynamic-discovery-function)
 
 ### Configure the Provision Watchers
 
