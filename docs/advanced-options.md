@@ -3,7 +3,7 @@
 ## Contents
 [Video Options](#video-options)  
 [Dynamic Discovery](#dynamic-discovery)  
-[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date) 
+[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
 [RTSP Server](#configurable-rtsp-server-hostname-and-port)
 
 ## Video options
