@@ -93,7 +93,7 @@ To manually trigger a Dynamic Discovery, use this [device service API](https://a
 The device service is able to rediscover and update devices that have been discovered previously.
 Nothing additional is needed to enable this. It will run whenever the discover call is sent, regardless
 of whether it is a manual or automated call to discover. The steps to configure discovery or to 
-manually trigger discovery is explained [here](#enable-the-dynamic-discovery-function)
+manually trigger discovery is explained [here](#enable-the-dynamic-discovery-function).
 
 ### Configure the Provision Watchers
 
