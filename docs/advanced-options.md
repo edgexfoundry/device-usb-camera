@@ -2,9 +2,17 @@
 
 ## Contents
 [Video Options](#video-options)  
+<<<<<<< HEAD
 [Dynamic Discovery](#dynamic-discovery)  
 [Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
 [RTSP Server](#configurable-rtsp-server-hostname-and-port)
+=======
+[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
+[RTSP Server](#configurable-rtsp-server-hostname-and-port)  
+[CameraStatus Command](#camerastatus-command)  
+[License](#license)  
+
+>>>>>>> main
 
 ## Video options
 There are two types of options:
@@ -43,18 +51,19 @@ You can also set default values for these options by adding additional attribute
 The attribute name consists of a prefix "default" and the option name.
 
 For example:
+
 ```yaml
 deviceResources:
   - name: "StartStreaming"
-   description: "Start streaming process."
-   attributes:
-     { command: "VIDEO_START_STREAMING",    
-       defaultInputFrameSize: "320x240", 
-       defaultOutputVideoQuality: "31" 
-     }
-   properties:
-     valueType: "Object"
-     readWrite: "W"
+    description: "Start streaming process."
+    attributes:
+      { command: "VIDEO_START_STREAMING",
+        defaultInputFrameSize: "320x240",
+        defaultOutputVideoQuality: "31"
+      }
+    properties:
+      valueType: "Object"
+      readWrite: "W"
 ```
 
 > NOTE: It's NOT recommended to set default video options in the [cmd/res/profiles/general.usb.camera.yaml](cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
@@ -96,28 +105,10 @@ of whether it is a manual or automated call to discover. The steps to configure 
 manually trigger discovery is explained [here](#enable-the-dynamic-discovery-function).
 
 ### Configure the Provision Watchers
+=======
+> NOTE: It's NOT recommended to set default video options in the [../cmd/res/profiles/general.usb.camera.yaml](../cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
+>>>>>>> main
 
-The provision watcher sets up parameters for EdgeX to automatically add devices to core-metadata. They can be configured to look for certain features, as well as block features. The default provision watcher is sufficient unless you plan on having multiple different cameras with different profiles and resources. Learn more about provision watchers [here](https://docs.edgexfoundry.org/2.2/microservices/core/metadata/Ch-Metadata/#provision-watcher).
-
-
-```shell
-curl -X POST \
--d '[
-   {
-      "provisionwatcher":{
-         "apiVersion":"v2",
-         "name":"USB-Camera-Provision-Watcher",
-         "adminState":"UNLOCKED",
-         "identifiers":{
-            "Path": "."
-         },
-         "serviceName": "device-usb-camera",
-         "profileName": "USB-Camera-General"
-      },
-      "apiVersion":"v2"
-   }
-]' http://localhost:59881/api/v2/provisionwatcher
-```
 
 ## Keep the paths of existing camera up to date
 The paths (/dev/video*) of the connected cameras may change whenever the cameras are re-connected or the system restarts.
@@ -142,6 +133,25 @@ For example:
   RtspServerHostName = "localhost"
   RtspTcpPort = "8554"
 ```
+## CameraStatus Command
+Use the following query to determine the status of the camera.
+URL parameter:
+- **DeviceName**: The name of the camera
+- **InputIndex**: indicates the current index of the video input (if a camera only has one source for video, the index needs to be set to '0')
+```
+curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?InputIndex=0 | jq -r '"CameraStatus: " + (.event.readings[].value|tostring)'
+```
+   Example Output: 
+   ```
+    CameraStatus: 0
+   ```
+   **Response meanings**:
+| Response   | Description |
+| ---------- | ----------- |
+| 0 | Ready |
+| 1 | No Power |
+| 2 | No Signal |
+| 3 | No Color |    
 
 ## License
 [Apache-2.0](LICENSE)
