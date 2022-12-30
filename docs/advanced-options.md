@@ -107,4 +107,4 @@ curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?
 | 3 | No Color |    
 
 ## License
-[Apache-2.0](LICENSE)
+[Apache-2.0](../LICENSE)

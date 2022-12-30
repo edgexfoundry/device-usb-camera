@@ -119,4 +119,4 @@ make docker
 [Explore more advanced options](./advanced-options.md)
 
 ## License
-[Apache-2.0](LICENSE)
+[Apache-2.0](../LICENSE)
