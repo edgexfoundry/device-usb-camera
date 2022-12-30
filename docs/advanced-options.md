@@ -2,17 +2,11 @@
 
 ## Contents
 [Video Options](#video-options)  
-<<<<<<< HEAD
-[Dynamic Discovery](#dynamic-discovery)  
-[Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
-[RTSP Server](#configurable-rtsp-server-hostname-and-port)
-=======
 [Camera Paths](#keep-the-paths-of-existing-camera-up-to-date)  
 [RTSP Server](#configurable-rtsp-server-hostname-and-port)  
 [CameraStatus Command](#camerastatus-command)  
 [License](#license)  
 
->>>>>>> main
 
 ## Video options
 There are two types of options:
@@ -67,47 +61,6 @@ deviceResources:
 ```
 
 > NOTE: It's NOT recommended to set default video options in the [cmd/res/profiles/general.usb.camera.yaml](cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
-
-## Dynamic Discovery
-The device service supports [dynamic discovery](https://docs.edgexfoundry.org/2.1/microservices/device/Ch-DeviceServices/#dynamic-provisioning).
-During dynamic discovery, the device service scans all connected USB devices and sends the discovered cameras to Core Metadata.
-The device name of the camera discovered by the device service is comprised of Card Name and Serial Number, and the characters colon, space and dot will be replaced with underscores as they are invalid characters for device names in EdgeX.
-Take the camera Logitech C270 as an example, it's Card Name is "C270 HD WEBCAM" and the Serial Number is "B1CF0E50" hence the device name - "C270_HD_WEBCAM-B1CF0E50".
-
-> NOTE: Card Name and Serial number are used by the device service to uniquely identify a camera. Some manufactures, however, may not support unique serial numbers for their cameras. Please check with your camera manufacturer.
-
-### Enable the Dynamic Discovery function
-Dynamic discovery is disabled by default to save computing resources.
-If you want the device service to run the discovery periodically, enable it and set a desired interval.
-The interval value must be a [Go duration](https://pkg.go.dev/time#ParseDuration).
-
-[Option 1] Enable from the [configuration.toml](../cmd/res/configuration.toml)
-```yaml
-[Device] 
-...
-    [Device.Discovery]
-    Enabled = true
-    Interval = "1h"
-```
-
-[Option 2] Enable from the env
-```shell
-export DEVICE_DISCOVERY_ENABLED=true
-export DEVICE_DISCOVERY_INTERVAL=1h
-```
-
-To manually trigger a Dynamic Discovery, use this [device service API](https://app.swaggerhub.com/apis-docs/EdgeXFoundry1/device-sdk/2.2.0#/default/post_discovery).
-
-### Rediscovery
-The device service is able to rediscover and update devices that have been discovered previously.
-Nothing additional is needed to enable this. It will run whenever the discover call is sent, regardless
-of whether it is a manual or automated call to discover. The steps to configure discovery or to 
-manually trigger discovery is explained [here](#enable-the-dynamic-discovery-function).
-
-### Configure the Provision Watchers
-=======
-> NOTE: It's NOT recommended to set default video options in the [../cmd/res/profiles/general.usb.camera.yaml](../cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
->>>>>>> main
 
 
 ## Keep the paths of existing camera up to date
