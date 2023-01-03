@@ -45,21 +45,22 @@ You can also set default values for these options by adding additional attribute
 The attribute name consists of a prefix "default" and the option name.
 
 For example:
+
 ```yaml
 deviceResources:
   - name: "StartStreaming"
-   description: "Start streaming process."
-   attributes:
-     { command: "VIDEO_START_STREAMING",    
-       defaultInputFrameSize: "320x240", 
-       defaultOutputVideoQuality: "31" 
-     }
-   properties:
-     valueType: "Object"
-     readWrite: "W"
+    description: "Start streaming process."
+    attributes:
+      { command: "VIDEO_START_STREAMING",
+        defaultInputFrameSize: "320x240",
+        defaultOutputVideoQuality: "31"
+      }
+    properties:
+      valueType: "Object"
+      readWrite: "W"
 ```
 
-> NOTE: It's NOT recommended to set default video options in the [../cmd/res/profiles/general.usb.camera.yaml](../cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
+> NOTE: It's NOT recommended to set default video options in the [cmd/res/profiles/general.usb.camera.yaml](cmd/res/profiles/general.usb.camera.yaml) as they may not be supported by every camera.
 
 
 ## Keep the paths of existing camera up to date
@@ -106,4 +107,4 @@ curl -X GET http://localhost:59882/api/v2/device/name/<DeviceName>/CameraStatus?
 | 3 | No Color |    
 
 ## License
-[Apache-2.0](LICENSE)
+[Apache-2.0](../LICENSE)

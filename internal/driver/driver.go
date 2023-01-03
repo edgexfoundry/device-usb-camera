@@ -145,7 +145,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 		}
 	}
 
-	// Make sure the paths of existing devices are up to date.
+	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshExistingDevicePaths()
 
 	return nil
@@ -468,6 +468,7 @@ func (d *Driver) addProvisionWatchers() error {
 // Discover triggers protocol specific device discovery, which is an asynchronous operation.
 // Devices found as part of this discovery operation are written to the channel devices.
 func (d *Driver) Discover() {
+	d.lc.Info("Discovery is triggered")
 	if registerProvisionWatchers {
 		d.watchersMu.Lock()
 		if !d.addedWatchers {
@@ -497,7 +498,14 @@ func (d *Driver) Discover() {
 				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
 				continue
 			}
+			// Update existing device if it's path has changed
 			if _, ok := currentDevices[cn+sn]; ok {
+				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][Path] {
+					currentDevices[cn+sn].Protocols[UsbProtocol][Path] = fdPath
+					if err := d.ds.UpdateDevice(currentDevices[cn+sn]); err != nil {
+						d.lc.Errorf("failed to update path for the device %s", currentDevices[cn+sn].Name)
+					}
+				}
 				continue
 			}
 			discovered := sdkModels.DiscoveredDevice{
