@@ -16,7 +16,7 @@
 ## [v2.3.0] Levski - 2022-11-09 (Not Compatible with 1.x releases)
 
 ### Features ✨
-- implement rediscovery ([#9bcd451](https://github.com/edgexfoundry/device-usb-camera/commit/9bcd451))  
+- implement rediscovery ([#120](https://github.com/edgexfoundry/device-usb-camera/pull/120)) ([#9bcd451](https://github.com/edgexfoundry/device-usb-camera/commit/9bcd451))
 - add internal command request/response topics ([#f7e3d81](https://github.com/edgexfoundry/device-usb-camera/commits/f7e3d81))
 - **snap:** add config interface with unique identifier ([#103](https://github.com/edgexfoundry/device-usb-camera/issues/103)) ([#b346198](https://github.com/edgexfoundry/device-usb-camera/commits/b346198))
 
