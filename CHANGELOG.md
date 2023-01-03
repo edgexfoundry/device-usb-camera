@@ -16,6 +16,7 @@
 ## [v2.3.0] Levski - 2022-11-09 (Not Compatible with 1.x releases)
 
 ### Features ✨
+- implement rediscovery ([#9bcd451](https://github.com/edgexfoundry/device-usb-camera/commit/9bcd451))  
 - add internal command request/response topics ([#f7e3d81](https://github.com/edgexfoundry/device-usb-camera/commits/f7e3d81))
 - **snap:** add config interface with unique identifier ([#103](https://github.com/edgexfoundry/device-usb-camera/issues/103)) ([#b346198](https://github.com/edgexfoundry/device-usb-camera/commits/b346198))
 
@@ -23,12 +24,15 @@
 - **snap:** Simplify rtsp server versioning and configuration ([#1dbc6f5](https://github.com/edgexfoundry/device-usb-camera/commits/1dbc6f5))
 
 ### Bug Fixes 🐛
+- improve error messaging for incorrect protocol properties ([#117](https://github.com/edgexfoundry/device-usb-camera/issues/117)) ([#7dbe31c](https://github.com/edgexfoundry/device-usb-camera/commits/7dbe31c))  
 - improve error messaging on read and write commands ([#116](https://github.com/edgexfoundry/device-usb-camera/issues/116)) ([#a13c0d8](https://github.com/edgexfoundry/device-usb-camera/commits/a13c0d8))
 - error forwarding in startStreaming ([#113](https://github.com/edgexfoundry/device-usb-camera/issues/113)) ([#02bc335](https://github.com/edgexfoundry/device-usb-camera/commit/02bc3351eb583ffe88737b5638435757cc287900)) ([#81c0ea8](https://github.com/edgexfoundry/device-usb-camera/commits/81c0ea8)) ([#679fd9a](https://github.com/edgexfoundry/device-usb-camera/commits/679fd9a)) ([#50aed43](https://github.com/edgexfoundry/device-usb-camera/commits/50aed43fc5ea9f2235be704591a04f41aa30b17f))
 - update command request and response topic ([#345b3c5](https://github.com/edgexfoundry/device-usb-camera/commits/345b3c5)) 
 - Correction in config field syntax ([#ae041b2](https://github.com/edgexfoundry/device-usb-camera/commits/ae041b2))
 
 ### Documentation 📖
+- updated change log for levski release ([#118](https://github.com/edgexfoundry/device-usb-camera/issues/118)) ([#e17bf6e](https://github.com/edgexfoundry/device-usb-camera/commits/e17bf6e))
+- updates to usb documentation  ([#115](https://github.com/edgexfoundry/device-usb-camera/issues/115)) ([#d57e067](https://github.com/edgexfoundry/device-usb-camera/commits/d57e067))
 - adding USB camera postman collection and env files ([#96](https://github.com/edgexfoundry/device-usb-camera/issues/96)) ([#e6cf2f2](https://github.com/edgexfoundry/device-usb-camera/commits/e6cf2f2))
 - usb rtsp streaming guide and readme ([#1](https://github.com/edgexfoundry/device-usb-camera/issues/1)) ([#92](https://github.com/edgexfoundry/device-usb-camera/issues/92)) ([#2387317](https://github.com/edgexfoundry/device-usb-camera/commits/2387317))
 
