@@ -9,7 +9,7 @@ package driver
 import (
 	"net/http"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 )
 
 type HttpHandler struct {

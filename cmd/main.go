@@ -7,7 +7,7 @@
 package main
 
 import (
-	"github.com/edgexfoundry/device-sdk-go/v2/pkg/startup"
+	"github.com/edgexfoundry/device-sdk-go/v3/pkg/startup"
 	deviceUsbCamera "github.com/edgexfoundry/device-usb-camera"
 	"github.com/edgexfoundry/device-usb-camera/internal/driver"
 )
