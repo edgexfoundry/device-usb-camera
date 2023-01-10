@@ -65,4 +65,4 @@ EXPOSE 59983
 EXPOSE 8554
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD [ "--configProvider=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res" ]
+CMD [ "--configProvider=consul.http://edgex-core-consul:8500", "--registry" ]
