@@ -20,7 +20,7 @@ FROM ${BASE} AS builder
 ARG ADD_BUILD_TAGS=""
 ARG MAKE="make -e ADD_BUILD_TAGS=$ADD_BUILD_TAGS build"
 
-ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev curl"
+ARG ALPINE_PKG_BASE="make git gcc libc-dev curl"
 ARG ALPINE_PKG_EXTRA="v4l-utils-dev v4l-utils v4l-utils-libs linux-headers"
 
 RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
@@ -44,7 +44,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2022: Intel Corporation'
 
 # dumb-init needed for injected secure bootstrapping entrypoint script when run in secure mode.
-RUN apk add --update --no-cache zeromq dumb-init ffmpeg udev
+RUN apk add --update --no-cache dumb-init ffmpeg udev
 
 WORKDIR /
 COPY --from=builder /device-usb-camera/cmd /
