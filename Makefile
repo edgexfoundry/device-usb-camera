@@ -25,8 +25,9 @@ build: $(MICROSERVICES)
 build-nats:
 	make -e ADD_BUILD_TAGS=include_nats_messaging build
 
+# A go module in this service needs CGO
 cmd/device-usb-camera:
-	CGO_ENABLED=0 go build -tags "$(ADD_BUILD_TAGS)" $(GOFLAGS) -o $@ ./cmd
+	go build -tags "$(ADD_BUILD_TAGS)" $(GOFLAGS) -o $@ ./cmd
 
 docker:
 	docker build . \
