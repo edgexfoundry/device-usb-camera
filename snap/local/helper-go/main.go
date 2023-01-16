@@ -19,6 +19,11 @@ import (
 	"os"
 )
 
+const (
+	usbCameraApp  = "device-usb-camera"
+	rtspServerApp = "rtsp-simple-server"
+)
+
 func main() {
 	subCommand := os.Args[1]
 	switch subCommand {
