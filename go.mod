@@ -3,7 +3,7 @@ module github.com/edgexfoundry/device-usb-camera
 go 1.18
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.8
+	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.9
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.2
 	github.com/stretchr/testify v1.8.1
 	github.com/vladimirvivien/go4vl v0.0.2
