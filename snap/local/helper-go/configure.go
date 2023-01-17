@@ -17,27 +17,18 @@
 package main
 
 import (
-	"github.com/canonical/edgex-snap-hooks/v2/log"
-	"github.com/canonical/edgex-snap-hooks/v2/options"
-	"github.com/canonical/edgex-snap-hooks/v2/snapctl"
+	"github.com/canonical/edgex-snap-hooks/v3/log"
+	"github.com/canonical/edgex-snap-hooks/v3/options"
 )
 
 func configure() {
 	log.SetComponentName("configure")
 
-	// config options are always enabled for this service
-	err := snapctl.Set("app-options", "true").Run()
-	if err != nil {
-		log.Fatalf("could not enable config options: %v", err)
+	if err := options.ProcessConfig(usbCameraApp, rtspServerApp); err != nil {
+		log.Fatalf("Error processing config options: %v", err)
 	}
 
-	err = options.ProcessConfig("device-usb-camera", "rtsp-simple-server")
-	if err != nil {
-		log.Fatalf("could not process config options: %v", err)
-	}
-
-	err = options.ProcessAutostart("device-usb-camera", "rtsp-simple-server")
-	if err != nil {
-		log.Fatalf("could not process autostart options: %v", err)
+	if err := options.ProcessAutostart(usbCameraApp, rtspServerApp); err != nil {
+		log.Fatalf("Error processing autostart options: %v", err)
 	}
 }
