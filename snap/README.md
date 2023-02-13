@@ -33,15 +33,15 @@ sudo snap connect edgexfoundry:edgex-secretstore-token edgex-device-usb-camera:e
 Please refer [here][secret-store-token] for further information.
 
 ### Connect the camera interface
-The [`camera`](https://snapcraft.io/docs/camera-interface) interface provides automatic access to all cameras.
+The [`camera`](https://snapcraft.io/docs/camera-interface) interface grants access to USB cameras.
+When installing the snap from the store, the access is granted automatically. However, if the snap is built and installed locally, the interface will not auto-connect. You can check the connection status by running the following command: `snap connections edgex-device-usb-camera`.
 
-However, if the snap is built and installed locally, the interface will not auto-connect. You can check the connection status by running the following command: `snap connections edgex-device-usb-camera`.
 
 To manually connect:
 ```
 snap connect edgex-device-usb-camera:camera :camera
 ```
-Please refer [here][device-usb-camera] for further information.
+Please refer to [docs] for further information.
 
 ### Example of use
 Please refer [here][edgex-demo] for an example of setting up the  edgex-device-usb-camera snap, including its configuration and commands for starting the stream.
@@ -49,5 +49,3 @@ Please refer [here][edgex-demo] for an example of setting up the  edgex-device-u
 [edgex-device-usb-camera]: https://snapcraft.io/edgex-device-usb-camera
 [docs]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
 [secret-store-token]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
-[device-usb-camera]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
-[edgex-demo]: https://github.com/canonical/edgex-demos/tree/main/openvino-object-detection#2-edgex-setup-device-usb-camera
