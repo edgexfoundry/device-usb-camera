@@ -33,13 +33,17 @@ sudo snap connect edgexfoundry:edgex-secretstore-token edgex-device-usb-camera:e
 Please refer [here][secret-store-token] for further information.
 
 ### Connect the camera interface
-The [`camera`](https://snapcraft.io/docs/camera-interface) interface is currently **NOT automatically connected** as it is pending auto-connection permissions from the store.
+The [`camera`](https://snapcraft.io/docs/camera-interface) interface provides automatic access to all cameras.
 
-To connect manually:
+However, if the snap is built and installed locally, the interface will not auto-connect. You can check the connection status by running the following command: `snap connections edgex-device-usb-camera`.
+
+To manually connect:
 ```
 snap connect edgex-device-usb-camera:camera :camera
 ```
+Please refer [here][device-usb-camera] for further information.
 
 [edgex-device-usb-camera]: https://snapcraft.io/edgex-device-usb-camera
 [docs]: https://docs.edgexfoundry.org/2.3/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
 [secret-store-token]: https://docs.edgexfoundry.org/2.3/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
+[device-usb-camera]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
