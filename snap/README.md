@@ -43,7 +43,11 @@ snap connect edgex-device-usb-camera:camera :camera
 ```
 Please refer [here][device-usb-camera] for further information.
 
+### Example of use
+Please refer [here][edgex-demo] for an example of setting up the  edgex-device-usb-camera snap, including its configuration and commands for starting the stream.
+
 [edgex-device-usb-camera]: https://snapcraft.io/edgex-device-usb-camera
 [docs]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
 [secret-store-token]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
 [device-usb-camera]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
+[edgex-demo]: https://github.com/canonical/edgex-demos/tree/main/openvino-object-detection#2-edgex-setup-device-usb-camera
