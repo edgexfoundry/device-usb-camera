@@ -44,6 +44,6 @@ snap connect edgex-device-usb-camera:camera :camera
 Please refer [here][device-usb-camera] for further information.
 
 [edgex-device-usb-camera]: https://snapcraft.io/edgex-device-usb-camera
-[docs]: https://docs.edgexfoundry.org/2.3/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
-[secret-store-token]: https://docs.edgexfoundry.org/2.3/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
+[docs]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
+[secret-store-token]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#secret-store-token
 [device-usb-camera]: https://docs.edgexfoundry.org/3.0/getting-started/Ch-GettingStartedSnapUsers/#device-usb-camera
