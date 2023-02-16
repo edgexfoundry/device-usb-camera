@@ -107,9 +107,7 @@ parts:
 
       RES=$SNAPCRAFT_PART_INSTALL/config/device-usb-camera/res/
       mkdir -p $RES
-      cp    cmd/res/configuration.toml $RES
-      cp -r cmd/res/devices $RES
-      cp -r cmd/res/profiles $RES
+      cp -r cmd/res/* $RES
       
       DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-usb-camera
       mkdir -p $DOC
