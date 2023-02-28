@@ -21,7 +21,7 @@ const (
 	RtspTcpPort                = "RtspTcpPort"
 	DefaultRtspTcpPort         = "8554"
 	ProvisionWatcherDir        = "ProvisionWatcherDir"
-	DefaultProvisionWatcherDir = "res/provision_watchers"
+	DefaultProvisionWatcherDir = "res/provisionwatchers"
 	RtspUriScheme              = "rtsp"
 	Stream                     = "stream"
 	PrefixInput                = "Input"

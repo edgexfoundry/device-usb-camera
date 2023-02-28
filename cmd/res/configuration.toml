@@ -13,8 +13,8 @@ StartupMsg = "device-usb-camera started"
   ClientId = "device-usb-camera"
 
 [Device]
-# TODO: Uncomment this in PR to use built in loading of Provision Watchers and remove custom ProvisionWatcherDir below
-#ProvisionWatchersDir = "./res/provision_watchers"
+# The location of Provision Watcher json files to import when using auto-discovery
+ProvisionWatchersDir = "./res/provisionwatchers"
   [Device.Discovery]
   Enabled = true
   Interval = "1h"
@@ -22,5 +22,3 @@ StartupMsg = "device-usb-camera started"
 [Driver]
 RtspServerHostName = "localhost"
 RtspTcpPort = "8554"
-# The location of Provision Watcher json files to import when using auto-discovery
-ProvisionWatcherDir = "res/provision_watchers"
