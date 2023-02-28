@@ -13,7 +13,8 @@ StartupMsg = "device-usb-camera started"
   ClientId = "device-usb-camera"
 
 [Device]
-ProvisionWatchersDir = "./res/provision_watchers"
+# TODO: Uncomment this in PR to use built in loading of Provision Watchers and remove custom ProvisionWatcherDir below
+#ProvisionWatchersDir = "./res/provision_watchers"
   [Device.Discovery]
   Enabled = true
   Interval = "1h"
