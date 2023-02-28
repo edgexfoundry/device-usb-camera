@@ -34,16 +34,15 @@ var driver *Driver
 var once sync.Once
 
 type Driver struct {
-	ds                  *service.DeviceService
-	lc                  logger.LoggingClient
-	wg                  *sync.WaitGroup
-	asyncCh             chan<- *sdkModels.AsyncValues
-	deviceCh            chan<- []sdkModels.DiscoveredDevice
-	activeDevices       map[string]*Device
-	rtspHostName        string
-	rtspTcpPort         string
-	provisionWatcherDir string
-	mutex               sync.Mutex
+	ds            *service.DeviceService
+	lc            logger.LoggingClient
+	wg            *sync.WaitGroup
+	asyncCh       chan<- *sdkModels.AsyncValues
+	deviceCh      chan<- []sdkModels.DiscoveredDevice
+	activeDevices map[string]*Device
+	rtspHostName  string
+	rtspTcpPort   string
+	mutex         sync.Mutex
 
 	addedWatchers bool
 	watchersMu    sync.Mutex
@@ -102,14 +101,6 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	}
 	d.lc.Infof("RTSP TCP port: %s", rtspPort)
 	d.rtspTcpPort = rtspPort
-
-	provisionWatcherDir, ok := service.DriverConfigs()[ProvisionWatcherDir]
-	if !ok {
-		provisionWatcherDir = DefaultProvisionWatcherDir
-		d.lc.Warnf("service config %s not found. Use the default value: %s", ProvisionWatcherDir, DefaultProvisionWatcherDir)
-	}
-	d.lc.Infof("ProvisionWatcherDir: %s", provisionWatcherDir)
-	d.provisionWatcherDir = provisionWatcherDir
 
 	d.lc.Info("Initializing cameras...")
 	for _, dev := range d.ds.Devices() {
