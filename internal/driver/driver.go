@@ -43,9 +43,6 @@ type Driver struct {
 	rtspHostName  string
 	rtspTcpPort   string
 	mutex         sync.Mutex
-
-	addedWatchers bool
-	watchersMu    sync.Mutex
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
