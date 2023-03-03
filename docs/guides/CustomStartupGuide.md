@@ -130,6 +130,20 @@ For example:
    ```bash
    make docker
    ```
+
+   <details>
+   <summary>[Optional] Build with NATS Messaging</summary>
+
+   Currently, the NATS Messaging capability (NATS MessageBus) is opt-in at build time. This means that the published Docker image and Snaps do not include the NATS messaging capability. To build the docker image using NATS, run make docker-nats:
+
+   ```bash
+   make docker-nats
+   ```
+         
+   See [Compose Builder](https://github.com/edgexfoundry/edgex-compose/tree/main/compose-builder#gen) `nat-bus` option to generate compose file for NATS and local dev images.
+      
+   </details>
+
 1. Navigate to the Edgex compose directory.
 
    ```shell
