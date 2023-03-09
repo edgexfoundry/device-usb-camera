@@ -42,6 +42,7 @@ apps:
       REGISTRY_ARG: "--registry"
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-usb-camera/res/profiles"
       DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-usb-camera/res/devices"
+      DEVICE_PROVISIONWATCHERSDIR: "$SNAP_DATA/config/device-usb-camera/res/provisionwatchers"
       SECRETSTORE_TOKENFILE: $SNAP_DATA/device-usb-camera/secrets-token.json
       # Add shared library object file to path for ffprobe/ffmpeg
       LD_LIB: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
