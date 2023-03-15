@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.45
-	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.24
+	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.30
 	github.com/stretchr/testify v1.8.2
 	github.com/vladimirvivien/go4vl v0.0.2
 	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
