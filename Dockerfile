@@ -36,7 +36,7 @@ RUN curl -o LICENSE-rtsp-simple-server https://raw.githubusercontent.com/aler9/r
 
 RUN ${MAKE}
 
-FROM aler9/rtsp-simple-server:v0.18.4 AS rtsp
+FROM aler9/rtsp-simple-server:v0.21.6 AS rtsp
 
 FROM alpine:3.16
 
