@@ -117,6 +117,11 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    git clone https://github.com/edgexfoundry/edgex-compose.git
    ```
 
+4. Checkout the stable `levski` branch
+   ```bash
+   git checkout levski
+   ```
+
 
 ## Get the Device USB Camera Source Code
 
@@ -126,17 +131,16 @@ The table below lists command line tools this guide uses to help with EdgeX conf
    ```
 
 2. Clone the device-usb-camera repository:
-
    ```bash
    git clone https://github.com/edgexfoundry/device-usb-camera.git
    ```
 
+3. Checkout the stable `levski` branch
+   ```bash
+   git checkout levski
+   ```
 
-## Next Steps 
-[General Usage](./general-usage.md)  
-[Device Discovery](./discovery.md)  
-[Advanced Options](./advanced-options.md)  
-
+## Next Steps
 For a full walkthrough of using the default images, use this [guide.](./guides/SimpleStartupGuide.md)  
 
 For a full walkthrough of building custom images, use this [guide.](./guides/CustomStartupGuide.md)  
