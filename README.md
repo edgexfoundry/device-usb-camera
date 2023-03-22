@@ -2,6 +2,8 @@
 [![Build Status](https://jenkins.edgexfoundry.org/view/EdgeX%20Foundry%20Project/job/edgexfoundry/job/device-usb-camera/job/main/badge/icon)](https://jenkins.edgexfoundry.org/view/EdgeX%20Foundry%20Project/job/edgexfoundry/job/device-usb-camera/job/main/) [![Code Coverage](https://codecov.io/gh/edgexfoundry/device-usb-camera/branch/main/graph/badge.svg?token=K4V4LAJYYW)](https://codecov.io/gh/edgexfoundry/device-usb-camera) [![Go Report Card](https://goreportcard.com/badge/github.com/edgexfoundry/device-usb-camera)](https://goreportcard.com/report/github.com/edgexfoundry/device-usb-camera) [![GitHub Latest Dev Tag)](https://img.shields.io/github/v/tag/edgexfoundry/device-usb-camera?include_prereleases&sort=semver&label=latest-dev)](https://github.com/edgexfoundry/device-usb-camera/tags) ![GitHub Latest Stable Tag)](https://img.shields.io/github/v/tag/edgexfoundry/device-usb-camera?sort=semver&label=latest-stable) [![GitHub License](https://img.shields.io/github/license/edgexfoundry/device-usb-camera)](https://choosealicense.com/licenses/apache-2.0/) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/edgexfoundry/device-usb-camera) [![GitHub Pull Requests](https://img.shields.io/github/issues-pr-raw/edgexfoundry/device-usb-camera)](https://github.com/edgexfoundry/device-usb-camera/pulls) [![GitHub Contributors](https://img.shields.io/github/contributors/edgexfoundry/device-usb-camera)](https://github.com/edgexfoundry/device-usb-camera/contributors) [![GitHub Committers](https://img.shields.io/badge/team-committers-green)](https://github.com/orgs/edgexfoundry/teams/device-usb-camera-committers/members) [![GitHub Commit Activity](https://img.shields.io/github/commit-activity/m/edgexfoundry/device-usb-camera)](https://github.com/edgexfoundry/device-usb-camera/commits)
 
 
+> **Note**: This is the stable release branch compatible with **EdgeX Levski (v2.3.x)**. It is only compatible with the [levski branch of edgex-compose](https://github.com/edgexfoundry/edgex-compose/tree/levski).
+
 ## Overview
 The USB Device Service is a microservice created to address the lack of standardization and automation of camera discovery and onboarding. EdgeX Foundry is a flexible microservice-based architecture created to promote the interoperability of multiple device interface combinations at the edge. In an EdgeX deployment, the USB Device Service controls and communicates with USB cameras, while EdgeX Foundry presents a standard interface to application developers. With normalized connectivity protocols and a vendor-neutral architecture, EdgeX paired with USB Camera Device Service, simplifies deployment of edge camera devices.
 
@@ -9,19 +11,6 @@ Specifically, the device service uses V4L2 API to get camera metadata, FFmpeg fr
 
 Use the USB Device Service to streamline and scale your edge camera device deployment. 
 
-## Build with NATS Messaging
-Currently, the NATS Messaging capability (NATS MessageBus) is opt-in at build time.
-This means that the published Docker image and Snaps do not include the NATS messaging capability.
-
-The following make commands will build the local binary or local Docker image with NATS messaging
-capability included.
-```makefile
-make build-nats
-make docker-nats
-```
-
-The locally built Docker image can then be used in place of the published Docker image in your compose file.
-See [Compose Builder](https://github.com/edgexfoundry/edgex-compose/tree/main/compose-builder#gen) `nat-bus` option to generate compose file for NATS and local dev images.
 
 ## How It Works
 

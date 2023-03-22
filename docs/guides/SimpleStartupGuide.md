@@ -39,7 +39,7 @@ You must have administrator (sudo) privileges to execute the user guide commands
 
 ## Tested Devices
 The following devices have been tested with EdgeX USB Camera Device Service:  
-> Note: Results may vary based on camera hardware/firmware version and operating system support.
+> **NOTE:** Results may vary based on camera hardware/firmware version and operating system support.
 <!-- sorted alphabetically -->
 - AUKEY PC-LM1E Webcam
 - HP w200 Webcam
@@ -72,7 +72,7 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 >Table 1: Command Line Tools
 ## Get the Source Code
-> Note: This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired working directory.
+> **NOTE:** This guide uses a assumes a working directory of `~/edgex`. The commands below will need to be updated if that is not the desired working directory.
 ###  Download EdgeX Compose Repository
 
 1. Create a directory for the EdgeX compose repository:
