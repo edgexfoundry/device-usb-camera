@@ -86,7 +86,7 @@ Install the build, media streaming, and parsing tools:
    sudo apt install build-essential jq curl
    ```
 
-NOTE: The device service ONLY works on Linux with kernel v5.10 or higher.  
+>**NOTE:** The device service ONLY works on Linux with kernel v5.10 or higher.  
 
 
 
