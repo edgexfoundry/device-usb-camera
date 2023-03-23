@@ -20,6 +20,7 @@ import (
 	hooks "github.com/canonical/edgex-snap-hooks/v3"
 	"github.com/canonical/edgex-snap-hooks/v3/env"
 	"github.com/canonical/edgex-snap-hooks/v3/log"
+	"github.com/canonical/edgex-snap-hooks/v3/snapctl"
 )
 
 func installUSBCameraConfig() error {
@@ -37,8 +38,15 @@ func installRTSPConfig() error {
 func install() {
 	log.SetComponentName("install")
 
-	if err := installUSBCameraConfig(); err != nil {
-		log.Fatalf("Error installing Device USB Camera files: %s", err)
+	// Install default config files for Device USB Camera only if no config provider is connected
+	isConnected, err := snapctl.IsConnected(usbCameraApp + "-config").Run()
+	if err != nil {
+		log.Fatalf("Error checking interface connection: %s", err)
+	}
+	if !isConnected {
+		if err := installUSBCameraConfig(); err != nil {
+			log.Fatalf("Error installing Device USB Camera files: %s", err)
+		}
 	}
 
 	if err := installRTSPConfig(); err != nil {
