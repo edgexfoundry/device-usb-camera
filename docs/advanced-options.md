@@ -78,13 +78,13 @@ It's recommended to trigger a check after re-plugging cameras.
 
 ## Configurable RTSP server hostname and port
 
-The hostname and port of the RTSP server to which the device service publishes video streams can be configured in the [Driver] section of the service configuration located in the [configuration.toml](../cmd/res/configuration.toml).
+The hostname and port of the RTSP server to which the device service publishes video streams can be configured in the [Driver] section of the service configuration located in the [configuration.yaml](../cmd/res/configuration.yaml).
 
 For example:
 ```yaml
-[Driver]
-  RtspServerHostName = "localhost"
-  RtspTcpPort = "8554"
+Driver:
+  RtspServerHostName: "localhost"
+  RtspTcpPort: "8554"
 ```
 ## CameraStatus Command
 Use the following query to determine the status of the camera.

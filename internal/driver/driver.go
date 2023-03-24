@@ -82,7 +82,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		return fmt.Errorf("failed to add API route %s, error: %s", ApiRefreshDevicePaths, err.Error())
 	}
 
-	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName] 
+	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
 	if !ok {
 		rtspServerHostName = DefaultRtspServerHostName
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspServerHostName, DefaultRtspServerHostName)

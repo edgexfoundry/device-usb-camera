@@ -107,16 +107,16 @@ The table below lists command line tools this guide uses to help with EdgeX conf
 
 ## OPTIONAL: Configuration Options
 ### Configurable RTSP server hostname and port
-The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `device-usb-camera/cmd/res/configuration.toml` file. The default values can be used for this guide.
+The hostname and port of the RTSP server can be configured in the `[Driver]` section of the `device-usb-camera/cmd/res/configuration.yaml` file. The default values can be used for this guide.
 
 For example:
 ```yaml
-[Driver]
-  RtspServerHostName = "localhost"
-  RtspTcpPort = "8554"
+Driver:
+  RtspServerHostName: "localhost"
+  RtspTcpPort: "8554"
 ```
 <p align="left">
-      <i>Sample: Snippet from configuration.toml</i>
+      <i>Sample: Snippet from configuration.yaml</i>
 </p>
 
 ## Deploy EdgeX and USB Device Camera Microservice
