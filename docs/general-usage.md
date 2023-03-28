@@ -63,12 +63,12 @@ The device's protocol properties contain:
 For example:
 ```yaml
 DeviceList:
-  Name: "hp-w200-01"
-  ProfileName: "USB-Camera-General"
-  Description: "HP Webcam w200 - 01"
-  Labels: [ "device-usb-camera-example" ]
-  Protocols
-    Protocols.USB:
+  name: "hp-w200-01"
+  profileName: "USB-Camera-General"
+  description: "HP Webcam w200 - 01"
+  labels: [ "device-usb-camera-example" ]
+  protocols
+    USB:
       Path: "/dev/video0"
       AutoStreaming: "false"
 ```

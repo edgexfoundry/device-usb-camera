@@ -1,9 +1,9 @@
 DeviceList:
-  Name: "example-camera"
-  ProfileName: "USB-Camera-General"
-  Description: "Example Camera"
-  Labels: [ "device-usb-camera-example", ]
-  DeviceList.Protocols:
-    DeviceList.Protocols.USB:
+  name: "example-camera"
+  profileName: "USB-Camera-General"
+  description: "Example Camera"
+  labels: [ "device-usb-camera-example", ]
+  protocols:
+    USB:
       Path: "/dev/video0"
       AutoStreaming: "false"
