@@ -62,18 +62,18 @@ The device's protocol properties contain:
 
 For example:
 ```yaml
-[[DeviceList]]
-  Name = "hp-w200-01"
-  ProfileName = "USB-Camera-General"
-  Description = "HP Webcam w200 - 01"
-  Labels = [ "device-usb-camera-example" ]
-  [DeviceList.Protocols]
-    [DeviceList.Protocols.USB]
-    Path = "/dev/video0"
-    AutoStreaming = "false"
+DeviceList:
+  name: "hp-w200-01"
+  profileName: "USB-Camera-General"
+  description: "HP Webcam w200 - 01"
+  labels: [ "device-usb-camera-example" ]
+  protocols
+    USB:
+      Path: "/dev/video0"
+      AutoStreaming: "false"
 ```
 <p align="left">
-      <i>Sample: Snippet from general.usb.camera.toml.example</i>
+      <i>Sample: Snippet from general.usb.camera.yaml.example</i>
 </p>
 
 See the examples at `cmd/res/devices`  

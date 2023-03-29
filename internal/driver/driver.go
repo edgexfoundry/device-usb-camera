@@ -23,8 +23,8 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
 
+	"github.com/edgexfoundry/device-sdk-go/v3/pkg/interfaces"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
-	"github.com/edgexfoundry/device-sdk-go/v3/pkg/service"
 
 	usbdevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/xfrr/goffmpeg/transcoder"
@@ -34,7 +34,7 @@ var driver *Driver
 var once sync.Once
 
 type Driver struct {
-	ds            *service.DeviceService
+	ds            interfaces.DeviceServiceSDK
 	lc            logger.LoggingClient
 	wg            *sync.WaitGroup
 	asyncCh       chan<- *sdkModels.AsyncValues
@@ -66,15 +66,14 @@ func (me MultiErr) Error() string {
 }
 
 // Initialize performs protocol-specific initialization for the device service.
-func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.AsyncValues,
-	deviceCh chan<- []sdkModels.DiscoveredDevice) error {
+func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	d.lc = lc
-	d.asyncCh = asyncCh
-	d.deviceCh = deviceCh
-	d.ds = service.RunningService()
+	d.lc = sdk.LoggingClient()
+	d.asyncCh = sdk.AsyncValuesChannel()
+	d.deviceCh = sdk.DiscoveredDeviceChannel()
+	d.ds = sdk
 	d.activeDevices = make(map[string]*Device)
 	d.wg = new(sync.WaitGroup)
 
@@ -83,7 +82,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 		return fmt.Errorf("failed to add API route %s, error: %s", ApiRefreshDevicePaths, err.Error())
 	}
 
-	rtspServerHostName, ok := service.DriverConfigs()[RtspServerHostName]
+	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
 	if !ok {
 		rtspServerHostName = DefaultRtspServerHostName
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspServerHostName, DefaultRtspServerHostName)
@@ -91,7 +90,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	d.lc.Infof("RTSP server hostname: %s", rtspServerHostName)
 	d.rtspHostName = rtspServerHostName
 
-	rtspPort, ok := service.DriverConfigs()[RtspTcpPort]
+	rtspPort, ok := d.ds.DriverConfigs()[RtspTcpPort]
 	if !ok {
 		rtspPort = DefaultRtspTcpPort
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspTcpPort, DefaultRtspTcpPort)
@@ -303,7 +302,7 @@ func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]model
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("The path is missing for %s.", deviceName), nil)
 	}
 
-	_, sn, err := getUSBDeviceIdInfo(path)
+	_, sn, err := getUSBDeviceIdInfo(path.(string))
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
@@ -360,7 +359,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshExistingDevicePaths() {
 	for _, cd := range d.ds.Devices() {
-		fdPath := cd.Protocols[UsbProtocol][Path]
+		fdPath := cd.Protocols[UsbProtocol][Path].(string)
 		cn, sn, err := getUSBDeviceIdInfo(fdPath)
 		if err != nil {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
@@ -430,7 +429,7 @@ func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolPropert
 			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
 				key, protocol), nil)
 	}
-	return value, nil
+	return value.(string), nil
 }
 
 func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProperties) (*Device, errors.EdgeX) {
@@ -502,8 +501,8 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device on the specified path: %s", fdPath), err)
 	}
-	psn := protocols[UsbProtocol][SerialNumber]
-	pcn := protocols[UsbProtocol][CardName]
+	psn := protocols[UsbProtocol][SerialNumber].(string)
+	pcn := protocols[UsbProtocol][CardName].(string)
 	// pre-defined devices may not include serial number information
 	if len(psn) == 0 {
 		device.Protocols[UsbProtocol][SerialNumber] = sn
@@ -616,8 +615,8 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 	cds := d.ds.Devices()
 	cdm := make(map[string]models.Device, len(cds))
 	for _, cd := range cds {
-		cn := cd.Protocols[UsbProtocol][CardName]
-		sn := cd.Protocols[UsbProtocol][SerialNumber]
+		cn := cd.Protocols[UsbProtocol][CardName].(string)
+		sn := cd.Protocols[UsbProtocol][SerialNumber].(string)
 		if len(cn) > 0 && len(sn) > 0 {
 			cdm[cn+sn] = cd
 		}

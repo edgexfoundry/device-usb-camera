@@ -11,13 +11,13 @@ Dynamic discovery is enabled by default to make setup easier. It can be disabled
 
 ### Disable discovery
 
-[Option 1] Disable discovery from the [configuration.toml](../cmd/res/configuration.toml) file.
+[Option 1] Disable discovery from the [configuration.yaml](../cmd/res/configuration.yaml) file.
 ```yaml
-[Device] 
+Device: 
 ...
-    [Device.Discovery]
-    Enabled = false
-    Interval = "1h"
+    Discovery:
+      Enabled: false
+      Interval: "1h"
 ```
 
 [Option 2] Disable discovery from environment variables. 
@@ -27,13 +27,13 @@ export DEVICE_DISCOVERY_INTERVAL=1h
 ```
 
 ### Configure discovery interval
-[Option 1] Configure discovery from the [configuration.toml](../cmd/res/configuration.toml) file.
+[Option 1] Configure discovery from the [configuration.yaml](../cmd/res/configuration.yaml) file.
 ```yaml
-[Device] 
+Device: 
 ...
-    [Device.Discovery]
-    Enabled = true
-    Interval = "1h"
+    Discovery:
+      Enabled: true
+      Interval: "1h"
 ```
 
 [Option 2] Configure discovery from environment variables.
