@@ -165,10 +165,10 @@ func parseOptionValue(name string, value interface{}) (string, error) {
 
 	if name == InputPixelFormat {
 		switch value {
-		case v4l2.PixelFormats[v4l2.PixFmtRGB24], FFmpegPixFmtRGB24:
-			return FFmpegPixFmtRGB24, nil
-		case v4l2.PixelFormats[v4l2.PixFmtGrey], FFmpegPixFmtGray:
-			return FFmpegPixFmtGray, nil
+		case v4l2.PixelFormats[v4l2.PixelFmtRGB24], FFmpegPixelFmtRGB24:
+			return FFmpegPixelFmtRGB24, nil
+		case v4l2.PixelFormats[v4l2.PixelFmtGrey], FFmpegPixelFmtGray:
+			return FFmpegPixelFmtGray, nil
 		case v4l2.PixelFormats[v4l2.PixelFmtYUYV], FFmpegPixelFmtYUYV:
 			return FFmpegPixelFmtYUYV, nil
 		case v4l2.PixelFormats[v4l2.PixelFmtMJPEG], FFmpegPixelFmtMJPEG:

@@ -20,10 +20,10 @@ func TestParseOptionValuePixelFormat(t *testing.T) {
 		expectedValue string
 		expectErr     bool
 	}{
-		{"rgb24 (go4vl)", v4l2.PixelFormats[v4l2.PixFmtRGB24], FFmpegPixFmtRGB24, false},
-		{"rgb24 (FFmpeg)", FFmpegPixFmtRGB24, FFmpegPixFmtRGB24, false},
-		{"gray (go4vl)", v4l2.PixelFormats[v4l2.PixFmtGrey], FFmpegPixFmtGray, false},
-		{"gray (FFmpeg)", FFmpegPixFmtGray, FFmpegPixFmtGray, false},
+		{"rgb24 (go4vl)", v4l2.PixelFormats[v4l2.PixelFmtRGB24], FFmpegPixelFmtRGB24, false},
+		{"rgb24 (FFmpeg)", FFmpegPixelFmtRGB24, FFmpegPixelFmtRGB24, false},
+		{"gray (go4vl)", v4l2.PixelFormats[v4l2.PixelFmtGrey], FFmpegPixelFmtGray, false},
+		{"gray (FFmpeg)", FFmpegPixelFmtGray, FFmpegPixelFmtGray, false},
 		{"yuyv (go4vl)", v4l2.PixelFormats[v4l2.PixelFmtYUYV], FFmpegPixelFmtYUYV, false},
 		{"yuyv (FFmpeg)", FFmpegPixelFmtYUYV, FFmpegPixelFmtYUYV, false},
 		{"mjpeg (go4vl)", v4l2.PixelFormats[v4l2.PixelFmtMJPEG], FFmpegPixelFmtMJPEG, false},

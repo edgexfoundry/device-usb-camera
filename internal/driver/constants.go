@@ -56,8 +56,8 @@ const (
 	FFmpegInputFormat = "-input_format"
 
 	// FFmpeg option values
-	FFmpegPixFmtRGB24   = "rgb24"
-	FFmpegPixFmtGray    = "gray"
+	FFmpegPixelFmtRGB24 = "rgb24"
+	FFmpegPixelFmtGray  = "gray"
 	FFmpegPixelFmtYUYV  = "yuyv422"
 	FFmpegPixelFmtMJPEG = "mjpeg"
 
