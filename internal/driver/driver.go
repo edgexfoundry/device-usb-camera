@@ -1,6 +1,7 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
 // Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2023 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -121,6 +122,10 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshExistingDevicePaths()
 
+	return nil
+}
+
+func (d *Driver) Start() error {
 	return nil
 }
 
@@ -373,7 +378,7 @@ func (d *Driver) RefreshExistingDevicePaths() {
 
 // Discover triggers protocol specific device discovery, which is an asynchronous operation.
 // Devices found as part of this discovery operation are written to the channel devices.
-func (d *Driver) Discover() {
+func (d *Driver) Discover() error {
 	d.lc.Info("Discovery is triggered")
 
 	var devices []sdkModels.DiscoveredDevice
@@ -416,6 +421,7 @@ func (d *Driver) Discover() {
 		}
 	}
 	d.deviceCh <- devices
+	return nil
 }
 
 func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolProperties, protocol, key string) (string, errors.EdgeX) {
@@ -698,4 +704,12 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 			fmt.Sprintf("could not find the serial number of the device on the specified path %s", path), nil)
 	}
 	return
+}
+
+func (d *Driver) ValidateDevice(device models.Device) error {
+	_, err := d.getProtocolProperty(device.Protocols, UsbProtocol, Path)
+	if err != nil {
+		return errors.NewCommonEdgeXWrapper(err)
+	}
+	return nil
 }
