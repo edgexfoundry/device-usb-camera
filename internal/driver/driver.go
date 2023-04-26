@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -150,16 +149,21 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	go d.RefreshExistingDevicePaths()
 
 	http.HandleFunc("/rtspauth", RtspCredentialsHandler)
-	err := http.ListenAndServe(":59999", nil)
+	go d.StartRtspCredentialServer()
+	return nil
+}
+func (d *Driver) StartRtspCredentialServer() {
+	d.lc.Infof("starting rtsp server\n")
+	err := http.ListenAndServe(":8000", nil)
 	if err == http.ErrServerClosed {
 		d.lc.Errorf("server closed\n")
 	} else if err != nil {
 		d.lc.Errorf("error starting server: %s\n", err)
 	}
-	return nil
 }
 func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "rtsp request\n")
+	//io.WriteString(w, "rtsp request\n")
+	w.WriteHeader(http.StatusOK)
 }
 
 func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]models.ProtocolProperties,
