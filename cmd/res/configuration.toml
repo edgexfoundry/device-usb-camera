@@ -10,6 +10,11 @@ LogLevel = "INFO"
       [Writable.InsecureSecrets.DB.Secrets]
       username = ""
       password = ""
+    [Writable.InsecureSecrets.rtsp_user1]
+    path = "rtsp_user1"
+      [Writable.InsecureSecrets.rtsp_user1.Secrets]
+      username = "user1"
+      password = "P@ssw0rd123!" 
   [Writable.Reading]
   ReadingUnits = false
   [Writable.Telemetry]
@@ -29,9 +34,9 @@ LogLevel = "INFO"
 
 [Service]
 HealthCheckInterval = "10s"
-Host = "localhost"
+Host = "host.docker.internal"
 Port = 59983 # Device services are assigned to the 599xx range
-ServerBindAddr = ""  # blank value defaults to Service.Host value
+ServerBindAddr = "0.0.0.0"  # blank value defaults to Service.Host value
 StartupMsg = "device-usb-camera started"
 # MaxRequestSize limit the request body size in kilobyte of put command
 MaxRequestSize = 0 # value 0 unlimited request size.
@@ -127,10 +132,10 @@ Labels = []
 UseMessageBus = true
   [Device.Discovery]
   Enabled = true
-  Interval = "1h"
+  Interval = "30s"
 
 [Driver]
-RtspServerHostName = "localhost"
+RtspServerHostName = "192.168.10.4"
 RtspTcpPort = "8554"
 # The location of Provision Watcher json files to import when using auto-discovery
 ProvisionWatcherDir = "res/provision_watchers"

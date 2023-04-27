@@ -27,6 +27,7 @@ func (d *Driver) tryGetCredentials(secretPath string) (Credentials, errors.EdgeX
 
 	secretData, err := d.ds.GetSecretProvider().GetSecret(secretPath, UsernameKey, PasswordKey)
 	if err != nil {
+		d.lc.Errorf("Failed to retrieve credentials for the secret path %s: %s", secretPath, err)
 		return Credentials{}, errors.NewCommonEdgeXWrapper(err)
 	}
 

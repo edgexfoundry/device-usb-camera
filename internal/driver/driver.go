@@ -165,7 +165,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 }
 func (d *Driver) StartRtspCredentialServer() {
 	d.lc.Infof("starting rtsp server\n")
-	err := http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":8000", nil) //TODO: get port from config
 	if err == http.ErrServerClosed {
 		d.lc.Errorf("server closed\n")
 	} else if err != nil {
@@ -192,17 +192,33 @@ func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 	//   }
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Printf("could not read body: %s\n", err)
+		driver.lc.Warnf("could not read body: %s\n", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 	log.Println(string(body))
 	var rtspRequest RtspRequest
 	err = json.Unmarshal(body, &rtspRequest)
 	if err != nil {
-		fmt.Printf("could not unmarshal read body: %s\n", err)
+		driver.lc.Warnf("could not unmarshal read body: %s\n", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 	fmt.Printf("user read body: %s\n", rtspRequest.User)
-	//io.WriteString(w, "rtsp request\n")
+	credential, edgexErr := driver.tryGetCredentials("rtsp_" + rtspRequest.User)
+	if edgexErr != nil {
+		driver.lc.Warnf("failed to get credentials for user %s", rtspRequest.User)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	// TODO: move to seperate function?
+	if credential.Password == rtspRequest.Password {
+		fmt.Printf("passwords match\n")
 	w.WriteHeader(http.StatusOK)
+	} else {
+		fmt.Printf("passwords do not match\n")
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 }
 
 func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]models.ProtocolProperties,
