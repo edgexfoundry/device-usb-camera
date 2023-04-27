@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -61,6 +62,16 @@ type Driver struct {
 
 	addedWatchers bool
 	watchersMu    sync.Mutex
+}
+type RtspRequest struct {
+	Ip       string `json:"ip"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Path     string `json:"path"`
+	Protocol string `json:"protocol"`
+	Id       string `json:"id"`
+	Action   string `json:"action"`
+	Query    string `json:"query"`
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
@@ -162,6 +173,34 @@ func (d *Driver) StartRtspCredentialServer() {
 	}
 }
 func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
+	//TODO: check for empty user and password
+	// from post
+	// {
+	// 	"user": "",
+	// 	"password": "",
+	//   }
+	//from post
+	// {
+	// 	"ip": "ip",
+	// 	"user": "user",
+	// 	"password": "password",
+	// 	"path": "path",
+	// 	"protocol": "rtsp|rtmp|hls|webrtc",
+	// 	"id": "id",
+	// 	"action": "read|publish",
+	// 	"query": "query"
+	//   }
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("could not read body: %s\n", err)
+	}
+	log.Println(string(body))
+	var rtspRequest RtspRequest
+	err = json.Unmarshal(body, &rtspRequest)
+	if err != nil {
+		fmt.Printf("could not unmarshal read body: %s\n", err)
+	}
+	fmt.Printf("user read body: %s\n", rtspRequest.User)
 	//io.WriteString(w, "rtsp request\n")
 	w.WriteHeader(http.StatusOK)
 }
