@@ -205,9 +205,13 @@ func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("user read body: %s\n", rtspRequest.User)
+	if rtspRequest.Action == "publish" {
+		driver.lc.Infof("allowing publish at path %s", rtspRequest.Path)
+		w.WriteHeader(http.StatusOK)
+	}
 	credential, edgexErr := driver.tryGetCredentials("rtsp_" + rtspRequest.User)
 	if edgexErr != nil {
-		driver.lc.Warnf("failed to get credentials for user %s", rtspRequest.User)
+		driver.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
