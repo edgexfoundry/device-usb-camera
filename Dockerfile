@@ -59,6 +59,7 @@ COPY --from=rtsp /rtsp-simple-server /
 RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g' rtsp-simple-server.yml
 RUN sed -i 's/hlsDisable: no/hlsDisable: yes/g' rtsp-simple-server.yml
 RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' rtsp-simple-server.yml
+RUN sed -i 's,externalAuthenticationURL:,externalAuthenticationURL: http://localhost:8000/rtspauth,g' rtsp-simple-server.yml
 
 EXPOSE 59983
 # RTSP port of rtsp-simple-server:

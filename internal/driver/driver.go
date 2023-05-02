@@ -173,23 +173,7 @@ func (d *Driver) StartRtspCredentialServer() {
 	}
 }
 func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
-	//TODO: check for empty user and password
-	// from post
-	// {
-	// 	"user": "",
-	// 	"password": "",
-	//   }
-	//from post
-	// {
-	// 	"ip": "ip",
-	// 	"user": "user",
-	// 	"password": "password",
-	// 	"path": "path",
-	// 	"protocol": "rtsp|rtmp|hls|webrtc",
-	// 	"id": "id",
-	// 	"action": "read|publish",
-	// 	"query": "query"
-	//   }
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		driver.lc.Warnf("could not read body: %s\n", err)
@@ -205,18 +189,15 @@ func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("user read body: %s\n", rtspRequest.User)
-	if rtspRequest.Action == "publish" {
-		driver.lc.Infof("allowing publish at path %s", rtspRequest.Path)
-		w.WriteHeader(http.StatusOK)
-	}
-	credential, edgexErr := driver.tryGetCredentials("rtsp_" + rtspRequest.User)
+	credential, edgexErr := driver.tryGetCredentials(rtspRequest.User)
 	if edgexErr != nil {
 		driver.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	// TODO: move to seperate function?
-	if credential.Password == rtspRequest.Password {
+
+	if credential.Username == rtspRequest.User &&
+		credential.Password == rtspRequest.Password {
 		fmt.Printf("passwords match\n")
 	w.WriteHeader(http.StatusOK)
 	} else {
@@ -307,7 +288,14 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VideoStreamUri:
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
+			rtspUri := &url.URL{
+				Scheme: RtspUriScheme,
+				Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
+			}
+			rtspUri.Path = path.Join(Stream, deviceName)
+			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, rtspUri.String())
+			
+			//	cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
 		case VideoStreamingStatus:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
 		default:
@@ -635,6 +623,12 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	rtspUri := &url.URL{
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
+	}
+	credential, edgexErr := driver.tryGetCredentials("rtspauth")
+	if edgexErr != nil {
+		driver.lc.Warnf("failed to get credentials for at path %s", name)
+	} else {
+		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 	}
 	rtspUri.Path = path.Join(Stream, name)
 

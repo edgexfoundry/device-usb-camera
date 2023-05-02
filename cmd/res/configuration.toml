@@ -10,11 +10,11 @@ LogLevel = "INFO"
       [Writable.InsecureSecrets.DB.Secrets]
       username = ""
       password = ""
-    [Writable.InsecureSecrets.rtsp_user1]
-    path = "rtsp_user1"
-      [Writable.InsecureSecrets.rtsp_user1.Secrets]
-      username = "user1"
-      password = "P@ssw0rd123!" 
+    [Writable.InsecureSecrets.rtspauth]
+    path = "rtspauth"
+      [Writable.InsecureSecrets.rtspauth.Secrets]
+      username = "rtspauth"
+      password = "Passwrd123" 
   [Writable.Reading]
   ReadingUnits = false
   [Writable.Telemetry]
@@ -34,9 +34,9 @@ LogLevel = "INFO"
 
 [Service]
 HealthCheckInterval = "10s"
-Host = "host.docker.internal"
+Host = "localhost"
 Port = 59983 # Device services are assigned to the 599xx range
-ServerBindAddr = "0.0.0.0"  # blank value defaults to Service.Host value
+ServerBindAddr = ""  # blank value defaults to Service.Host value
 StartupMsg = "device-usb-camera started"
 # MaxRequestSize limit the request body size in kilobyte of put command
 MaxRequestSize = 0 # value 0 unlimited request size.
