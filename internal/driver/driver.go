@@ -47,6 +47,10 @@ const (
 	provisionWatcherRetrySleep = 200 * time.Millisecond
 )
 
+const (
+	rtspAuthKey string = "rtspauth"
+)
+
 type Driver struct {
 	ds                  *service.DeviceService
 	lc                  logger.LoggingClient
@@ -607,13 +611,12 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
-	credential, edgexErr := d.tryGetCredentials("rtspauth")
+	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
-		d.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
+		d.lc.Warnf("failed to get credentials for at path %s", rtspAuthKey)
 	}
 
 	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
-
 	rtspUri.Path = path.Join(Stream, name)
 
 	// Create new instance of transcoder
