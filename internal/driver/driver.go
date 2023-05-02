@@ -63,16 +63,6 @@ type Driver struct {
 	addedWatchers bool
 	watchersMu    sync.Mutex
 }
-type RtspRequest struct {
-	Ip       string `json:"ip"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Path     string `json:"path"`
-	Protocol string `json:"protocol"`
-	Id       string `json:"id"`
-	Action   string `json:"action"`
-	Query    string `json:"query"`
-}
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
 func NewProtocolDriver() *Driver {
@@ -164,6 +154,12 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	return nil
 }
 func (d *Driver) StartRtspCredentialServer() {
+
+	////
+	// rtspAuthServer := http.NewServeMux()
+	// rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
+	// http.ListenAndServe("localhost:8080", rtspAuthServer) ///
+	/////
 	d.lc.Infof("starting rtsp server\n")
 	err := http.ListenAndServe(":8000", nil) //TODO: get port from config
 	if err == http.ErrServerClosed {
@@ -199,7 +195,7 @@ func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 	if credential.Username == rtspRequest.User &&
 		credential.Password == rtspRequest.Password {
 		fmt.Printf("passwords match\n")
-	w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusOK)
 	} else {
 		fmt.Printf("passwords do not match\n")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -294,8 +290,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			rtspUri.Path = path.Join(Stream, deviceName)
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, rtspUri.String())
-			
-			//	cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
+
 		case VideoStreamingStatus:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
 		default:
@@ -626,7 +621,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	credential, edgexErr := driver.tryGetCredentials("rtspauth")
 	if edgexErr != nil {
-		driver.lc.Warnf("failed to get credentials for at path %s", name)
+		driver.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
 	} else {
 		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 	}
