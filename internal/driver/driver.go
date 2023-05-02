@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -148,56 +147,46 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshExistingDevicePaths()
-
-	http.HandleFunc("/rtspauth", RtspCredentialsHandler)
 	go d.StartRtspCredentialServer()
 	return nil
 }
 func (d *Driver) StartRtspCredentialServer() {
 
-	////
-	// rtspAuthServer := http.NewServeMux()
-	// rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
-	// http.ListenAndServe("localhost:8080", rtspAuthServer) ///
-	/////
 	d.lc.Infof("starting rtsp server\n")
-	err := http.ListenAndServe(":8000", nil) //TODO: get port from config
-	if err == http.ErrServerClosed {
-		d.lc.Errorf("server closed\n")
-	} else if err != nil {
-		d.lc.Errorf("error starting server: %s\n", err)
-	}
+	rtspAuthServer := http.NewServeMux()
+	rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
+	http.ListenAndServe("localhost:8000", rtspAuthServer)
 }
-func RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
+func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		driver.lc.Warnf("could not read body: %s\n", err)
+		d.lc.Warnf("could not read body: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	log.Println(string(body))
+
 	var rtspRequest RtspRequest
 	err = json.Unmarshal(body, &rtspRequest)
 	if err != nil {
-		driver.lc.Warnf("could not unmarshal read body: %s\n", err)
+		d.lc.Warnf("could not unmarshal read body: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	fmt.Printf("user read body: %s\n", rtspRequest.User)
-	credential, edgexErr := driver.tryGetCredentials(rtspRequest.User)
+
+	credential, edgexErr := d.tryGetCredentials(rtspRequest.User)
 	if edgexErr != nil {
-		driver.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
+		d.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	if credential.Username == rtspRequest.User &&
 		credential.Password == rtspRequest.Password {
-		fmt.Printf("passwords match\n")
+		d.lc.Debug("passwords match\n")
 		w.WriteHeader(http.StatusOK)
 	} else {
-		fmt.Printf("passwords do not match\n")
+		d.lc.Warn("passwords do not match\n")
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
