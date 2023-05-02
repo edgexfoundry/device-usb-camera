@@ -151,7 +151,6 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	return nil
 }
 func (d *Driver) StartRtspCredentialServer() {
-
 	d.lc.Infof("starting rtsp server\n")
 	rtspAuthServer := http.NewServeMux()
 	rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
@@ -610,7 +609,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	credential, edgexErr := driver.tryGetCredentials("rtspauth")
 	if edgexErr != nil {
-		driver.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
+		d.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
 	}
 
 	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
