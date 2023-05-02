@@ -607,7 +607,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
-	credential, edgexErr := driver.tryGetCredentials("rtspauth")
+	credential, edgexErr := d.tryGetCredentials("rtspauth")
 	if edgexErr != nil {
 		d.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
 	}
