@@ -616,7 +616,10 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		d.lc.Warnf("failed to get credentials for at path %s", rtspAuthKey)
 	}
 
-	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
+	if credential.Username != "" && credential.Password != "" {
+		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
+	}
+
 	rtspUri.Path = path.Join(Stream, name)
 
 	// Create new instance of transcoder
