@@ -177,10 +177,16 @@ func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	credential, edgexErr := d.tryGetCredentials(rtspRequest.User)
+	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
 		d.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
 		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if credential.Username == "" && credential.Password == "" {
+		d.lc.Debug("rtsp password disabled\n")
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
