@@ -611,9 +611,10 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	credential, edgexErr := driver.tryGetCredentials("rtspauth")
 	if edgexErr != nil {
 		driver.lc.Warnf("failed to get credentials for at path %s", "rtspauth")
-	} else {
-		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 	}
+
+	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
+
 	rtspUri.Path = path.Join(Stream, name)
 
 	// Create new instance of transcoder
