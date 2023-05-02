@@ -1,12 +1,12 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
 package driver
 
-type RtspRequest struct {
+type RTSPAuthRequest struct {
 	Ip       string `json:"ip"`
 	User     string `json:"user"`
 	Password string `json:"password"`

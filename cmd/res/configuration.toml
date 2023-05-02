@@ -10,11 +10,12 @@ LogLevel = "INFO"
       [Writable.InsecureSecrets.DB.Secrets]
       username = ""
       password = ""
+    # This is the name of the secret used for rtsp authentication
     [Writable.InsecureSecrets.rtspauth]
     path = "rtspauth"
       [Writable.InsecureSecrets.rtspauth.Secrets]
-      username = "rtspauth"
-      password = "Passwrd123" 
+      username = ""
+      password = ""
   [Writable.Reading]
   ReadingUnits = false
   [Writable.Telemetry]
@@ -132,10 +133,10 @@ Labels = []
 UseMessageBus = true
   [Device.Discovery]
   Enabled = true
-  Interval = "30s"
+  Interval = "1h"
 
 [Driver]
-RtspServerHostName = "192.168.10.4"
+RtspServerHostName = "localhost"
 RtspTcpPort = "8554"
 # The location of Provision Watcher json files to import when using auto-discovery
 ProvisionWatcherDir = "res/provision_watchers"

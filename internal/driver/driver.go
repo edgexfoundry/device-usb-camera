@@ -48,6 +48,7 @@ const (
 )
 
 const (
+	// Key used in the secret store for RTSP credentials.
 	rtspAuthKey string = "rtspauth"
 )
 
@@ -155,7 +156,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	return nil
 }
 func (d *Driver) StartRtspCredentialServer() {
-	d.lc.Infof("starting rtsp server\n")
+	d.lc.Infof("starting rtsp server")
 	rtspAuthServer := http.NewServeMux()
 	rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
 	http.ListenAndServe("localhost:8000", rtspAuthServer)
@@ -164,38 +165,32 @@ func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		d.lc.Warnf("could not read body: %s\n", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		d.lc.Errorf("could not read body: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var rtspRequest RtspRequest
-	err = json.Unmarshal(body, &rtspRequest)
+	var rtspAuthRequest RTSPAuthRequest
+	err = json.Unmarshal(body, &rtspAuthRequest)
 	if err != nil {
-		d.lc.Warnf("could not unmarshal read body: %s\n", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		d.lc.Errorf("could not unmarshal read body: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
-		d.lc.Warnf("failed to get credentials for at path %s", rtspRequest.Path)
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthKey)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	if credential.Username == "" && credential.Password == "" {
-		d.lc.Debug("rtsp password disabled\n")
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if credential.Username == rtspRequest.User &&
-		credential.Password == rtspRequest.Password {
-		d.lc.Debug("passwords match\n")
+	if credential.Username == rtspAuthRequest.User &&
+		credential.Password == rtspAuthRequest.Password {
+		d.lc.Debug("passwords match")
 		w.WriteHeader(http.StatusOK)
 	} else {
-		d.lc.Warn("passwords do not match\n")
+		d.lc.Warn("passwords do not match")
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
@@ -619,12 +614,10 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
-		d.lc.Warnf("failed to get credentials for at path %s", rtspAuthKey)
+		d.lc.Warnf("Failed to get credentials for rtsp authentication from secretName %s", rtspAuthKey)
 	}
 
-	if credential.Username != "" && credential.Password != "" {
-		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
-	}
+	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 
 	rtspUri.Path = path.Join(Stream, name)
 
