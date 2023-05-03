@@ -36,6 +36,7 @@ type Device struct {
 	path                        string
 	serialNumber                string
 	rtspUri                     string
+	rtspUriNoCredentials        string
 	transcoder                  *transcoder.Transcoder
 	ctx                         context.Context
 	cancelFunc                  context.CancelFunc

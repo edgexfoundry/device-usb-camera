@@ -187,7 +187,7 @@ func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
-		d.lc.Error("username or password is empty")
+		d.lc.Debug("username or password is empty") // this can happen during normal operation
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
@@ -289,12 +289,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VideoStreamUri:
-			rtspUri := &url.URL{
-				Scheme: RtspUriScheme,
-				Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
-			}
-			rtspUri.Path = path.Join(Stream, deviceName)
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, rtspUri.String())
+			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUriNoCredentials)
 
 		case VideoStreamingStatus:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
@@ -627,9 +622,9 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
 		d.lc.Warnf("Failed to get credentials for rtsp authentication from secretName %s", rtspAuthKey)
-	}
-
+	} else {
 	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
+	}
 
 	rtspUri.Path = path.Join(Stream, name)
 
@@ -698,11 +693,17 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 			fmt.Sprintf("wrong device serial number, expected %s=%s, actual %s=%s", SerialNumber, psn, SerialNumber, sn), nil)
 	}
 
+	rtspUriNoCredentials := &url.URL{
+		Scheme: RtspUriScheme,
+		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
+	}
+	rtspUriNoCredentials.Path = path.Join(Stream, name)
 	return &Device{
 		name:                        name,
 		path:                        fdPath,
 		serialNumber:                sn,
 		rtspUri:                     rtspUri.String(),
+		rtspUriNoCredentials:        rtspUriNoCredentials.String(),
 		transcoder:                  trans,
 		autoStreaming:               autoStreaming,
 		streamingStatusResourceName: streamingStatusResourceName,
