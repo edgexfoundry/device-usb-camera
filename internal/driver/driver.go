@@ -53,17 +53,17 @@ const (
 )
 
 type Driver struct {
-	ds                  *service.DeviceService
-	lc                  logger.LoggingClient
-	wg                  *sync.WaitGroup
-	asyncCh             chan<- *sdkModels.AsyncValues
-	deviceCh            chan<- []sdkModels.DiscoveredDevice
-	activeDevices       map[string]*Device
-	rtspHostName        string
-	rtspTcpPort         string
-	provisionWatcherDir string
+	ds                       *service.DeviceService
+	lc                       logger.LoggingClient
+	wg                       *sync.WaitGroup
+	asyncCh                  chan<- *sdkModels.AsyncValues
+	deviceCh                 chan<- []sdkModels.DiscoveredDevice
+	activeDevices            map[string]*Device
+	rtspHostName             string
+	rtspTcpPort              string
+	provisionWatcherDir      string
 	rtspAuthenticationServer string
-	mutex               sync.Mutex
+	mutex                    sync.Mutex
 
 	addedWatchers bool
 	watchersMu    sync.Mutex
@@ -166,10 +166,10 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 func (d *Driver) StartRtspCredentialServer() {
 	d.lc.Infof("starting rtsp server")
 	rtspAuthServer := http.NewServeMux()
-	rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
+	rtspAuthServer.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
 	http.ListenAndServe(d.rtspAuthenticationServer, rtspAuthServer)
 }
-func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
+func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -623,7 +623,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	if edgexErr != nil {
 		d.lc.Warnf("Failed to get credentials for rtsp authentication from secretName %s", rtspAuthKey)
 	} else {
-	rtspUri.User = url.UserPassword(credential.Username, credential.Password)
+		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 	}
 
 	rtspUri.Path = path.Join(Stream, name)
