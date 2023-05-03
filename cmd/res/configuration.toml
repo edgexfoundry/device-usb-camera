@@ -138,5 +138,6 @@ UseMessageBus = true
 [Driver]
 RtspServerHostName = "localhost"
 RtspTcpPort = "8554"
+RtspAuthenticationServer = "localhost:8000"
 # The location of Provision Watcher json files to import when using auto-discovery
 ProvisionWatcherDir = "res/provision_watchers"

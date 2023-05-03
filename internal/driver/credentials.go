@@ -24,7 +24,6 @@ const (
 // tryGetCredentials will attempt one time to get the credentials located at secretPath from
 // secret provider and return them, otherwise return an error.
 func (d *Driver) tryGetCredentials(secretPath string) (Credentials, errors.EdgeX) {
-
 	secretData, err := d.ds.GetSecretProvider().GetSecret(secretPath, UsernameKey, PasswordKey)
 	if err != nil {
 		d.lc.Errorf("Failed to retrieve credentials for the secret path %s: %s", secretPath, err)

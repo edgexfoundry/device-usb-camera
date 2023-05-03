@@ -20,6 +20,8 @@ const (
 	DefaultRtspServerHostName  = "localhost"
 	RtspTcpPort                = "RtspTcpPort"
 	DefaultRtspTcpPort         = "8554"
+	RtspAuthenticationServer        = "RtspAuthenticationServer"
+	DefaultRtspAuthenticationServer = "localhost:8000"
 	ProvisionWatcherDir        = "ProvisionWatcherDir"
 	DefaultProvisionWatcherDir = "res/provision_watchers"
 	RtspUriScheme              = "rtsp"

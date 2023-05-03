@@ -62,6 +62,7 @@ type Driver struct {
 	rtspHostName        string
 	rtspTcpPort         string
 	provisionWatcherDir string
+	rtspAuthenticationServer string
 	mutex               sync.Mutex
 
 	addedWatchers bool
@@ -130,6 +131,13 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModels.A
 	d.lc.Infof("ProvisionWatcherDir: %s", provisionWatcherDir)
 	d.provisionWatcherDir = provisionWatcherDir
 
+	rtspAuthenticationServer, ok := service.DriverConfigs()[RtspAuthenticationServer]
+	if !ok {
+		rtspAuthenticationServer = DefaultRtspAuthenticationServer
+		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
+	}
+	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServer)
+	d.rtspAuthenticationServer = rtspAuthenticationServer
 	d.lc.Info("Initializing cameras...")
 	for _, dev := range d.ds.Devices() {
 		d.lc.Infof("initialize device %s", dev.Name)
@@ -159,7 +167,7 @@ func (d *Driver) StartRtspCredentialServer() {
 	d.lc.Infof("starting rtsp server")
 	rtspAuthServer := http.NewServeMux()
 	rtspAuthServer.HandleFunc("/rtspauth", d.RtspCredentialsHandler)
-	http.ListenAndServe("localhost:8000", rtspAuthServer)
+	http.ListenAndServe(d.rtspAuthenticationServer, rtspAuthServer)
 }
 func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -178,6 +186,10 @@ func (d *Driver) RtspCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
+		d.lc.Error("username or password is empty")
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
 		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthKey)
