@@ -85,6 +85,7 @@ For example:
 Driver:
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
+  RtspAuthenticationServer: "localhost:8000"
 ```
 ## CameraStatus Command
 Use the following query to determine the status of the camera.

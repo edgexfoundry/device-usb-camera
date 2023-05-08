@@ -114,6 +114,7 @@ For example:
 Driver:
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
+  RtspAuthenticationServer: "localhost:8000"
 ```
 <p align="left">
       <i>Sample: Snippet from configuration.yaml</i>
