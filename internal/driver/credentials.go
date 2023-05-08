@@ -7,6 +7,7 @@
 package driver
 
 import (
+	"github.com/edgexfoundry/go-mod-bootstrap/bootstrap/secret"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/errors"
 )
 
@@ -16,23 +17,18 @@ type Credentials struct {
 	Password string
 }
 
-const (
-	UsernameKey = "username"
-	PasswordKey = "password"
-)
-
 // tryGetCredentials will attempt one time to get the credentials located at secretPath from
 // secret provider and return them, otherwise return an error.
 func (d *Driver) tryGetCredentials(secretPath string) (Credentials, errors.EdgeX) {
-	secretData, err := d.ds.GetSecretProvider().GetSecret(secretPath, UsernameKey, PasswordKey)
+	secretData, err := d.ds.SecretProvider().GetSecret(secretPath, secret.UsernameKey, secret.PasswordKey)
 	if err != nil {
 		d.lc.Errorf("Failed to retrieve credentials for the secret path %s: %s", secretPath, err)
 		return Credentials{}, errors.NewCommonEdgeXWrapper(err)
 	}
 
 	credentials := Credentials{
-		Username: secretData[UsernameKey],
-		Password: secretData[PasswordKey],
+		Username: secretData[secret.UsernameKey],
+		Password: secretData[secret.PasswordKey],
 	}
 
 	return credentials, nil

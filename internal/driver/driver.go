@@ -9,7 +9,9 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -35,20 +37,21 @@ var driver *Driver
 var once sync.Once
 
 const (
-	// Key used in the secret store for RTSP credentials.
+	// rtspAuthKey defines the secretName used for storing RTSP credentials in the secret store.
 	rtspAuthKey string = "rtspauth"
 )
+
 type Driver struct {
-	ds            interfaces.DeviceServiceSDK
-	lc            logger.LoggingClient
-	wg            *sync.WaitGroup
-	asyncCh       chan<- *sdkModels.AsyncValues
-	deviceCh      chan<- []sdkModels.DiscoveredDevice
-	activeDevices map[string]*Device
-	rtspHostName  string
-	rtspTcpPort   string
+	ds                       interfaces.DeviceServiceSDK
+	lc                       logger.LoggingClient
+	wg                       *sync.WaitGroup
+	asyncCh                  chan<- *sdkModels.AsyncValues
+	deviceCh                 chan<- []sdkModels.DiscoveredDevice
+	activeDevices            map[string]*Device
+	rtspHostName             string
+	rtspTcpPort              string
 	rtspAuthenticationServer string
-	mutex         sync.Mutex
+	mutex                    sync.Mutex
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
@@ -133,10 +136,10 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshExistingDevicePaths()
-	go d.StartRtspCredentialServer()
+	go d.StartRTSPCredentialServer()
 	return nil
 }
-func (d *Driver) StartRtspCredentialServer() {
+func (d *Driver) StartRTSPCredentialServer() {
 	d.lc.Infof("starting rtsp server")
 	rtspAuthServer := http.NewServeMux()
 	rtspAuthServer.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
@@ -147,7 +150,7 @@ func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		d.lc.Errorf("could not read body: %s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -155,13 +158,13 @@ func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 	err = json.Unmarshal(body, &rtspAuthRequest)
 	if err != nil {
 		d.lc.Errorf("could not unmarshal read body: %s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
 		d.lc.Debug("username or password is empty") // this can happen during normal operation
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
@@ -513,7 +516,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
 	if edgexErr != nil {
-		d.lc.Warnf("Failed to get credentials for rtsp authentication from secretName %s", rtspAuthKey)
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthKey)
 	} else {
 		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
 	}

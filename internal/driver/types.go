@@ -7,12 +7,12 @@
 package driver
 
 type RTSPAuthRequest struct {
-	Ip       string `json:"ip"`
+	IP       string `json:"ip"`
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Path     string `json:"path"`
 	Protocol string `json:"protocol"`
-	Id       string `json:"id"`
+	ID       string `json:"id"`
 	Action   string `json:"action"`
 	Query    string `json:"query"`
 }

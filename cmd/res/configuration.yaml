@@ -34,4 +34,4 @@ Device:
 Driver:
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
-  RtspAuthenticationServer = "localhost:8000"
+  RtspAuthenticationServer: "localhost:8000"
