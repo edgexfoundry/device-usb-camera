@@ -28,7 +28,7 @@ require (
 	github.com/edgexfoundry/go-mod-bootstrap v0.0.72
 	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.81 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v3 v3.0.0-dev.10 // indirect
-	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0 // indirect
+	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0
 	github.com/edgexfoundry/go-mod-messaging/v3 v3.0.0-dev.28 // indirect
 	github.com/edgexfoundry/go-mod-registry/v3 v3.0.0-dev.7 // indirect
 	github.com/edgexfoundry/go-mod-secrets/v3 v3.0.0-dev.15 // indirect
@@ -65,7 +65,6 @@ require (
 	github.com/nats-io/nats.go v1.25.0 // indirect
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.1.4 // indirect

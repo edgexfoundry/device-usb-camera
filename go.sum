@@ -1,3 +1,4 @@
+github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
@@ -32,8 +33,6 @@ github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.82 h1:6+md+aWLZbftOIUYg4WDpM
 github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.82/go.mod h1:Sgpu7xUgYmi1HuD1tYT5ckllEbHDz0pIQA8pQBz8wcc=
 github.com/edgexfoundry/go-mod-bootstrap v0.0.72 h1:DI0Q7yyj1OJIGGK9zKIdkhLQ0GfiophsIq7SnLBNa5g=
 github.com/edgexfoundry/go-mod-bootstrap v0.0.72/go.mod h1:52ELSSAIAoRBFydbEMeGCjMbSR8vO5EiHQKZue5clxA=
-github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.80 h1:UNkjGG3nyi/Cr4lKbR3ruaNBWdSZKM1xvgGIUCNLCrQ=
-github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.80/go.mod h1:EzvvqkwwZIzN0bXC4N46HUD19014u+lZoIxLJh+swkg=
 github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.81 h1:h5nfqRxNzd3c27G4hVczG4b3Z5m1u7l5shbgRS0X2Kg=
 github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.81/go.mod h1:DkbiITVp5Dajs61zQMdBCsFLvBp0ww8DWncpB1y3FtM=
 github.com/edgexfoundry/go-mod-configuration v0.0.8 h1:pbmR66or9vFVoyfhrAU3tJy68s8PiUYzHFuCYXApcwA=
@@ -45,8 +44,6 @@ github.com/edgexfoundry/go-mod-core-contracts v0.1.147 h1:Dp9O/DnoSoBU1B4DLzndJY
 github.com/edgexfoundry/go-mod-core-contracts v0.1.147/go.mod h1:JCVWpClIxRDIVJ33VTQRQxm6UqvNouvsuuoX5k/9vas=
 github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0 h1:8Svk1HTehXEgwxgyA4muVhSkP3D9n1q+oSHI3B1Ac90=
 github.com/edgexfoundry/go-mod-core-contracts/v2 v2.3.0/go.mod h1:4/e61acxVkhQWCTjQ4XcHVJDnrMDloFsZZB1B6STCRw=
-github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.39 h1:tlw1Bd/hq4D6PQFo3BaN0JUkSqDuAPduaGBYCvoEYTg=
-github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.39/go.mod h1:zzzWGWij6wAqm1go9TLs++TFMIsBqBb1eRnIj4mRxGw=
 github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.40 h1:30hNBz5Hrhp4gRBs3oXJaOIAtklZ+yrD5EqVXjlwRgE=
 github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.40/go.mod h1:zzzWGWij6wAqm1go9TLs++TFMIsBqBb1eRnIj4mRxGw=
 github.com/edgexfoundry/go-mod-messaging/v3 v3.0.0-dev.28 h1:7i64Llcg8xRS/kuMDRPcBP0NuKS3tbeiGm0Rz1kUrco=
@@ -89,6 +86,7 @@ github.com/go-playground/validator/v10 v10.13.0 h1:cFRQdfaSMCOSfGCCLB20MHvuoHb/s
 github.com/go-playground/validator/v10 v10.13.0/go.mod h1:dwu7+CG8/CtBiJFZDz4e+5Upb6OLw04gtBYw0mcG/z4=
 github.com/go-redis/redis/v7 v7.3.0 h1:3oHqd0W7f/VLKBxeYTEpqdMUsmMectngjM9OtoRoIgg=
 github.com/go-redis/redis/v7 v7.3.0/go.mod h1:JDNMw23GTyLNC4GZu9njt15ctBQVn7xjRfnwdHj/Dcg=
+github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
@@ -239,7 +237,6 @@ github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/9
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
-github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
