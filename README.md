@@ -8,7 +8,7 @@
 > **The current stable branch of device-usb-camera is [Levski](https://github.com/edgexfoundry/device-usb-camera/tree/levski).**
 
 ## General
-Visit the [EdgeX documentation page](https://docs.edgexfoundry.org/3.0/microservices/device/supported/device-usb-camera/General/) to learn more about the latest release.
+Visit the [EdgeX documentation page](https://docs.edgexfoundry.org/latest/microservices/device/supported/device-usb-camera/General/) to learn more about the latest release.
 
 # License
 [Apache-2.0](LICENSE)
