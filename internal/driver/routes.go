@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,16 +12,8 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 )
 
-type HttpHandler struct {
-	driver *Driver
-}
-
-func NewHttpHandler(driver *Driver) HttpHandler {
-	return HttpHandler{driver}
-}
-
-func (h HttpHandler) RefreshExistingDevicePaths(writer http.ResponseWriter, request *http.Request) {
-	go h.driver.RefreshExistingDevicePaths()
+func (d *Driver) RefreshExistingDevicePathsRoute(writer http.ResponseWriter, request *http.Request) {
+	go d.RefreshExistingDevicePaths()
 	correlationID := request.Header.Get(common.CorrelationHeader)
 	writer.Header().Set(common.CorrelationHeader, correlationID)
 	writer.Header().Set(common.ContentType, common.ContentTypeJSON)

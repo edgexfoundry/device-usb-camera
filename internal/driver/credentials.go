@@ -33,3 +33,17 @@ func (d *Driver) tryGetCredentials(secretPath string) (Credentials, errors.EdgeX
 
 	return credentials, nil
 }
+
+func (d *Driver) secretUpdated(secretName string) {
+	d.lc.Infof("Secret updated callback called for secretName '%s'", secretName)
+
+	for _, device := range d.activeDevices {
+		d.lc.Debugf("Updating usb camera device %s with new stream uri", device.name)
+		uri := d.getAuthenticatedRTSPUri(device.name)
+		if err := device.transcoder.SetOutputPath(uri); err != nil {
+			d.lc.Errorf("Failed to update output path for device %s: %v", device.name, err)
+		}
+	}
+
+	d.lc.Debug("Done updating usb device stream uris")
+}

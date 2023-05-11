@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // Copyright (C) 2023 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -11,7 +11,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/gorilla/mux"
+	"io"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -37,21 +38,22 @@ var driver *Driver
 var once sync.Once
 
 const (
-	// rtspAuthKey defines the secretName used for storing RTSP credentials in the secret store.
-	rtspAuthKey string = "rtspauth"
+	// rtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
+	rtspAuthSecretName string = "rtspauth"
 )
 
 type Driver struct {
-	ds                       interfaces.DeviceServiceSDK
-	lc                       logger.LoggingClient
-	wg                       *sync.WaitGroup
-	asyncCh                  chan<- *sdkModels.AsyncValues
-	deviceCh                 chan<- []sdkModels.DiscoveredDevice
-	activeDevices            map[string]*Device
-	rtspHostName             string
-	rtspTcpPort              string
-	rtspAuthenticationServer string
-	mutex                    sync.Mutex
+	ds                          interfaces.DeviceServiceSDK
+	lc                          logger.LoggingClient
+	wg                          *sync.WaitGroup
+	asyncCh                     chan<- *sdkModels.AsyncValues
+	deviceCh                    chan<- []sdkModels.DiscoveredDevice
+	activeDevices               map[string]*Device
+	rtspHostName                string
+	rtspTcpPort                 string
+	rtspAuthenticationServerUri string
+	mutex                       sync.Mutex
+	rtspAuthServer              *http.Server
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
@@ -86,8 +88,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.activeDevices = make(map[string]*Device)
 	d.wg = new(sync.WaitGroup)
 
-	h := NewHttpHandler(d)
-	if err := d.ds.AddRoute(common.ApiBase+ApiRefreshDevicePaths, h.RefreshExistingDevicePaths, http.MethodPost); err != nil {
+	if err := d.ds.AddRoute(common.ApiBase+ApiRefreshDevicePaths, d.RefreshExistingDevicePathsRoute, http.MethodPost); err != nil {
 		return fmt.Errorf("failed to add API route %s, error: %s", ApiRefreshDevicePaths, err.Error())
 	}
 
@@ -107,13 +108,22 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.lc.Infof("RTSP TCP port: %s", rtspPort)
 	d.rtspTcpPort = rtspPort
 
-	rtspAuthenticationServer, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
+	rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
 	if !ok {
-		rtspAuthenticationServer = DefaultRtspAuthenticationServer
+		rtspAuthenticationServerUri = DefaultRtspAuthenticationServer
 		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
 	}
-	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServer)
-	d.rtspAuthenticationServer = rtspAuthenticationServer
+	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
+	d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
+
+	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
+		d.lc.Errorf("failed to register secret update callback: %v", err)
+	}
+
+	return nil
+}
+
+func (d *Driver) Start() error {
 	d.lc.Info("Initializing cameras...")
 	for _, dev := range d.ds.Devices() {
 		d.lc.Infof("initialize device %s", dev.Name)
@@ -125,6 +135,12 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		d.activeDevices[dev.Name] = activeDevice
 	}
 
+	// Make sure the paths of existing devices are up-to-date.
+	go d.RefreshExistingDevicePaths()
+
+	d.wg.Add(1)
+	go d.StartRTSPCredentialServer()
+
 	for _, dev := range d.activeDevices {
 		if dev.autoStreaming {
 			edgexErr := d.startStreaming(dev)
@@ -133,43 +149,61 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 			}
 		}
 	}
-
-	// Make sure the paths of existing devices are up-to-date.
-	go d.RefreshExistingDevicePaths()
-	go d.StartRTSPCredentialServer()
 	return nil
 }
+
 func (d *Driver) StartRTSPCredentialServer() {
-	d.lc.Infof("starting rtsp server")
-	rtspAuthServer := http.NewServeMux()
-	rtspAuthServer.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
-	http.ListenAndServe(d.rtspAuthenticationServer, rtspAuthServer)
+	d.lc.Infof("Starting rtsp server")
+	defer d.wg.Done()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
+
+	d.rtspAuthServer = &http.Server{
+		Addr:              d.rtspAuthenticationServerUri,
+		Handler:           router,
+		ReadHeaderTimeout: 5 * time.Second, // G112: A configured ReadHeaderTimeout in the http.Server averts a potential Slowloris Attack
+	}
+
+	err := d.rtspAuthServer.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		d.lc.Errorf("RTSP Auth Web server failed: %v", err)
+	}
+	d.rtspAuthServer = nil
 }
+
 func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) {
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		d.lc.Errorf("could not read body: %s", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var rtspAuthRequest RTSPAuthRequest
 	err = json.Unmarshal(body, &rtspAuthRequest)
 	if err != nil {
-		d.lc.Errorf("could not unmarshal read body: %s", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		d.lc.Errorf("could not unmarshal body into json: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
-		d.lc.Debug("username or password is empty") // this can happen during normal operation
+		d.lc.Debug("rtsp auth username or password is empty")
+		// From https://github.com/aler9/mediamtx README:
+		// Please be aware that it's perfectly normal for the authentication server to receive requests with empty users and passwords.
+		// This happens because a RTSP client doesn't provide credentials until it is asked to.
+		// In order to receive the credentials, the authentication server must reply with status code 401, then the client will send credentials.
 		w.WriteHeader(http.StatusUnauthorized)
 	}
-	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
+	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
 	if edgexErr != nil {
-		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthKey)
-		w.WriteHeader(http.StatusUnauthorized)
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthSecretName)
+		w.WriteHeader(http.StatusInternalServerError)
+		if _, err = w.Write([]byte("RTSP Authentication has not been fully configured!")); err != nil {
+			d.lc.Errorf("Error writing message: %v", err.Error())
+		}
 		return
 	}
 
@@ -265,7 +299,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VideoStreamUri:
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUriNoCredentials)
+			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
 
 		case VideoStreamingStatus:
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
@@ -323,6 +357,13 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 func (d *Driver) Stop(force bool) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
+
+	if d.rtspAuthServer != nil {
+		err := d.rtspAuthServer.Shutdown(context.Background())
+		if err != nil {
+			d.lc.Errorf("Error occurred while shutting down the rtsp auth server: %v", err)
+		}
+	}
 
 	d.wg.Add(len(d.activeDevices))
 
@@ -418,6 +459,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 // RefreshExistingDevicePaths checks whether the existing devices match the connected devices.
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshExistingDevicePaths() {
+	d.lc.Debug("Refreshing existing device paths")
 	for _, cd := range d.ds.Devices() {
 		fdPath := cd.Protocols[UsbProtocol][Path].(string)
 		cn, sn, err := getUSBDeviceIdInfo(fdPath)
@@ -514,19 +556,12 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
-	credential, edgexErr := d.tryGetCredentials(rtspAuthKey)
-	if edgexErr != nil {
-		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthKey)
-	} else {
-		rtspUri.User = url.UserPassword(credential.Username, credential.Password)
-	}
-
 	rtspUri.Path = path.Join(Stream, name)
 
 	// Create new instance of transcoder
 	trans := new(transcoder.Transcoder)
-	// Initialize transcoder passing the input path and output path
-	err = trans.Initialize(fdPath, rtspUri.String())
+	// Initialize transcoder passing the input path and output path, along with the credentials
+	err = trans.Initialize(fdPath, d.getAuthenticatedRTSPUri(name))
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to initialize transcoder for device %s", name), err)
@@ -588,21 +623,30 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 			fmt.Sprintf("wrong device serial number, expected %s=%s, actual %s=%s", SerialNumber, psn, SerialNumber, sn), nil)
 	}
 
-	rtspUriNoCredentials := &url.URL{
-		Scheme: RtspUriScheme,
-		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
-	}
-	rtspUriNoCredentials.Path = path.Join(Stream, name)
 	return &Device{
 		name:                        name,
 		path:                        fdPath,
 		serialNumber:                sn,
 		rtspUri:                     rtspUri.String(),
-		rtspUriNoCredentials:        rtspUriNoCredentials.String(),
 		transcoder:                  trans,
 		autoStreaming:               autoStreaming,
 		streamingStatusResourceName: streamingStatusResourceName,
 	}, nil
+}
+
+func (d *Driver) getAuthenticatedRTSPUri(name string) string {
+	rtspAuthenticatedUri := &url.URL{
+		Scheme: RtspUriScheme,
+		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
+	}
+	rtspAuthenticatedUri.Path = path.Join(Stream, name)
+	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
+	if edgexErr != nil {
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthSecretName)
+	} else {
+		rtspAuthenticatedUri.User = url.UserPassword(credential.Username, credential.Password)
+	}
+	return rtspAuthenticatedUri.String()
 }
 
 // getDevice gets an active device by name, which is managed by device service.

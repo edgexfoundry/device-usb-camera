@@ -2,6 +2,12 @@ MaxEventSize: 0 # value 0 unlimit the maximum event size that can be sent to mes
 
 Writable:
   LogLevel: "INFO"
+  InsecureSecrets:
+    rtspauth:
+      SecretName: rtspauth
+      SecretData:
+        username: ""
+        password: ""
 
 Service:
   Host: "localhost"
