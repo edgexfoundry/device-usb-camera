@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.89
+	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.87
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.41
 	github.com/stretchr/testify v1.8.2
 	github.com/vladimirvivien/go4vl v0.0.5
@@ -17,7 +18,6 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.2 // indirect
-	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.87 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v3 v3.0.0-dev.10 // indirect
 	github.com/edgexfoundry/go-mod-messaging/v3 v3.0.0-dev.31 // indirect
 	github.com/edgexfoundry/go-mod-registry/v3 v3.0.0-dev.7 // indirect
