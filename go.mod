@@ -3,9 +3,10 @@ module github.com/edgexfoundry/device-usb-camera
 go 1.20
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.89
-	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.87
+	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0-dev.90
+	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.88
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.41
+	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.8.2
 	github.com/vladimirvivien/go4vl v0.0.5
 	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
@@ -33,7 +34,6 @@ require (
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/consul/api v1.20.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
