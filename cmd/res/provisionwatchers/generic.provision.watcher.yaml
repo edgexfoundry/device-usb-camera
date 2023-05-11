@@ -1,9 +1,9 @@
 name: "USB-Camera-Provision-Watcher"
-identifiers: 
+serviceName: "device-usb-camera"
+identifiers:
     Path: "."
 blockingIdentifiers: {}
 adminState: "UNLOCKED"
 discoveredDevice:
-    serviceName: "device-usb-camera"
     profileName: "USB-Camera-General"
     adminState: "UNLOCKED"
