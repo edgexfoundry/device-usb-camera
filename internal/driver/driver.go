@@ -172,11 +172,12 @@ func (d *Driver) StartRTSPCredentialServer() {
 	d.rtspAuthServer = nil
 }
 
+// RTSPCredentialsHandler is the http handler for handling rtsp authentication requests. It expects the
+// request to follow the format defined by https://github.com/aler9/mediamtx#authentication
 func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) {
-
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		d.lc.Errorf("could not read body: %s", err)
+		d.lc.Errorf("rtsp authentication: could not read body: %s", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -184,18 +185,20 @@ func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 	var rtspAuthRequest RTSPAuthRequest
 	err = json.Unmarshal(body, &rtspAuthRequest)
 	if err != nil {
-		d.lc.Errorf("could not unmarshal body into json: %s", err)
+		d.lc.Errorf("rtsp authentication: could not unmarshal body into json: %s", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
-		d.lc.Debug("rtsp auth username or password is empty")
-		// From https://github.com/aler9/mediamtx README:
-		// Please be aware that it's perfectly normal for the authentication server to receive requests with empty users and passwords.
-		// This happens because a RTSP client doesn't provide credentials until it is asked to.
-		// In order to receive the credentials, the authentication server must reply with status code 401, then the client will send credentials.
+		d.lc.Debug("rtsp authentication: username or password is empty")
+		// From https://github.com/aler9/mediamtx#authentication README:
+		// Please be aware that it's perfectly normal for the authentication server to receive requests with
+		// empty users and passwords. This happens because a RTSP client doesn't provide credentials until it
+		// is asked to. In order to receive the credentials, the authentication server must reply with status code 401,
+		// then the client will send credentials.
 		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
 	if edgexErr != nil {
@@ -207,14 +210,14 @@ func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if credential.Username == rtspAuthRequest.User &&
-		credential.Password == rtspAuthRequest.Password {
-		d.lc.Debug("passwords match")
-		w.WriteHeader(http.StatusOK)
-	} else {
-		d.lc.Warn("passwords do not match")
+	if credential.Username != rtspAuthRequest.User ||
+		credential.Password != rtspAuthRequest.Password {
+		d.lc.Warn("rtsp authentication: user or password do not match")
 		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+
+	d.lc.Debug("rtsp authentication: passwords match")
 }
 
 func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]models.ProtocolProperties,
