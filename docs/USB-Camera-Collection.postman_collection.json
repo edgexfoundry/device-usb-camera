@@ -36,7 +36,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{metadata_host}}:{{metadata_port}}/api/v2/device/service/name/{{device_service_name}}",
+					"raw": "http://{{metadata_host}}:{{metadata_port}}/api/v3/device/service/name/{{device_service_name}}",
 					"protocol": "http",
 					"host": [
 						"{{metadata_host}}"
@@ -44,7 +44,7 @@
 					"port": "{{metadata_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"service",
 						"name",
@@ -86,7 +86,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/CameraInfo",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraInfo",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -94,7 +94,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -135,7 +135,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/VideoInputIndex",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/VideoInputIndex",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -143,7 +143,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -184,7 +184,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/ImageFormats",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/ImageFormats",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -192,7 +192,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -233,7 +233,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/DataFormat",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/DataFormat",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -241,7 +241,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -282,7 +282,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/CropCapability",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CropCapability",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -290,7 +290,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -331,7 +331,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StreamingParam",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StreamingParam",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -339,7 +339,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -380,7 +380,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StreamURI",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StreamURI",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -388,7 +388,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -429,7 +429,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/GetCameraMetaData",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/GetCameraMetaData",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -437,7 +437,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -478,7 +478,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StreamingStatus",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StreamingStatus",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -486,7 +486,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -524,7 +524,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StartStreaming",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StartStreaming",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -532,7 +532,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -571,7 +571,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StopStreaming",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StopStreaming",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -579,7 +579,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -621,7 +621,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/CameraStatus?InputIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraStatus?InputIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -629,7 +629,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
@@ -673,7 +673,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v2/device/name/{{camera_name}}/StartStreaming",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/StartStreaming",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -681,7 +681,7 @@
 					"port": "{{command_port}}",
 					"path": [
 						"api",
-						"v2",
+						"v3",
 						"device",
 						"name",
 						"{{camera_name}}",
