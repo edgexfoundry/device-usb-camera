@@ -153,7 +153,7 @@ func (d *Driver) Start() error {
 }
 
 func (d *Driver) StartRTSPCredentialServer() {
-	d.lc.Infof("Starting rtsp server")
+	d.lc.Infof("Starting rtsp authentication server on %s", d.rtspAuthenticationServerUri)
 	defer d.wg.Done()
 
 	router := mux.NewRouter()
@@ -347,11 +347,10 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
 		case VideoStopStreaming:
-			device.StopStreaming(nil)
+			device.StopStreaming()
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
-		go d.publishStreamingStatus(device)
 	}
 
 	return nil
@@ -376,7 +375,7 @@ func (d *Driver) Stop(force bool) error {
 
 	for _, device := range d.activeDevices {
 		go func(device *Device) {
-			device.StopStreaming(nil)
+			device.StopStreaming()
 			d.wg.Done()
 		}(device)
 	}
@@ -452,7 +451,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if device, ok := d.activeDevices[deviceName]; ok {
-		device.StopStreaming(nil)
+		device.StopStreaming()
 		delete(d.activeDevices, deviceName)
 		d.lc.Debugf("Device %s is removed", deviceName)
 	}
@@ -627,6 +626,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 
 	return &Device{
+		lc:                          d.lc,
 		name:                        name,
 		path:                        fdPath,
 		serialNumber:                sn,
@@ -676,41 +676,32 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 }
 
 func (d *Driver) startStreaming(device *Device) errors.EdgeX {
-	ctx, cancel := context.WithCancel(context.TODO())
-	errChan, err := device.StartStreaming(ctx, cancel)
+	errChan, err := device.StartStreaming()
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
-	startErrs := make(chan errors.EdgeX, 1)
-	d.wg.Add(1)
-	go func() {
-		select {
-		case err := <-errChan:
-			device.StopStreaming(err)
-			d.lc.Errorf("the video streaming process for device %s has stopped", device.name)
-			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
-			d.wg.Done()
-			return
-		case <-device.ctx.Done():
-			if err := device.transcoder.Stop(); err != nil {
-				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
-				d.wg.Done()
-				return
-			}
-			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
-			d.wg.Done()
-			return
-		}
+
+	defer func() {
+		go d.publishStreamingStatus(device)
 	}()
-	for {
-		select {
-		case <-time.After(time.Second):
-			d.lc.Infof("start video streaming for device %s", device.name)
+
+	// wait a little bit before returning to see if there are any errors on startup
+	select {
+	case <-time.After(time.Second):
+		d.lc.Infof("Video streaming for device %s has started without error", device.name)
+		go func() {
+			// wait for the process to complete in the background and then publish the streaming status
+			<-errChan
+			d.publishStreamingStatus(device)
+		}()
+		return nil
+	case startErr := <-errChan:
+		if startErr == nil {
 			return nil
-		case startErr := <-startErrs:
-			return startErr
 		}
+		return errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("the video streaming process for device %s has stopped", device.name), startErr)
 	}
 }
 
