@@ -42,6 +42,7 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 	// these args must be put in the output section and not the first args, so just inject them right before the last
 	// arg which is the rtsp url.
 	command = append(command[0:len(command)-1], "-rtsp_transport", "tcp", command[len(command)-1])
+	// todo: evaluate shell injection risks. if safe, use: // nolint: gosec
 	proc := exec.Command(t.FFmpegExec(), command...)
 
 	// Set the stdinPipe in case we need to stop the transcoding

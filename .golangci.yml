@@ -1,4 +1,4 @@
 linters:
-  disable:
+  disable: []
   enable:
     - gosec

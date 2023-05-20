@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	userPassRegex = regexp.MustCompile("//(\\S+):(\\S+)@")
+	userPassRegex = regexp.MustCompile(`//(\S+):(\S+)@`)
 )
 
 type EdgeXErrorWrapper struct{}
