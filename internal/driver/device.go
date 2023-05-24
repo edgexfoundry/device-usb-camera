@@ -57,21 +57,21 @@ type streamingStatus struct {
 	OutputVideoQuality string
 }
 
-func (dev *Device) StartStreaming() (<-chan error, error) {
+func (dev *Device) StartStreaming() (<-chan string, <-chan error, error) {
 	dev.mutex.Lock()
 	isStreaming := dev.streamingStatus.IsStreaming
 	dev.mutex.Unlock()
 	if isStreaming {
-		return nil, fmt.Errorf("video streaming is already in progress")
+		return nil, nil, fmt.Errorf("video streaming is already in progress")
 	}
 
 	dev.lc.Infof("Attempting to start streaming device %s", dev.name)
-	errChan, err := dev.runTranscoderWithOutput()
+	progressChan, errChan, err := dev.runTranscoderWithOutput()
 	if err != nil {
 		wrappedErr := errors.NewCommonEdgeX(errors.KindServerError, "failed running ffmpeg transcoder for device "+dev.name, err)
-		return nil, wrappedErr
+		return nil, nil, wrappedErr
 	}
-	return errChan, nil
+	return progressChan, errChan, nil
 }
 
 func (dev *Device) StopStreaming() {

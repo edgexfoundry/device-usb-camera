@@ -10,22 +10,22 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
 	"os/exec"
 	"strings"
 )
 
 const (
-	maxStderrLines = 25
-	ffmpegLogLevel = "info"
+	maxStderrLines           = 25
+	ffmpegLogLevel           = "info"
+	ffmpegStatsPeriodSeconds = "60"
 )
 
 // runTranscoderWithOutput is based on transcoder.Transcoder.Run(), but tweaks a few things, and adds some
 // quality of life improvements for the end user. It starts the transcoding process while also logging the ffmpeg
 // output (from StdErr). StdErr text is also returned via the done error channel, so that it can be returned
 // to the caller of a REST API. If an error occurs starting the process, it is returned immediately, and not
-// via the error channel.
-func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
+// via the error channel. Raw ffmpeg progress messages are returned via the string channel.
+func (dev *Device) runTranscoderWithOutput() (<-chan string, <-chan error, error) {
 	dev.mutex.Lock()
 	defer dev.mutex.Unlock()
 
@@ -33,11 +33,10 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 
 	// generate the ffmpeg command line options, and prepend with some pre-defined options
 	// -loglevel level+<ffmpegLogLevel>: will set the log level to ffmpegLogLevel and prefix output with the log level (for parsing)
-	command := append([]string{"-loglevel", "level+" + ffmpegLogLevel}, t.GetCommand()...)
-	if dev.lc.LogLevel() != models.TraceLog {
-		// disable progress output if trace logging is not enabled
-		command = append([]string{"-nostats"}, command...)
-	}
+	// -hide_banner: do not display ffmpeg compilation flags and info on startup
+	// -stats_period <ffmpegStatsPeriodSeconds>: how often to print transcoding stats
+	// **WARNING** if you change the way loglevel or progress is configured, it may affect other sections of the code!
+	command := append([]string{"-loglevel", "level+" + ffmpegLogLevel, "-hide_banner", "-stats_period", ffmpegStatsPeriodSeconds}, t.GetCommand()...)
 	// -rtsp_transport tcp: force the rtsp transport to use tcp
 	// these args must be put in the output section and not the first args, so just inject them right before the last
 	// arg which is the rtsp url.
@@ -51,22 +50,29 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 		dev.lc.Errorf("Ffmpeg Stdin not available: %s", err.Error())
 	}
 
+	var progress chan string
 	var stdErrLines []string
 	stdErrPipe, err := proc.StderrPipe()
 	if err != nil {
 		dev.lc.Errorf("Ffmpeg StderrPipe not available: %s. Unable to track output from process.", err.Error())
 	} else {
 		output := make(chan string, 10)
+		progress = make(chan string, 10)
 		// use a scanner to read the output of the pipe and send it to output channel
 		go func() {
 			defer close(output)
+			defer close(progress)
 			scanner := bufio.NewScanner(stdErrPipe)
 			scanner.Split(scanFFmpegLines)
 			scanner.Buffer(make([]byte, 2), bufio.MaxScanTokenSize)
 
 			for scanner.Scan() {
 				// Scan the next line, redact it, and send it to output channel.
-				output <- redact(scanner.Text())
+				line := redact(scanner.Text())
+				output <- line
+				if strings.HasPrefix(line, "[info] frame=") {
+					progress <- strings.Replace(line, "[info] ", "", 1)
+				}
 			}
 			dev.lc.Debugf("Output scanner complete for transcoder for device %s", dev.name)
 		}()
@@ -102,7 +108,7 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 
 	// attempt to start the process
 	if err = proc.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start FFMPEG transcoding for device %s (%s) with %s, message %s",
+		return nil, nil, fmt.Errorf("failed to start FFMPEG transcoding for device %s (%s) with %s, message %s",
 			dev.name, redact(strings.Join(command, " ")), err, strings.Join(stdErrLines, "\n"))
 	}
 	// only set the transcoder's process if we are successful in starting it
@@ -122,7 +128,7 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 		// wait until the process has exited
 		err = proc.Wait()
 		dev.lc.Debugf("FFmpeg process with pid %d for device %s exited with code %d. User time: %v, System time: %v",
-			proc.Process.Pid, dev.name, proc.ProcessState.ExitCode(), proc.ProcessState.UserTime(), proc.ProcessState.UserTime())
+			proc.Process.Pid, dev.name, proc.ProcessState.ExitCode(), proc.ProcessState.UserTime(), proc.ProcessState.SystemTime())
 
 		dev.mutex.Lock()
 		dev.lc.Debugf("Set IsStreaming=false for device %s", dev.name)
@@ -142,7 +148,7 @@ func (dev *Device) runTranscoderWithOutput() (<-chan error, error) {
 		done <- err
 	}()
 
-	return done, nil
+	return progress, done, nil
 }
 
 // scanFFmpegLines is based on bufio.ScanLines, however it will return a line as soon as

@@ -676,32 +676,52 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 }
 
 func (d *Driver) startStreaming(device *Device) errors.EdgeX {
-	errChan, err := device.StartStreaming()
+	progressChan, errChan, err := device.StartStreaming()
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
 
 	defer func() {
+		// before we return, publish the current streaming status right away.
+		// do this even on error, as this will contain the error message as well.
 		go d.publishStreamingStatus(device)
 	}()
 
+	waitForFinishAndPublish := func() {
+		d.lc.Debugf("Waiting for ffmpeg errChan to be done")
+		<-errChan
+		d.lc.Debugf("Done waiting for ffmpeg errChan to be done")
+		d.publishStreamingStatus(device)
+	}
+
 	// wait a little bit before returning to see if there are any errors on startup
-	select {
-	case <-time.After(time.Second):
-		d.lc.Infof("Video streaming for device %s has started without error", device.name)
-		go func() {
-			// wait for the process to complete in the background and then publish the streaming status
-			<-errChan
-			d.publishStreamingStatus(device)
-		}()
-		return nil
-	case startErr := <-errChan:
-		if startErr == nil {
+	ticker := time.NewTicker(4 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			// this should rarely happen, as ffmpeg should print progress on the first frame. If it does happen,
+			// then either progress has been disabled or the process could be having issues.
+			d.lc.Warnf("Video streaming for device %s has started but has not sent progress messages yet.", device.name)
+			go waitForFinishAndPublish() // track process in the background
+			return nil
+		case startErr, ok := <-errChan:
+			if startErr == nil || !ok {
+				d.lc.Warnf("Video streaming for device %s seems to have stopped already.", device.name)
+				return nil
+			}
+			return errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("the video streaming process for device %s has stopped", device.name), startErr)
+		case _, ok := <-progressChan:
+			if !ok {
+				continue // channel was closed, so something else must be the problem
+			}
+			// if we got a progress message, that means that the transcoding is successful
+			d.lc.Infof("Video streaming for device %s has started without error", device.name)
+			go waitForFinishAndPublish() // track process in the background
 			return nil
 		}
-		return errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("the video streaming process for device %s has stopped", device.name), startErr)
 	}
 }
 
