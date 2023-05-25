@@ -7,8 +7,9 @@
 package driver
 
 import (
-	"context"
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 	"reflect"
 	"regexp"
 	"strings"
@@ -32,13 +33,12 @@ var (
 )
 
 type Device struct {
+	lc                          logger.LoggingClient
 	name                        string
 	path                        string
 	serialNumber                string
 	rtspUri                     string
 	transcoder                  *transcoder.Transcoder
-	ctx                         context.Context
-	cancelFunc                  context.CancelFunc
 	autoStreaming               bool
 	mutex                       sync.Mutex
 	streamingStatus             streamingStatus
@@ -57,30 +57,34 @@ type streamingStatus struct {
 	OutputVideoQuality string
 }
 
-func (dev *Device) StartStreaming(ctx context.Context, cancel context.CancelFunc) (<-chan error, error) {
+func (dev *Device) StartStreaming() (<-chan string, <-chan error, error) {
 	dev.mutex.Lock()
-	defer dev.mutex.Unlock()
-	if dev.streamingStatus.IsStreaming {
-		return nil, fmt.Errorf("video streaming is already in progress")
+	isStreaming := dev.streamingStatus.IsStreaming
+	dev.mutex.Unlock()
+	if isStreaming {
+		return nil, nil, fmt.Errorf("video streaming is already in progress")
 	}
-	dev.ctx = ctx
-	dev.cancelFunc = cancel
-	errChan := dev.transcoder.Run(false)
-	dev.streamingStatus.IsStreaming = true
-	return errChan, nil
+
+	dev.lc.Infof("Attempting to start streaming device %s", dev.name)
+	progressChan, errChan, err := dev.runTranscoderWithOutput()
+	if err != nil {
+		wrappedErr := errors.NewCommonEdgeX(errors.KindServerError, "failed running ffmpeg transcoder for device "+dev.name, err)
+		return nil, nil, wrappedErr
+	}
+	return progressChan, errChan, nil
 }
 
-func (dev *Device) StopStreaming(err error) {
+func (dev *Device) StopStreaming() {
 	dev.mutex.Lock()
 	defer dev.mutex.Unlock()
-	if err != nil {
-		dev.streamingStatus.Error = err.Error()
-	} else {
-		dev.streamingStatus.Error = ""
+	if !dev.streamingStatus.IsStreaming {
+		return
 	}
-	if dev.streamingStatus.IsStreaming {
-		dev.cancelFunc()
-		dev.streamingStatus.IsStreaming = false
+
+	dev.lc.Debugf("Stopping transcoder for device %s", dev.name)
+	if err := dev.transcoder.Stop(); err != nil {
+		dev.lc.Errorf("Failed to stop video streaming transcoder for device %s, error: %s", dev.name, err)
+		return
 	}
 }
 

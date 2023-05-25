@@ -153,7 +153,7 @@ func (d *Driver) Start() error {
 }
 
 func (d *Driver) StartRTSPCredentialServer() {
-	d.lc.Infof("Starting rtsp server")
+	d.lc.Infof("Starting rtsp authentication server on %s", d.rtspAuthenticationServerUri)
 	defer d.wg.Done()
 
 	router := mux.NewRouter()
@@ -347,11 +347,10 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
 		case VideoStopStreaming:
-			device.StopStreaming(nil)
+			device.StopStreaming()
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
-		go d.publishStreamingStatus(device)
 	}
 
 	return nil
@@ -376,7 +375,7 @@ func (d *Driver) Stop(force bool) error {
 
 	for _, device := range d.activeDevices {
 		go func(device *Device) {
-			device.StopStreaming(nil)
+			device.StopStreaming()
 			d.wg.Done()
 		}(device)
 	}
@@ -452,7 +451,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if device, ok := d.activeDevices[deviceName]; ok {
-		device.StopStreaming(nil)
+		device.StopStreaming()
 		delete(d.activeDevices, deviceName)
 		d.lc.Debugf("Device %s is removed", deviceName)
 	}
@@ -627,6 +626,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 
 	return &Device{
+		lc:                          d.lc,
 		name:                        name,
 		path:                        fdPath,
 		serialNumber:                sn,
@@ -676,40 +676,51 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 }
 
 func (d *Driver) startStreaming(device *Device) errors.EdgeX {
-	ctx, cancel := context.WithCancel(context.TODO())
-	errChan, err := device.StartStreaming(ctx, cancel)
+	progressChan, errChan, err := device.StartStreaming()
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"failed to start video streaming for device %s", device.name), err)
 	}
-	startErrs := make(chan errors.EdgeX, 1)
-	d.wg.Add(1)
-	go func() {
-		select {
-		case err := <-errChan:
-			device.StopStreaming(err)
-			d.lc.Errorf("the video streaming process for device %s has stopped", device.name)
-			startErrs <- errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("the video streaming process for device %s has stopped, error: %s", device.name, err), err)
-			d.wg.Done()
-			return
-		case <-device.ctx.Done():
-			if err := device.transcoder.Stop(); err != nil {
-				d.lc.Errorf("failed to stop video streaming for device %s, error: %s", device.name, err)
-				d.wg.Done()
-				return
-			}
-			d.lc.Debugf("the video streaming process for device %s has stopped", device.name)
-			d.wg.Done()
-			return
-		}
+
+	defer func() {
+		// before we return, publish the current streaming status right away.
+		// do this even on error, as this will contain the error message as well.
+		go d.publishStreamingStatus(device)
 	}()
+
+	waitForFinishAndPublish := func() {
+		d.lc.Debugf("Waiting for ffmpeg errChan to be done")
+		<-errChan
+		d.lc.Debugf("Done waiting for ffmpeg errChan to be done")
+		d.publishStreamingStatus(device)
+	}
+
+	// wait a little bit before returning to see if there are any errors on startup
+	ticker := time.NewTicker(4 * time.Second)
+	defer ticker.Stop()
 	for {
 		select {
-		case <-time.After(time.Second):
-			d.lc.Infof("start video streaming for device %s", device.name)
+		case <-ticker.C:
+			// this should rarely happen, as ffmpeg should print progress on the first frame. If it does happen,
+			// then either progress has been disabled or the process could be having issues.
+			d.lc.Warnf("Video streaming for device %s has started but has not sent progress messages yet.", device.name)
+			go waitForFinishAndPublish() // track process in the background
 			return nil
-		case startErr := <-startErrs:
-			return startErr
+		case startErr, ok := <-errChan:
+			if startErr == nil || !ok {
+				d.lc.Warnf("Video streaming for device %s seems to have stopped already.", device.name)
+				return nil
+			}
+			return errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("the video streaming process for device %s has stopped", device.name), startErr)
+		case _, ok := <-progressChan:
+			if !ok {
+				continue // channel was closed, so something else must be the problem
+			}
+			// if we got a progress message, that means that the transcoding is successful
+			d.lc.Infof("Video streaming for device %s has started without error", device.name)
+			go waitForFinishAndPublish() // track process in the background
+			return nil
 		}
 	}
 }
