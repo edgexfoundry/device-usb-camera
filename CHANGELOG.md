@@ -27,6 +27,12 @@
 
 ### Code Refactoring ♻
 - Consume Provision Watcher changes for running multiple instances ([#52b8227](https://github.com/edgexfoundry/device-usb-camera/commits/52b8227))
+- Change configuration and device toml files to yaml ([#a642c90](https://github.com/edgexfoundry/device-usb-camera/commits/a642c90))
+- Use device sdk for adding provision watchers and remove manual code ([#eb09eea](https://github.com/edgexfoundry/device-usb-camera/commits/eb09eea))
+- Replace internal topics from config with new constants ([#69957f4](https://github.com/edgexfoundry/device-usb-camera/commits/69957f4))
+- Rework code for refactored MessageBus Configuration ([#bd8c447](https://github.com/edgexfoundry/device-usb-camera/commits/bd8c447))
+- Rename command line flags for the sake of consistency ([#11d8830](https://github.com/edgexfoundry/device-usb-camera/commits/11d8830))
+- Use latest SDK for flattened config stem ([#df2144b](https://github.com/edgexfoundry/device-usb-camera/commits/df2144b))
 - **snap:** Update command and metadata sourcing ([#190](https://github.com/edgexfoundry/device-usb-camera/issues/190)) ([#585c9f0](https://github.com/edgexfoundry/device-usb-camera/commits/585c9f0))
 - **snap:** Refactor and upgrade to edgex-snap-hooks v3 ([#129](https://github.com/edgexfoundry/device-usb-camera/issues/129)) ([#ad81b67](https://github.com/edgexfoundry/device-usb-camera/commits/ad81b67))
 
