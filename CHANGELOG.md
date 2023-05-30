@@ -13,6 +13,38 @@
 - [go-mod-secrets](https://github.com/edgexfoundry/go-mod-secrets/blob/main/CHANGELOG.md) (indirect dependency)
 - [go-mod-configuration](https://github.com/edgexfoundry/go-mod-configuration/blob/main/CHANGELOG.md) (indirect dependency)
 
+## [3.0.0] Minnesota - 2023-05-31
+
+### Features ✨
+- Support for rtsp server authentication ([#240](https://github.com/edgexfoundry/device-usb-camera/issues/240)) ([#6884326](https://github.com/edgexfoundry/device-usb-camera/commits/6884326))
+- **snap:** Copy provision watcher files in snapcraft ([#150](https://github.com/edgexfoundry/device-usb-camera/issues/150)) ([#d43df40](https://github.com/edgexfoundry/device-usb-camera/commits/d43df40))
+
+### Bug Fixes 🐛
+- Return ffmpeg error logs to caller, and fix StreamingStatus ([#254](https://github.com/edgexfoundry/device-usb-camera/issues/254)) ([#e4cb32a](https://github.com/edgexfoundry/device-usb-camera/commits/e4cb32a))
+- Upgrade rtsp-simple-server to fix vulnerability ([#3d9796f](https://github.com/edgexfoundry/device-usb-camera/commits/3d9796f))
+- **snap:** Refactor to avoid conflicts with readonly config provider directory ([#194](https://github.com/edgexfoundry/device-usb-camera/issues/194)) ([#8746c93](https://github.com/edgexfoundry/device-usb-camera/commits/8746c93))
+- **snap:** Set snap-specific provision watchers directory ([#175](https://github.com/edgexfoundry/device-usb-camera/issues/175)) ([#4e47f77](https://github.com/edgexfoundry/device-usb-camera/commits/4e47f77))
+
+### Code Refactoring ♻
+- Consume Provision Watcher changes for running multiple instances ([#52b8227](https://github.com/edgexfoundry/device-usb-camera/commits/52b8227))
+- **snap:** Update command and metadata sourcing ([#190](https://github.com/edgexfoundry/device-usb-camera/issues/190)) ([#585c9f0](https://github.com/edgexfoundry/device-usb-camera/commits/585c9f0))
+- **snap:** Refactor and upgrade to edgex-snap-hooks v3 ([#129](https://github.com/edgexfoundry/device-usb-camera/issues/129)) ([#ad81b67](https://github.com/edgexfoundry/device-usb-camera/commits/ad81b67))
+
+### Documentation 📖
+- Updated postman collection from v2 to v3 ([#251](https://github.com/edgexfoundry/device-usb-camera/issues/251)) ([#faedb97](https://github.com/edgexfoundry/device-usb-camera/commits/faedb97))
+- Remove docs ([#238](https://github.com/edgexfoundry/device-usb-camera/issues/238)) ([#9fcc0da](https://github.com/edgexfoundry/device-usb-camera/commits/9fcc0da))
+- Add warning to main branch and link to levski ([#191](https://github.com/edgexfoundry/device-usb-camera/issues/191)) ([#96327e0](https://github.com/edgexfoundry/device-usb-camera/commits/96327e0))
+- Add warning for main branch and link to releases ([#185](https://github.com/edgexfoundry/device-usb-camera/issues/185)) ([#59664bc](https://github.com/edgexfoundry/device-usb-camera/commits/59664bc))
+- Change location of nats documentation ([#168](https://github.com/edgexfoundry/device-usb-camera/issues/168)) ([#6531ea4](https://github.com/edgexfoundry/device-usb-camera/commits/6531ea4))
+- **snap:** Update camera interface, getting started doc version ([#143](https://github.com/edgexfoundry/device-usb-camera/issues/143)) ([#c4833ec](https://github.com/edgexfoundry/device-usb-camera/commits/c4833ec))
+
+### Build 👷
+- Ignore all go-mods except device-sdk-go ([#8f2ed8f](https://github.com/edgexfoundry/device-usb-camera/commits/8f2ed8f))
+- Update to use latest sdk ([#174](https://github.com/edgexfoundry/device-usb-camera/issues/174)) ([#3323a63](https://github.com/edgexfoundry/device-usb-camera/commits/3323a63))
+- Update to Go 1.20, Alpine 3.17 and linter v1.51.2 ([#90e2dc0](https://github.com/edgexfoundry/device-usb-camera/commits/90e2dc0))
+- Ignore all go-mods except device-sdk-go ([#1a7f20c](https://github.com/edgexfoundry/device-usb-camera/commits/1a7f20c))
+
+
 ## [v2.3.0] Levski - 2022-11-09 (Not Compatible with 1.x releases)
 
 ### Features ✨
