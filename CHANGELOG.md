@@ -17,8 +17,20 @@
 
 ### Features ✨
 - Support for rtsp server authentication ([#240](https://github.com/edgexfoundry/device-usb-camera/issues/240)) ([#6884326](https://github.com/edgexfoundry/device-usb-camera/commits/6884326))
+- Consume SDK interface changes ([#50a7cc5](https://github.com/edgexfoundry/device-usb-camera/commits/50a7cc5))
+  ```text
+  BREAKING CHANGE: Consume SDK interface changes by adding Start, Discover and ValidateDevice func on driver
+  ```
+- Updates for common config ([#60114fc](https://github.com/edgexfoundry/device-usb-camera/commits/60114fc))
+  ```text
+  BREAKING CHANGE: Configuration file changed to remove common config settings
+  ```
 - **snap:** Copy provision watcher files in snapcraft ([#150](https://github.com/edgexfoundry/device-usb-camera/issues/150)) ([#d43df40](https://github.com/edgexfoundry/device-usb-camera/commits/d43df40))
-
+-- Remove ZeroMQ message bus capability ([#8695117](https://github.com/edgexfoundry/device-usb-camera/commits/8695117))
+  ```text
+  BREAKING CHANGE: Remove ZeroMQ message bus capability
+  ``` 
+  
 ### Bug Fixes 🐛
 - Return ffmpeg error logs to caller, and fix StreamingStatus ([#254](https://github.com/edgexfoundry/device-usb-camera/issues/254)) ([#e4cb32a](https://github.com/edgexfoundry/device-usb-camera/commits/e4cb32a))
 - Upgrade rtsp-simple-server to fix vulnerability ([#3d9796f](https://github.com/edgexfoundry/device-usb-camera/commits/3d9796f))
@@ -27,10 +39,6 @@
 
 ### Code Refactoring ♻
 - Consume Provision Watcher changes for running multiple instances ([#52b8227](https://github.com/edgexfoundry/device-usb-camera/commits/52b8227))
-- Consume SDK interface changes
-  ```text
-  BREAKING CHANGE: Consume SDK interface changes by adding Start, Discover and ValidateDevice func on driver
-  ```
 - Change configuration and device toml files to yaml ([#a642c90](https://github.com/edgexfoundry/device-usb-camera/commits/a642c90))
   ```text
   BREAKING CHANGE: Configuration and device files now use yaml instead of toml
@@ -43,14 +51,6 @@
   ```text
   BREAKING CHANGE: Internal topics no longer configurable, except the base topic.
   ```
-- Updates for common config
-  ```text
-  BREAKING CHANGE: Configuration file changed to remove common config settings
-  ```
-- Remove ZeroMQ message bus capability
-  ```text
-  BREAKING CHANGE: Remove ZeroMQ message bus capability
-  ``` 
 - Rework code for refactored MessageBus Configuration ([#bd8c447](https://github.com/edgexfoundry/device-usb-camera/commits/bd8c447))
    ```text
   BREAKING CHANGE: MessageQueue renamed to MessageBus and fields changed.
