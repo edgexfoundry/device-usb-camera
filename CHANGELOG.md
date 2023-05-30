@@ -27,6 +27,10 @@
 
 ### Code Refactoring ♻
 - Consume Provision Watcher changes for running multiple instances ([#52b8227](https://github.com/edgexfoundry/device-usb-camera/commits/52b8227))
+- Consume SDK interface changes
+  ```text
+  BREAKING CHANGE: Consume SDK interface changes by adding Start, Discover and ValidateDevice func on driver
+  ```
 - Change configuration and device toml files to yaml ([#a642c90](https://github.com/edgexfoundry/device-usb-camera/commits/a642c90))
   ```text
   BREAKING CHANGE: Configuration and device files now use yaml instead of toml
@@ -39,6 +43,14 @@
   ```text
   BREAKING CHANGE: Internal topics no longer configurable, except the base topic.
   ```
+- Updates for common config
+  ```text
+  BREAKING CHANGE: Configuration file changed to remove common config settings
+  ```
+- Remove ZeroMQ message bus capability
+  ```text
+  BREAKING CHANGE: Remove ZeroMQ message bus capability
+  ``` 
 - Rework code for refactored MessageBus Configuration ([#bd8c447](https://github.com/edgexfoundry/device-usb-camera/commits/bd8c447))
    ```text
   BREAKING CHANGE: MessageQueue renamed to MessageBus and fields changed.
