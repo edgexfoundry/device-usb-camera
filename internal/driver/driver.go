@@ -11,7 +11,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
@@ -136,7 +137,9 @@ func (d *Driver) Start() error {
 	}
 
 	// Make sure the paths of existing devices are up-to-date.
-	go d.RefreshExistingDevicePaths()
+	if d.ds.Devices() != nil {
+		go d.RefreshExistingDevicePaths()
+	}
 
 	d.wg.Add(1)
 	go d.StartRTSPCredentialServer()
@@ -231,7 +234,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	if edgexErr != nil {
 		return responses, edgexErr
 	}
-	cameraDevice, err := usbdevice.Open(device.path)
+	cameraDevice, err := usbdevice.Open(device.path[0].(string))
 	if err != nil {
 		return responses, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", device.path), err)
@@ -401,11 +404,11 @@ func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]model
 	}
 
 	path, ok := usb[Path]
-	if !ok || path == "" {
+	if !ok || path == nil {
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("The path is missing for %s.", deviceName), nil)
 	}
 
-	_, sn, err := getUSBDeviceIdInfo(path.(string))
+	_, sn, err := getUSBDeviceIdInfo(path.([]interface{})[0].(string))
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
@@ -462,8 +465,14 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshExistingDevicePaths() {
 	d.lc.Debug("Refreshing existing device paths")
+	var fdPath = ""
 	for _, cd := range d.ds.Devices() {
-		fdPath := cd.Protocols[UsbProtocol][Path].(string)
+		if cd.Protocols[UsbProtocol][Path] != nil {
+			fdPath = cd.Protocols[UsbProtocol][Path].([]interface{})[0].(string)
+		} else {
+			fdPath = ""
+		}
+
 		cn, sn, err := getUSBDeviceIdInfo(fdPath)
 		if err != nil {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
@@ -480,7 +489,8 @@ func (d *Driver) RefreshExistingDevicePaths() {
 func (d *Driver) Discover() error {
 	d.lc.Info("Discovery is triggered")
 
-	var devices []sdkModels.DiscoveredDevice
+	devices := make(map[string]sdkModels.DiscoveredDevice)
+	// currentSerials := make(map[string]string)
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
 	currentDevices := d.cachedDeviceMap()
 	// The file descriptor of video capture device can be /dev/video0 ~ 63
@@ -495,31 +505,42 @@ func (d *Driver) Discover() error {
 			}
 			// Update existing device if it's path has changed
 			if _, ok := currentDevices[cn+sn]; ok {
-				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][Path] {
-					currentDevices[cn+sn].Protocols[UsbProtocol][Path] = fdPath
+				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][BusNumber] {
+					var temp []string
+					currentDevices[cn+sn].Protocols[UsbProtocol][Path] = temp
 					if err := d.ds.UpdateDevice(currentDevices[cn+sn]); err != nil {
 						d.lc.Errorf("failed to update path for the device %s", currentDevices[cn+sn].Name)
 					}
 				}
 				continue
 			}
-			discovered := sdkModels.DiscoveredDevice{
-				Name: buildDeviceName(cn, sn),
-				Protocols: map[string]models.ProtocolProperties{
-					UsbProtocol: {
-						Path:         fdPath,
-						SerialNumber: sn,
-						CardName:     cn,
+			if _, found := devices[sn]; !found {
+				discovered := sdkModels.DiscoveredDevice{
+					Name: buildDeviceName(cn, sn),
+					Protocols: map[string]models.ProtocolProperties{
+						UsbProtocol: {
+							Path:         []string{fdPath},
+							SerialNumber: sn,
+							CardName:     cn,
+							// BusNumber:    bn,
+						},
 					},
-				},
-				Description: fmt.Sprintf("USB camera %s", cn),
-				Labels:      []string{"auto-discovery", cn},
+					Description: fmt.Sprintf("USB camera %s", cn),
+					Labels:      []string{"auto-discovery", cn},
+				}
+				devices[sn] = discovered
+				d.lc.Infof("discovered device: %s", discovered.Name)
+			} else {
+				tempPaths := devices[sn].Protocols[UsbProtocol][Path]
+				devices[sn].Protocols[UsbProtocol][Path] = append(tempPaths.([]string), fdPath)
 			}
-			devices = append(devices, discovered)
-			d.lc.Infof("discovered device: %s", discovered.Name)
 		}
 	}
-	d.deviceCh <- devices
+	var discoveredDevices []sdkModels.DiscoveredDevice
+	for _, device := range devices {
+		discoveredDevices = append(discoveredDevices, device)
+	}
+	d.deviceCh <- discoveredDevices
 	return nil
 }
 
@@ -537,6 +558,26 @@ func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolPropert
 	return value.(string), nil
 }
 
+func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]interface{}, errors.EdgeX) {
+	if _, ok := protocols[UsbProtocol]; !ok {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			fmt.Sprintf("%s protocol configuration not found. Please check device configuration", UsbProtocol), nil)
+	}
+	value, ok := protocols[UsbProtocol][Path]
+	if !ok {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
+				Path, UsbProtocol), nil)
+	}
+	if value != nil {
+		return value.([]interface{}), nil
+	} else {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
+				Path, UsbProtocol), nil)
+	}
+}
+
 func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProperties) (*Device, errors.EdgeX) {
 	device, err := d.ds.GetDeviceByName(name)
 	if err != nil {
@@ -549,11 +590,11 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 			fmt.Sprintf("profile %s not found in core metadata", name), err)
 	}
 
-	fdPath, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, Path)
+	paths, edgexErr := d.getPaths(protocols)
 	if edgexErr != nil {
 		return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 	}
-
+	fdPath := paths[0].(string)
 	rtspUri := &url.URL{
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
@@ -628,7 +669,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	return &Device{
 		lc:                          d.lc,
 		name:                        name,
-		path:                        fdPath,
+		path:                        paths,
 		serialNumber:                sn,
 		rtspUri:                     rtspUri.String(),
 		transcoder:                  trans,
@@ -816,6 +857,13 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 		}
 	}
 	cardName = m[UdevV4lProduct]
+
+	// r, _ := regexp.Compile("usb+[0-9]")
+	// busNumber = r.FindString(m["DEVPATH"])
+	// if len(busNumber) == 0 {
+	// 	return "", "", errors.NewCommonEdgeX(errors.KindServerError,
+	// 		fmt.Sprintf("could not find the bus number of the device on the specified path %s", path), nil)
+	// }
 	if len(cardName) == 0 {
 		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the card name of the device on the specified path %s", path), nil)
@@ -833,7 +881,7 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 }
 
 func (d *Driver) ValidateDevice(device models.Device) error {
-	_, err := d.getProtocolProperty(device.Protocols, UsbProtocol, Path)
+	_, err := d.getPaths(device.Protocols)
 	if err != nil {
 		return errors.NewCommonEdgeXWrapper(err)
 	}

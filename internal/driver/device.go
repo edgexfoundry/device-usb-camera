@@ -8,12 +8,13 @@ package driver
 
 import (
 	"fmt"
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 
 	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
@@ -35,7 +36,7 @@ var (
 type Device struct {
 	lc                          logger.LoggingClient
 	name                        string
-	path                        string
+	path                        []interface{}
 	serialNumber                string
 	rtspUri                     string
 	transcoder                  *transcoder.Transcoder

@@ -10,6 +10,7 @@ const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
 	Path                            = "Path"
+	BusNumber                       = "BusNumber"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
 	BasePath                        = "/dev/video"
