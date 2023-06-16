@@ -465,21 +465,27 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshExistingDevicePaths() {
 	d.lc.Debug("Refreshing existing device paths")
-	var fdPath = ""
 	for _, cd := range d.ds.Devices() {
-		if cd.Protocols[UsbProtocol][Path] != nil {
-			fdPath = cd.Protocols[UsbProtocol][Path].([]interface{})[0].(string)
-		} else {
-			fdPath = ""
-		}
+		d.RefreshExistingDevicePath(cd)
+	}
+}
 
-		cn, sn, err := getUSBDeviceIdInfo(fdPath)
+// RefreshExistingDevicePaths checks whether the existing devices match the connected devices.
+// If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
+func (d *Driver) RefreshExistingDevicePath(cd models.Device) {
+	d.lc.Debug("Refreshing existing device paths")
+	for _, fdPath := range cd.Protocols[UsbProtocol][Path].([]interface{}) {
+		cn, sn, err := getUSBDeviceIdInfo(fdPath.(string))
 		if err != nil {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
 		}
 		// If the card name or serial number is different, it means that the path of the device has changed.
-		if cn != cd.Protocols[UsbProtocol][CardName] || sn != cd.Protocols[UsbProtocol][SerialNumber] {
+		if cn != cd.Protocols[UsbProtocol][CardName] || sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath.(string)) {
+			// Delete the paths and start fresh
+			cd.Protocols[UsbProtocol][Path] = nil
+			// cd.Protocols[UsbProtocol][Path] = nil
 			go d.updateDevicePath(cd)
+			break
 		}
 	}
 }
@@ -488,7 +494,6 @@ func (d *Driver) RefreshExistingDevicePaths() {
 // Devices found as part of this discovery operation are written to the channel devices.
 func (d *Driver) Discover() error {
 	d.lc.Info("Discovery is triggered")
-
 	devices := make(map[string]sdkModels.DiscoveredDevice)
 	// currentSerials := make(map[string]string)
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
@@ -505,13 +510,14 @@ func (d *Driver) Discover() error {
 			}
 			// Update existing device if it's path has changed
 			if _, ok := currentDevices[cn+sn]; ok {
-				if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][BusNumber] {
-					var temp []string
-					currentDevices[cn+sn].Protocols[UsbProtocol][Path] = temp
-					if err := d.ds.UpdateDevice(currentDevices[cn+sn]); err != nil {
-						d.lc.Errorf("failed to update path for the device %s", currentDevices[cn+sn].Name)
-					}
-				}
+				d.RefreshExistingDevicePath(currentDevices[cn+sn])
+				// if fdPath != currentDevices[cn+sn].Protocols[UsbProtocol][Path]. {
+				// 	var temp []string
+				// 	currentDevices[cn+sn].Protocols[UsbProtocol][Path] = temp
+				// 	if err := d.ds.UpdateDevice(currentDevices[cn+sn]); err != nil {
+				// 		d.lc.Errorf("failed to update path for the device %s", currentDevices[cn+sn].Name)
+				// 	}
+				// }
 				continue
 			}
 			if _, found := devices[sn]; !found {
@@ -522,7 +528,6 @@ func (d *Driver) Discover() error {
 							Path:         []string{fdPath},
 							SerialNumber: sn,
 							CardName:     cn,
-							// BusNumber:    bn,
 						},
 					},
 					Description: fmt.Sprintf("USB camera %s", cn),
@@ -595,6 +600,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 	}
 	fdPath := paths[0].(string)
+
 	rtspUri := &url.URL{
 		Scheme: RtspUriScheme,
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
@@ -812,6 +818,8 @@ func (d *Driver) updateDevicePath(device models.Device) {
 	// Scan all paths to find the matching device.
 	// The file descriptor of video capture device can be /dev/video0 ~ 63
 	// https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L1402-L1406
+	var init []interface{}
+	device.Protocols[UsbProtocol][Path] = init
 	for i := 0; i < 64; i++ {
 		fdPath := BasePath + strconv.Itoa(i)
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
@@ -821,13 +829,12 @@ func (d *Driver) updateDevicePath(device models.Device) {
 				continue
 			}
 			if cn == device.Protocols[UsbProtocol][CardName] && sn == device.Protocols[UsbProtocol][SerialNumber] {
-				device.Protocols[UsbProtocol][Path] = fdPath
-				if err := d.ds.UpdateDevice(device); err != nil {
-					d.lc.Errorf("failed to update path for the device %s", device.Name)
-				}
-				break
+				device.Protocols[UsbProtocol][Path] = append(device.Protocols[UsbProtocol][Path].([]interface{}), fdPath)
 			}
 		}
+	}
+	if err := d.ds.UpdateDevice(device); err != nil {
+		d.lc.Errorf("failed to update path for the device %s", device.Name)
 	}
 }
 
