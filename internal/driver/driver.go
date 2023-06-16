@@ -747,9 +747,9 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 	cds := d.ds.Devices()
 	cdm := make(map[string]models.Device, len(cds))
 	for _, cd := range cds {
-		cn := cd.Protocols[UsbProtocol][CardName].(string)
-		sn := cd.Protocols[UsbProtocol][SerialNumber].(string)
-		if len(cn) > 0 && len(sn) > 0 {
+		cn, cnOK := cd.Protocols[UsbProtocol][CardName].(string)
+		sn, snOK := cd.Protocols[UsbProtocol][SerialNumber].(string)
+		if len(cn) > 0 && cnOK && len(sn) > 0 && snOK {
 			cdm[cn+sn] = cd
 		}
 	}
