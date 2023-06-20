@@ -9,8 +9,7 @@ package driver
 const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
-	Path                            = "Path"
-	BusNumber                       = "BusNumber"
+	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
 	BasePath                        = "/dev/video"

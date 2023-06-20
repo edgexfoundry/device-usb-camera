@@ -36,7 +36,7 @@ var (
 type Device struct {
 	lc                          logger.LoggingClient
 	name                        string
-	path                        []interface{}
+	paths                       []interface{}
 	serialNumber                string
 	rtspUri                     string
 	transcoder                  *transcoder.Transcoder
