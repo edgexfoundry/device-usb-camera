@@ -3,6 +3,7 @@ module github.com/edgexfoundry/device-usb-camera
 go 1.20
 
 require (
+	github.com/IOTechSystems/onvif v0.1.6
 	github.com/edgexfoundry/device-sdk-go/v3 v3.0.0
 	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.1
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0
@@ -16,13 +17,16 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
 	github.com/armon/go-metrics v0.3.10 // indirect
+	github.com/beevik/etree v1.1.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/clbanning/mxj/v2 v2.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.2 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v3 v3.0.0 // indirect
 	github.com/edgexfoundry/go-mod-messaging/v3 v3.0.0 // indirect
 	github.com/edgexfoundry/go-mod-registry/v3 v3.0.0 // indirect
 	github.com/edgexfoundry/go-mod-secrets/v3 v3.0.1 // indirect
+	github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
@@ -58,6 +62,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.1.4 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
 	golang.org/x/crypto v0.8.0 // indirect

@@ -858,13 +858,6 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 		}
 	}
 	cardName = m[UdevV4lProduct]
-
-	// r, _ := regexp.Compile("usb+[0-9]")
-	// busNumber = r.FindString(m["DEVPATH"])
-	// if len(busNumber) == 0 {
-	// 	return "", "", errors.NewCommonEdgeX(errors.KindServerError,
-	// 		fmt.Sprintf("could not find the bus number of the device on the specified path %s", path), nil)
-	// }
 	if len(cardName) == 0 {
 		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the card name of the device on the specified path %s", path), nil)
