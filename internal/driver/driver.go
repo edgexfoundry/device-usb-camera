@@ -633,6 +633,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 
 	if shouldUpdate {
 		if err := d.ds.PatchDevice(dtos.UpdateDevice{
+			Name:      &device.Name,
 			Protocols: dtos.FromProtocolModelsToDTOs(device.Protocols),
 		}); err != nil {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError,
