@@ -44,6 +44,8 @@ func NewDriver() *Driver {
 func createTestDevice(a, b, c int) models.Device {
 	return models.Device{Name: "testDeviceRealsense", Protocols: map[string]models.ProtocolProperties{
 		UsbProtocol: map[string]any{
+			CardName:     "testDevice" + strconv.Itoa(a),
+			SerialNumber: strconv.Itoa(a) + strconv.Itoa(b) + strconv.Itoa(c),
 			Paths: []interface{}{
 				"/dev/video" + strconv.Itoa(a),
 				"/dev/video" + strconv.Itoa(b),
@@ -51,6 +53,49 @@ func createTestDevice(a, b, c int) models.Device {
 			},
 		},
 	}}
+}
+
+func TestDriver_cachedDeviceMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		devices  []models.Device
+		expected map[string]models.Device
+	}{
+		{
+			name: "happy path single device",
+			devices: []models.Device{
+				createTestDevice(0, 2, 4),
+			},
+			expected: map[string]models.Device{
+				"testDevice0024": createTestDevice(0, 2, 4),
+			},
+		},
+		{
+			name: "happy path multiple devices",
+			devices: []models.Device{
+				createTestDevice(0, 2, 4),
+				createTestDevice(6, 8, 10),
+				createTestDevice(12, 14, 16),
+				createTestDevice(18, 20, 22),
+			},
+			expected: map[string]models.Device{
+				"testDevice0024":     createTestDevice(0, 2, 4),
+				"testDevice66810":    createTestDevice(6, 8, 10),
+				"testDevice12121416": createTestDevice(12, 14, 16),
+				"testDevice18182022": createTestDevice(18, 20, 22),
+			},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			driver, mockService := createDriverWithMockService()
+			mockService.On("Devices").
+				Return(test.devices)
+			cacheMap := driver.cachedDeviceMap()
+			assert.Equal(t, test.expected, cacheMap)
+		})
+	}
 }
 
 // func TestDriver_updateDevicePath(t *testing.T) {
@@ -74,13 +119,43 @@ func TestDriver_getPaths(t *testing.T) {
 		errorExpected bool
 	}{
 		{
-			name:   "happyPath",
+			name:   "happy path",
 			device: createTestDevice(0, 2, 4),
 			expected: []interface{}{
 				"/dev/video0",
 				"/dev/video2",
 				"/dev/video4",
 			},
+		},
+		{
+			name: "empty paths",
+			device: models.Device{
+				Name: "testDeviceRealsense",
+				Protocols: map[string]models.ProtocolProperties{
+					UsbProtocol: map[string]any{
+						Paths: []interface{}{},
+					},
+				},
+			},
+			expected: []interface{}{},
+		},
+		{
+			name: "no paths field",
+			device: models.Device{
+				Name: "testDeviceRealsense",
+				Protocols: map[string]models.ProtocolProperties{
+					UsbProtocol: map[string]any{},
+				},
+			},
+			errorExpected: true,
+		},
+		{
+			name: "no Protocols field",
+			device: models.Device{
+				Name:      "testDeviceRealsense",
+				Protocols: map[string]models.ProtocolProperties{},
+			},
+			errorExpected: true,
 		},
 	}
 	for _, test := range tests {
