@@ -11,6 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
@@ -606,23 +607,37 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device on the specified path: %s", fdPath), err)
 	}
-	psn := protocols[UsbProtocol][SerialNumber].(string)
-	pcn := protocols[UsbProtocol][CardName].(string)
-	// pre-defined devices may not include serial number information
-	if len(psn) == 0 {
-		device.Protocols[UsbProtocol][SerialNumber] = sn
-		c := cameraDevice.Capability()
-		device.Protocols[UsbProtocol][CardName] = c.Card
-		if err := d.ds.UpdateDevice(device); err != nil {
-			return nil, errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to update the device %s to add serial number information", device.Name), err)
-		}
-	} else if pcn != cn {
-		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("wrong device card name, expected %s=%s, actual %s=%s", CardName, pcn, CardName, cn), nil)
-	} else if psn != sn {
+
+	// if the user provided a serial number or card name, but it does not match the device's serial number or card name,
+	// then return an error, as this may not be the correct device
+	psn, psnOK := protocols[UsbProtocol][SerialNumber].(string)
+	if psnOK && psn != "" && psn != sn {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("wrong device serial number, expected %s=%s, actual %s=%s", SerialNumber, psn, SerialNumber, sn), nil)
+	}
+	pcn, pcnOK := protocols[UsbProtocol][CardName].(string)
+	if pcnOK && pcn != "" && pcn != cn {
+		return nil, errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("wrong device card name, expected %s=%s, actual %s=%s", CardName, pcn, CardName, cn), nil)
+	}
+
+	shouldUpdate := false
+	if !psnOK || psn == "" { // pre-defined devices may not include serial number information
+		device.Protocols[UsbProtocol][SerialNumber] = sn
+		shouldUpdate = true
+	}
+	if !pcnOK || pcn == "" { // pre-defined devices may not include card name information
+		device.Protocols[UsbProtocol][CardName] = cn
+		shouldUpdate = true
+	}
+
+	if shouldUpdate {
+		if err := d.ds.PatchDevice(dtos.UpdateDevice{
+			Protocols: dtos.FromProtocolModelsToDTOs(device.Protocols),
+		}); err != nil {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("failed to update the device %s to add serial number and/or card name information", device.Name), err)
+		}
 	}
 
 	return &Device{
