@@ -12,8 +12,8 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 )
 
-func (d *Driver) RefreshExistingDevicePathsRoute(writer http.ResponseWriter, request *http.Request) {
-	go d.RefreshExistingDevicePaths()
+func (d *Driver) RefreshExistingDevicesPathsRoute(writer http.ResponseWriter, request *http.Request) {
+	go d.RefreshExistingDevicesPaths()
 	correlationID := request.Header.Get(common.CorrelationHeader)
 	writer.Header().Set(common.CorrelationHeader, correlationID)
 	writer.Header().Set(common.ContentType, common.ContentTypeJSON)
