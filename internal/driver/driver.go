@@ -463,7 +463,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	return nil
 }
 
-// RefreshExistingDevicePaths checks whether the existing devices match the connected devices.
+// RefreshExistingDevicesPaths checks whether the existing devices match the connected devices.
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshExistingDevicesPaths() {
 	d.lc.Debug("Refreshing existing device paths")
@@ -476,20 +476,51 @@ func (d *Driver) RefreshExistingDevicesPaths() {
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshDevicePaths(cd models.Device) {
 	d.lc.Debug("Refreshing existing device paths")
-	for _, fdPath := range cd.Protocols[UsbProtocol][Paths].([]interface{}) {
-		cn, sn, err := getUSBDeviceIdInfo(fdPath.(string))
-		if err != nil {
-			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
-		}
-		// If the card name or serial number is different, it means that the path of the device has changed.
-		if cn != cd.Protocols[UsbProtocol][CardName] || sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath.(string)) {
-			// Delete the paths and start fresh
-			cd.Protocols[UsbProtocol][Paths] = nil
-			// cd.Protocols[UsbProtocol][Path] = nil
-			go d.updateDevicePath(cd)
-			break
+	props, _ := getV4L2Output()
+	pathInfo, _ := regexp.Compile("\t")
+	busInfo, _ := regexp.Compile("(usb-0000:00:[0-9]+.[0-9]-[0-9].[0-9])")
+	cdBus := cd.Protocols[UsbProtocol][BusInfo]
+	// cdCard := cd.Protocols[UsbProtocol][CardName].(string)
+	cdSerial := cd.Protocols[UsbProtocol][SerialNumber]
+	var hasChanged bool
+	for index, prop := range props {
+		// isPath := pathInfo.MatchString(prop)
+		if busInfo.MatchString(prop) {
+			cleanPath := pathInfo.ReplaceAllString(props[index+1], "")
+			bus := busInfo.FindString(prop)
+			_, sn, _ := getUSBDeviceIdInfo(cleanPath)
+			if sn == cdSerial && bus != cdBus {
+				hasChanged = true
+				cd.Protocols[UsbProtocol][BusInfo] = busInfo.FindString(prop)
+				cd.Protocols[UsbProtocol][Paths] = []string{}
+			} else {
+				hasChanged = false
+			}
+		} else if pathInfo.MatchString(prop) && hasChanged {
+			cleanPath := pathInfo.ReplaceAllString(prop, "")
+			if d.isVideoCaptureDevice(cleanPath) {
+				cd.Protocols[UsbProtocol][Paths] = append(cd.Protocols[UsbProtocol][Paths].([]string), cleanPath)
+			}
 		}
 	}
+	if err := d.ds.UpdateDevice(cd); err != nil {
+		d.lc.Errorf("failed to update path for the device %s", cd.Name)
+	}
+	// println(currentDeviceName)
+	// for _, fdPath := range cd.Protocols[UsbProtocol][Paths].([]string) {
+	// 	cn, sn, err := getUSBDeviceIdInfo(fdPath)
+	// 	if err != nil {
+	// 		d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
+	// 	}
+	// 	// If the card name or serial number is different, it means that the path of the device has changed.
+	// 	if cn != cd.Protocols[UsbProtocol][CardName] || sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath.(string)) {
+	// 		// Delete the paths and start fresh
+	// 		cd.Protocols[UsbProtocol][Paths] = nil
+	// 		// cd.Protocols[UsbProtocol][Path] = nil
+	// go d.updateDevicePath(cd)
+	// 		break
+	// 	}
+	// }
 }
 
 // Discover triggers protocol specific device discovery, which is an asynchronous operation.
@@ -500,80 +531,87 @@ func (d *Driver) Discover() error {
 	currentDevices := d.cachedDeviceMap()
 	var discoveredDevices []sdkModels.DiscoveredDevice
 
-	deviceList, err := d.getConnectedDevices()
+	props, err := getV4L2Output()
 	if err != nil {
 		return err
 	}
-
-	for _, device := range deviceList {
-		cn := device.Protocols[UsbProtocol][CardName].(string)
-		sn := device.Protocols[UsbProtocol][SerialNumber].(string)
-
-		// Update existing device if it's path has changed
-		if _, ok := currentDevices[cn+sn]; ok {
-			d.RefreshDevicePaths(currentDevices[cn+sn])
-			continue
+	r, _ := regexp.Compile("\t")
+	busInfo, _ := regexp.Compile("(usb-0000:00:[0-9]+.[0-9]-[0-9].[0-9])")
+	deviceIndex := -1
+	var existing bool
+	for index, prop := range props {
+		isPath := r.MatchString(prop)
+		if busInfo.MatchString(prop) {
+			cleanPath := r.ReplaceAllString(props[index+1], "")
+			cn, sn, err := getUSBDeviceIdInfo(cleanPath)
+			if err != nil {
+				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
+				continue
+			}
+			if _, ok := currentDevices[cn+sn]; ok {
+				d.RefreshDevicePaths(currentDevices[cn+sn])
+				existing = true
+				continue
+			} else {
+				existing = false
+			}
+			temp := sdkModels.DiscoveredDevice{
+				Name: buildDeviceName(cn, sn),
+				Protocols: map[string]models.ProtocolProperties{
+					UsbProtocol: {
+						CardName:     cn,
+						SerialNumber: sn,
+						Paths:        []string{},
+						BusInfo:      busInfo.FindString(prop),
+					},
+				},
+				Description: fmt.Sprintf("USB camera %s", cn),
+				Labels:      []string{"auto-discovery", cn},
+			}
+			discoveredDevices = append(discoveredDevices, temp)
+			deviceIndex = deviceIndex + 1
+		} else if isPath && !existing {
+			cleanPath := r.ReplaceAllString(prop, "")
+			if d.isVideoCaptureDevice(cleanPath) {
+				discoveredDevices[deviceIndex].Protocols[UsbProtocol][Paths] = append(discoveredDevices[deviceIndex].Protocols[UsbProtocol][Paths].([]string), cleanPath)
+			}
 		}
-		discoveredDevices = append(discoveredDevices, device)
 	}
 	d.deviceCh <- discoveredDevices
 	return nil
 }
 
-func (d *Driver) getConnectedDevices() ([]sdkModels.DiscoveredDevice, errors.EdgeX) {
-	cmd := exec.Command("v4l2-ctl", "--list-devices")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to run command: %s: %s", cmd.String(), output), err)
-	}
-	props := strings.Split(string(output), "\n")
+// Example output from "v4l2-ctl --listdevices"
+// Intel(R) RealSense(TM) Depth Ca (usb-0000:00:14.0-1.1):
+//  /t/dev/video0
+// 	/t/dev/video1
+// 	/t/dev/video2
+// 	/t/dev/video3
+// 	/t/dev/video4
+// 	/t/dev/video5
+// 	/t/dev/media0
+// 	/t/dev/media1
+//
+// C270 HD WEBCAM (usb-0000:00:14.0-2.2):
+// 	/t/dev/video8
+// 	/t/dev/video9
+// 	/t/dev/media3
+//
+// the tabs ("/t") are used as delimters
 
-	r, _ := regexp.Compile("\t")
-	devFlag := true
-	var m []sdkModels.DiscoveredDevice
-	index := -1
-	for _, prop := range props {
-		isPath := strings.Contains(prop, "\t")
-		if prop != "" && !isPath {
-			temp := sdkModels.DiscoveredDevice{
-				Name: "",
-				Protocols: map[string]models.ProtocolProperties{
-					UsbProtocol: {
-						CardName:     "",
-						SerialNumber: "",
-						Paths:        []string{},
-					},
-				},
-				Description: "",
-				Labels:      []string{},
-			}
-			m = append(m, temp)
-			index = index + 1
-			devFlag = true
-			continue
-		}
-		if isPath {
-			cleanPath := r.ReplaceAllString(prop, "")
-			if d.isVideoCaptureDevice(cleanPath) {
-				if devFlag {
-					cn, sn, err := getUSBDeviceIdInfo(cleanPath)
-					if err != nil {
-						d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
-						continue
-					}
-					m[index].Protocols[UsbProtocol][CardName] = cn
-					m[index].Protocols[UsbProtocol][SerialNumber] = sn
-					m[index].Name = buildDeviceName(cn, sn)
-					m[index].Description = fmt.Sprintf("USB camera %s", cn)
-					m[index].Labels = []string{"auto-discovery", cn}
-					devFlag = false
-				}
-				m[index].Protocols[UsbProtocol][Paths] = append(m[index].Protocols[UsbProtocol][Paths].([]string), cleanPath)
-			}
-		}
-	}
-	return m, nil
+// getConnectedDevices uses v4l2-ctl to determine the USB camera devices connected
+// to the system. Using this output, it also filters and adds the video capture video streams
+// to the appropriate device.
+
+func getV4L2Output() ([]string, errors.EdgeX) {
+	cmd := exec.Command("v4l2-ctl", "--list-devices")
+	output, _ := cmd.Output()
+	// if err != nil {
+	// 	return nil, errors.NewCommonEdgeX(errors.KindServerError,
+	// 		fmt.Sprintf("failed to run command: %s: %s", cmd.String(), output), err)
+	// }
+	props := strings.Split(string(output), "\n")
+	return props, nil
 }
 
 func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolProperties, protocol, key string) (string, errors.EdgeX) {
@@ -602,11 +640,14 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]str
 				Paths, UsbProtocol), nil)
 	}
 	if value != nil {
-		s := make([]string, len(value.([]interface{})))
-		for index, v := range value.([]interface{}) {
-			s[index] = v.(string)
+		if _, ok := (value.([]interface{})); ok {
+			s := make([]string, len(value.([]interface{})))
+			for index, v := range value.([]interface{}) {
+				s[index] = v.(string)
+			}
+			return s, nil
 		}
-		return s, nil
+		return value.([]string), nil
 	} else {
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
 			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
@@ -686,6 +727,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	psn := protocols[UsbProtocol][SerialNumber].(string)
 	pcn := protocols[UsbProtocol][CardName].(string)
+	bus := protocols[UsbProtocol][BusInfo].(string)
 	// pre-defined devices may not include serial number information
 	if len(psn) == 0 {
 		device.Protocols[UsbProtocol][SerialNumber] = sn
@@ -707,6 +749,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		lc:                          d.lc,
 		name:                        name,
 		paths:                       paths,
+		bus:                         bus,
 		serialNumber:                sn,
 		rtspUri:                     rtspUri.String(),
 		transcoder:                  trans,
