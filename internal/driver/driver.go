@@ -407,7 +407,7 @@ func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]model
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("The path is missing for %s.", deviceName), nil)
 	}
 
-	_, sn, err := getUSBDeviceIdInfo(path.([]interface{})[0].(string))
+	_, sn, _, err := getUSBDeviceIdInfo(path.([]interface{})[0].(string))
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
@@ -482,8 +482,7 @@ func (d *Driver) RefreshSingleDevicePaths(cd models.Device) {
 	for index, line := range props {
 		if busRegex.MatchString(line) {
 			cleanPath := pathRegex.ReplaceAllString(props[index+1], "")
-			bus := busRegex.FindString(line)
-			_, sn, err := getUSBDeviceIdInfo(cleanPath)
+			_, sn, bus, err := getUSBDeviceIdInfo(cleanPath)
 			if err != nil {
 				d.lc.Errorf("Error when getting serial number: %s", err)
 			}
@@ -527,7 +526,7 @@ func (d *Driver) Discover() error {
 	for index, line := range v4lOut {
 		if busRegex.MatchString(line) {
 			cleanPath := r.ReplaceAllString(v4lOut[index+1], "")
-			cn, sn, err := getUSBDeviceIdInfo(cleanPath)
+			cn, sn, bus, err := getUSBDeviceIdInfo(cleanPath)
 			if err != nil {
 				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
 				continue
@@ -546,7 +545,7 @@ func (d *Driver) Discover() error {
 						CardName:     cn,
 						SerialNumber: sn,
 						Paths:        []string{},
-						BusInfo:      busRegex.FindString(line),
+						BusInfo:      bus,
 					},
 				},
 				Description: fmt.Sprintf("USB camera %s", cn),
@@ -705,16 +704,11 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	defer cameraDevice.Close()
 
-	cn, sn, err := getUSBDeviceIdInfo(fdPath)
+	cn, sn, bus, err := getUSBDeviceIdInfo(fdPath)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device on the specified path: %s", fdPath), err)
 	}
-
-	bus := protocols[UsbProtocol][BusInfo].(string)
-	// pre-defined devices may not include serial number information
-	if len(psn) == 0 {
-
 
 	// if the user provided a serial number or card name, but it does not match the device's serial number or card name,
 	// then return an error, as this may not be the correct device
@@ -729,6 +723,12 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 			fmt.Sprintf("wrong device card name, expected %s=%s, actual %s=%s", CardName, pcn, CardName, cn), nil)
 	}
 
+	pbus, busOK := protocols[UsbProtocol][BusInfo].(string)
+	if busOK && pbus != "" && pbus != bus {
+		return nil, errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("wrong device bus, expected %s=%s, actual %s=%s", BusInfo, pbus, BusInfo, bus), nil)
+	}
+
 	shouldUpdate := false
 	if !psnOK || psn == "" { // pre-defined devices may not include serial number information
 		device.Protocols[UsbProtocol][SerialNumber] = sn
@@ -736,6 +736,10 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	if !pcnOK || pcn == "" { // pre-defined devices may not include card name information
 		device.Protocols[UsbProtocol][CardName] = cn
+		shouldUpdate = true
+	}
+	if !busOK || pbus == "" { // pre-defined devices may not include card name information
+		device.Protocols[UsbProtocol][BusInfo] = bus
 		shouldUpdate = true
 	}
 
@@ -902,11 +906,11 @@ func getQueryParameters(req sdkModels.CommandRequest) (url.Values, errors.EdgeX)
 }
 
 // getUSBDeviceIdInfo returns the serial number and the card name of the device on the specified path
-func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err error) {
+func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, busInfo string, err error) {
 	cmd := exec.Command("udevadm", "info", "--query=property", path)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
+		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to run command: %s: %s", cmd.String(), output), err)
 	}
 	props := strings.Split(string(output), "\n")
@@ -919,7 +923,7 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 	}
 	cardName = m[UdevV4lProduct]
 	if len(cardName) == 0 {
-		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
+		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the card name of the device on the specified path %s", path), nil)
 	}
 	if len(m[UdevSerialShort]) > 0 {
@@ -927,8 +931,9 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, err 
 	} else {
 		serialNumber = m[UdevSerial]
 	}
+	busInfo = m["ID_PATH"]
 	if len(serialNumber) == 0 {
-		return "", "", errors.NewCommonEdgeX(errors.KindServerError,
+		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device on the specified path %s", path), nil)
 	}
 	return
