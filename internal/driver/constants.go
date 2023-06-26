@@ -71,4 +71,5 @@ const (
 	UdevSerialShort = "ID_SERIAL_SHORT"
 	UdevSerial      = "ID_SERIAL"
 	UdevV4lProduct  = "ID_V4L_PRODUCT"
+	IdPath          = "ID_PATH"
 )

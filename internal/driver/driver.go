@@ -926,12 +926,18 @@ func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, busI
 		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the card name of the device on the specified path %s", path), nil)
 	}
+	busInfo = m[IdPath]
+	if len(busInfo) == 0 {
+		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("could not find the bus info of the device on the specified path %s", path), nil)
+	}
+
 	if len(m[UdevSerialShort]) > 0 {
 		serialNumber = m[UdevSerialShort]
 	} else {
 		serialNumber = m[UdevSerial]
 	}
-	busInfo = m["ID_PATH"]
+
 	if len(serialNumber) == 0 {
 		return "", "", "", errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("could not find the serial number of the device on the specified path %s", path), nil)
