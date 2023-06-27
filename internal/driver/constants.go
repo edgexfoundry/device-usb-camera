@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,6 @@ const (
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
-	BasePath                        = "/dev/video"
 	BusInfo                         = "BusInfo"
 	AutoStreaming                   = "AutoStreaming"
 	InputIndex                      = "InputIndex"

@@ -232,7 +232,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	if edgexErr != nil {
 		return responses, edgexErr
 	}
-	// currently defaults to using the first available stream
+	// Currently defaults to using the first available stream
 	cameraDevice, err := usbdevice.Open(device.paths[0])
 	if err != nil {
 		return responses, errors.NewCommonEdgeX(errors.KindServerError,
@@ -460,8 +460,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	return nil
 }
 
-// RefreshExistingDevicesPaths checks whether the existing devices match the connected devices.
-// If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
+// RefreshMultipleDevicePaths runs RefreshSingleDevicePaths for every currently connected device
 func (d *Driver) RefreshMultipleDevicePaths() {
 	d.lc.Debug("Refreshing existing device paths")
 	for _, cd := range d.ds.Devices() {
@@ -469,7 +468,7 @@ func (d *Driver) RefreshMultipleDevicePaths() {
 	}
 }
 
-// RefreshExistingDevicePaths checks whether the existing devices match the connected devices.
+// RefreshSingleDevicePaths checks whether the existing devices match the connected devices.
 // If there is a mismatch between them, scan all paths to find the matching device and update the existing device with the correct path.
 func (d *Driver) RefreshSingleDevicePaths(cd models.Device) {
 	d.lc.Debug("Refreshing existing device paths")
@@ -519,13 +518,15 @@ func (d *Driver) Discover() error {
 		return err
 	}
 
-	r, _ := regexp.Compile("\t")
+	pathRegex, _ := regexp.Compile("\t")
 	busRegex, _ := regexp.Compile("(usb-0000:00:[0-9]+.[0-9]-[0-9].[0-9])")
 	deviceIndex := -1
+	// existing is used as a flag in order to skip lines of output that belong
+	// to a device that hass already been added
 	var existing bool
 	for index, line := range v4lOut {
-		if busRegex.MatchString(line) {
-			cleanPath := r.ReplaceAllString(v4lOut[index+1], "")
+		if busRegex.MatchString(line) { // Corresponds to a device from output
+			cleanPath := pathRegex.ReplaceAllString(v4lOut[index+1], "")
 			cn, sn, bus, err := getUSBDeviceIdInfo(cleanPath)
 			if err != nil {
 				d.lc.Errorf("failed to get device serial number, error: %s", err.Error())
@@ -553,8 +554,8 @@ func (d *Driver) Discover() error {
 			}
 			discoveredDevices = append(discoveredDevices, temp)
 			deviceIndex = deviceIndex + 1
-		} else if !existing && r.MatchString(line) {
-			cleanPath := r.ReplaceAllString(line, "")
+		} else if !existing && pathRegex.MatchString(line) { // corresponds to a path belonging to a device
+			cleanPath := pathRegex.ReplaceAllString(line, "")
 			if d.isVideoCaptureDevice(cleanPath) {
 				discoveredDevices[deviceIndex].Protocols[UsbProtocol][Paths] = append(discoveredDevices[deviceIndex].Protocols[UsbProtocol][Paths].([]string), cleanPath)
 			}
@@ -583,10 +584,7 @@ func (d *Driver) Discover() error {
 // the tabs ("/t") are used as identifiers for the paths, and the bus format
 // is used as identifiers for the device headings
 
-// getConnectedDevices uses v4l2-ctl to determine the USB camera devices connected
-// to the system. Using this output, it also filters and adds the video capture video streams
-// to the appropriate device.
-
+// getV4L2Output uses v4l2-ctl to get a listingt of connected usb devices and paths
 func getV4L2Output() ([]string, errors.EdgeX) {
 	cmd := exec.Command("v4l2-ctl", "--list-devices")
 	output, _ := cmd.Output()
@@ -612,6 +610,7 @@ func (d *Driver) getProtocolProperty(protocols map[string]models.ProtocolPropert
 	return value.(string), nil
 }
 
+// getPaths takes a device's protocols and returns the []string slice of /dev/video paths
 func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]string, errors.EdgeX) {
 	if _, ok := protocols[UsbProtocol]; !ok {
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
@@ -624,7 +623,9 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]str
 				Paths, UsbProtocol), nil)
 	}
 	if value != nil {
-		if _, ok := (value.([]interface{})); ok {
+		// Depending on where the function is called from, protocols could contain
+		// a []string or []interface{} filled with strings
+		if _, ok := value.([]interface{}); ok {
 			s := make([]string, len(value.([]interface{})))
 			for index, v := range value.([]interface{}) {
 				s[index] = v.(string)
@@ -905,7 +906,7 @@ func getQueryParameters(req sdkModels.CommandRequest) (url.Values, errors.EdgeX)
 	return queryParams, nil
 }
 
-// getUSBDeviceIdInfo returns the serial number and the card name of the device on the specified path
+// getUSBDeviceIdInfo returns the serial number, card name, and bus indo of the device on the specified path
 func getUSBDeviceIdInfo(path string) (cardName string, serialNumber string, busInfo string, err error) {
 	cmd := exec.Command("udevadm", "info", "--query=property", path)
 	output, err := cmd.CombinedOutput()
