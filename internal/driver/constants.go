@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022-2023 Intel Corporation
+// Copyright (C) 2022 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,7 @@ const (
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
-	BusInfo                         = "BusInfo"
+	BasePath                        = "/dev/video"
 	AutoStreaming                   = "AutoStreaming"
 	InputIndex                      = "InputIndex"
 	UrlRawQuery                     = "urlRawQuery"
@@ -70,5 +70,4 @@ const (
 	UdevSerialShort = "ID_SERIAL_SHORT"
 	UdevSerial      = "ID_SERIAL"
 	UdevV4lProduct  = "ID_V4L_PRODUCT"
-	IdPath          = "ID_PATH"
 )

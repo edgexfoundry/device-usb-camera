@@ -46,7 +46,7 @@ func createTestDevice(a, b, c int) models.Device {
 		UsbProtocol: map[string]any{
 			CardName:     "testDevice" + strconv.Itoa(a),
 			SerialNumber: strconv.Itoa(a) + strconv.Itoa(b) + strconv.Itoa(c),
-			Paths: []string{
+			Paths: []interface{}{
 				"/dev/video" + strconv.Itoa(a),
 				"/dev/video" + strconv.Itoa(b),
 				"/dev/video" + strconv.Itoa(c),
@@ -98,17 +98,30 @@ func TestDriver_cachedDeviceMap(t *testing.T) {
 	}
 }
 
+// func TestDriver_updateDevicePath(t *testing.T) {
+// 	driver, mockService := createDriverWithMockService()
+// 	testDevice := createTestDevice()
+
+// 	mockService.On("isVideoCaptureDevice", "/dev/video0").
+// 		Return(true)
+
+// 	mockService.On("UpdateDevice", testDevice).
+// 		Return(nil)
+
+// 	driver.updateDevicePath(testDevice)
+// }
+
 func TestDriver_getPaths(t *testing.T) {
 	tests := []struct {
 		name          string
 		device        models.Device
-		expected      []string
+		expected      []interface{}
 		errorExpected bool
 	}{
 		{
 			name:   "happy path",
 			device: createTestDevice(0, 2, 4),
-			expected: []string{
+			expected: []interface{}{
 				"/dev/video0",
 				"/dev/video2",
 				"/dev/video4",
@@ -120,11 +133,11 @@ func TestDriver_getPaths(t *testing.T) {
 				Name: "testDeviceRealsense",
 				Protocols: map[string]models.ProtocolProperties{
 					UsbProtocol: map[string]any{
-						Paths: []string{},
+						Paths: []interface{}{},
 					},
 				},
 			},
-			expected: []string{},
+			expected: []interface{}{},
 		},
 		{
 			name: "no paths field",
