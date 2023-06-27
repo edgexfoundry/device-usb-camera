@@ -115,13 +115,13 @@ func TestDriver_getPaths(t *testing.T) {
 	tests := []struct {
 		name          string
 		device        models.Device
-		expected      []interface{}
+		expected      []string
 		errorExpected bool
 	}{
 		{
 			name:   "happy path",
 			device: createTestDevice(0, 2, 4),
-			expected: []interface{}{
+			expected: []string{
 				"/dev/video0",
 				"/dev/video2",
 				"/dev/video4",
@@ -137,7 +137,7 @@ func TestDriver_getPaths(t *testing.T) {
 					},
 				},
 			},
-			expected: []interface{}{},
+			expected: []string{},
 		},
 		{
 			name: "no paths field",
