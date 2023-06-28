@@ -471,7 +471,11 @@ func (d *Driver) RefreshMultipleDevicePaths() {
 // and update the existing device with the correct path.
 func (d *Driver) RefreshSingleDevicePaths(cd models.Device) {
 	d.lc.Debug("Refreshing existing device paths")
-	for _, fdPath := range cd.Protocols[UsbProtocol][Paths].([]string) {
+	paths, err := d.getPaths(cd.Protocols)
+	if err != nil {
+		d.lc.Errorf("Failed to get paths for device %s", cd.Name)
+	}
+	for _, fdPath := range paths {
 		cn, sn, err := getUSBDeviceIdInfo(fdPath)
 		if err != nil {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
