@@ -12,7 +12,6 @@ const (
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
-	BasePath                        = "/dev/video"
 	AutoStreaming                   = "AutoStreaming"
 	InputIndex                      = "InputIndex"
 	UrlRawQuery                     = "urlRawQuery"
