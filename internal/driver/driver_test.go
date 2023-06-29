@@ -28,31 +28,32 @@ func createDriverWithMockService() (*Driver, *sdkMocks.DeviceServiceSDK) {
 }
 
 func NewDriver() *Driver {
-	return &Driver{
-		activeDevices: map[string]*Device{
-			"testDeviceRealsense": &Device{
-				paths: []{
-					"/dev/video0",
-					"/dev/video2",
-					"/dev/video4",
-				},
-			},
-		},
-	}
+	return &Driver{}
 }
 
 func createTestDevice(a, b, c int) models.Device {
-	return models.Device{Name: "testDeviceRealsense", Protocols: map[string]models.ProtocolProperties{
-		UsbProtocol: map[string]any{
-			CardName:     "testDevice" + strconv.Itoa(a),
-			SerialNumber: strconv.Itoa(a) + strconv.Itoa(b) + strconv.Itoa(c),
-			Paths: []interface{}{
-				"/dev/video" + strconv.Itoa(a),
-				"/dev/video" + strconv.Itoa(b),
-				"/dev/video" + strconv.Itoa(c),
+	return models.Device{
+		Name: "testDeviceRealsense",
+		Protocols: map[string]models.ProtocolProperties{
+			UsbProtocol: map[string]any{
+				CardName:     "testDevice" + strconv.Itoa(a),
+				SerialNumber: strconv.Itoa(a) + strconv.Itoa(b) + strconv.Itoa(c),
+				Paths: []map[string]string{
+					{
+						Path:              "/dev/video" + strconv.Itoa(a),
+						FormatDescription: "YUYV 4:2:2",
+					},
+					{
+						Path:              "/dev/video" + strconv.Itoa(b),
+						FormatDescription: "16-bit Depth",
+					},
+					{
+						Path:              "/dev/video" + strconv.Itoa(c),
+						FormatDescription: "8-bit Greyscale",
+					},
+				},
 			},
-		},
-	}}
+		}}
 }
 
 func TestDriver_cachedDeviceMap(t *testing.T) {
@@ -115,16 +116,25 @@ func TestDriver_getPaths(t *testing.T) {
 	tests := []struct {
 		name          string
 		device        models.Device
-		expected      []string
+		expected      []map[string]string
 		errorExpected bool
 	}{
 		{
 			name:   "happy path",
 			device: createTestDevice(0, 2, 4),
-			expected: []string{
-				"/dev/video0",
-				"/dev/video2",
-				"/dev/video4",
+			expected: []map[string]string{
+				{
+					Path:              "/dev/video0",
+					FormatDescription: "YUYV 4:2:2",
+				},
+				{
+					Path:              "/dev/video2",
+					FormatDescription: "16-bit Depth",
+				},
+				{
+					Path:              "/dev/video4",
+					FormatDescription: "8-bit Greyscale",
+				},
 			},
 		},
 		{
@@ -133,11 +143,11 @@ func TestDriver_getPaths(t *testing.T) {
 				Name: "testDeviceRealsense",
 				Protocols: map[string]models.ProtocolProperties{
 					UsbProtocol: map[string]any{
-						Paths: []interface{}{},
+						Paths: []map[string]string{},
 					},
 				},
 			},
-			expected: []string{},
+			expected: []map[string]string{},
 		},
 		{
 			name: "no paths field",

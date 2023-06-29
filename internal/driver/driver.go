@@ -137,6 +137,10 @@ func (d *Driver) Start() error {
 		d.activeDevices[dev.Name] = activeDevice
 	}
 
+	if len(d.ds.Devices()) > 0 {
+		go d.RefreshMultipleDevicePaths()
+	}
+
 	d.wg.Add(1)
 	go d.StartRTSPCredentialServer()
 
@@ -586,8 +590,7 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]map
 	}
 	if value != nil {
 		// Depending on where the function is called from, protocols could contain
-		// a []string or []interface{} filled with strings
-
+		// a []map[string]string or []interface{} filled with more interfaces
 		if _, ok := value.([]interface{}); ok {
 			pathMaps := make([]map[string]string, len(value.([]interface{})))
 			for index, v := range value.([]interface{}) {
@@ -598,13 +601,13 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]map
 				}
 			}
 			return pathMaps, nil
-		} else {
-			return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
-				fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
-					Paths, UsbProtocol), nil)
 		}
+		return value.([]map[string]string), nil
+	} else {
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			fmt.Sprintf("property %s of protocol %s is nil. Please check device configuration",
+				Paths, UsbProtocol), nil)
 	}
-	return value.([]map[string]string), nil
 }
 
 func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProperties) (*Device, errors.EdgeX) {
