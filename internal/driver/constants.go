@@ -10,6 +10,8 @@ const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
 	Paths                           = "Paths"
+	Path                            = "Path"
+	FormatDescription               = "FormatDescription"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
 	AutoStreaming                   = "AutoStreaming"
