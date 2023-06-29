@@ -394,21 +394,15 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]models.Protoc
 
 // addDeviceInternal attempts to add a device to the device service's active devices
 func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]models.ProtocolProperties) (*Device, error) {
-
-	usb, ok := protocols[UsbProtocol]
-	if !ok {
-		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("Device %s is missing required %s protocol info.", deviceName, UsbProtocol), nil)
+	path, err := d.getPaths(protocols)
+	if err != nil {
+		return nil, err
 	}
 
-	path, ok := usb[Paths]
-	if !ok || path == nil {
-		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("The path is missing for %s.", deviceName), nil)
-	}
-
-	_, sn, err := getUSBDeviceIdInfo(path.([]interface{})[0].(string))
+	_, sn, error := getUSBDeviceIdInfo(path[0])
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("could not find the serial number of the device %s", deviceName), err)
+			fmt.Sprintf("could not find the serial number of the device %s", deviceName), error)
 	}
 	for _, ad := range d.activeDevices {
 		if ad.serialNumber == sn {
@@ -836,8 +830,8 @@ func (d *Driver) updateDevicePaths(device models.Device) {
 	// Scan all paths to find the matching device.
 	// The file descriptor of video capture device can be /dev/video0 ~ 63
 	// https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L1402-L1406
-	// var init []interface{}
-	// device.Protocols[UsbProtocol][Paths] = []interface{}
+	var init []string
+	device.Protocols[UsbProtocol][Paths] = init
 	allDevices, _ := usbdevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
@@ -847,7 +841,7 @@ func (d *Driver) updateDevicePaths(device models.Device) {
 				continue
 			}
 			if cn == device.Protocols[UsbProtocol][CardName] && sn == device.Protocols[UsbProtocol][SerialNumber] {
-				device.Protocols[UsbProtocol][Paths] = append(device.Protocols[UsbProtocol][Paths].([]interface{}), fdPath)
+				device.Protocols[UsbProtocol][Paths] = append(device.Protocols[UsbProtocol][Paths].([]string), fdPath)
 			}
 		}
 	}
