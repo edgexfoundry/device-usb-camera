@@ -491,14 +491,12 @@ func (d *Driver) RefreshDevicePaths(cd models.Device) {
 func (d *Driver) Discover() error {
 	d.lc.Info("Discovery is triggered")
 	devices := make(map[string]sdkModels.DiscoveredDevice)
-	// currentSerials := make(map[string]string)
+
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
 	currentDevices := d.cachedDeviceMap()
-	// The file descriptor of video capture device can be /dev/video0 ~ 63
-	// https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L1402-L1406
+
 	allDevices, _ := usbdevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
-		// fdPath := BasePath + strconv.Itoa(i)
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
 			cn, sn, err := getUSBDeviceIdInfo(fdPath)
 			if err != nil {
