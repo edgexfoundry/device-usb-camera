@@ -236,10 +236,10 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 		return responses, edgexErr
 	}
 	// currently defaults to using the first available stream
-	cameraDevice, err := usbdevice.Open(device.paths[0]["paths"])
+	cameraDevice, err := usbdevice.Open(device.paths[0][Path])
 	if err != nil {
 		return responses, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to open the underlying device at specified path %s", device.paths[0]), err)
+			fmt.Sprintf("failed to open the underlying device at specified path %s", device.paths[0][Path]), err)
 	}
 	defer cameraDevice.Close()
 
