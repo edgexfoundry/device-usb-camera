@@ -560,6 +560,7 @@ func (d *Driver) getPathMap(fdPath string) (map[string]string, error) {
 		d.lc.Errorf("Failed to open USB device %s due to error: %s", fdPath, err)
 		return nil, err
 	}
+	defer dev.Close()
 	description, err := dev.GetFormatDescriptions()
 	if err != nil {
 		d.lc.Errorf("Failed to get format for USB device %s due to error: %s", fdPath, err)
