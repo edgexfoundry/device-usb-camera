@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os/exec"
 	"path"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -469,23 +470,30 @@ func (d *Driver) RefreshMultipleDevicePaths() {
 // and update the existing device with the correct path.
 func (d *Driver) RefreshSingleDevicePaths(cd models.Device) {
 	d.lc.Debug("Refreshing existing device paths")
-	paths, err := d.getPaths(cd.Protocols)
-	if err != nil {
-		return
-	}
-	for _, path := range paths {
-		fdPath := path[Path]
+	allDevices, _ := usbdevice.GetAllDevicePaths()
+	devMap := make(map[string]([]map[string]string))
+	for _, fdPath := range allDevices {
 		cn, sn, err := getUSBDeviceIdInfo(fdPath)
 		if err != nil {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
+			continue
 		}
-		// If the card name or serial number is different, it means that the path of the device has changed.
-		if cn != cd.Protocols[UsbProtocol][CardName] || sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath) {
-			// Delete the paths and start fresh
-			cd.Protocols[UsbProtocol][Paths] = nil
-			// cd.Protocols[UsbProtocol][Path] = nil
-			go d.updateDevicePaths(cd)
-			break
+		path, err := d.getPathMap(fdPath)
+		if err != nil {
+			d.lc.Errorf("failed to get the path information of device %s, error: %s", cd.Name, err.Error())
+			continue
+		}
+		devMap[cn+sn] = append(devMap[cn+sn], path)
+	}
+	ccn, cnOK := cd.Protocols[UsbProtocol][CardName].(string)
+	csn, snOK := cd.Protocols[UsbProtocol][SerialNumber].(string)
+	if len(ccn) > 0 && cnOK && len(csn) > 0 && snOK {
+		if !reflect.DeepEqual(devMap[ccn+csn], cd.Protocols[UsbProtocol][Paths]) {
+			cd.Protocols[UsbProtocol][Paths] = []map[string]string{}
+			cd.Protocols[UsbProtocol][Paths] = devMap[ccn+csn]
+			if err := d.ds.UpdateDevice(cd); err != nil {
+				d.lc.Errorf("failed to update paths for the device %s", cd.Name)
+			}
 		}
 	}
 }
@@ -854,34 +862,6 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 	defer cameraDevice.Close()
 	c := cameraDevice.Capability()
 	return isVideoCaptureSupported(c) && isStreamingSupported(c)
-}
-
-func (d *Driver) updateDevicePaths(device models.Device) {
-	// Scan all paths to find the matching device.
-	// The file descriptor of video capture device can be /dev/video0 ~ 63
-	// https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L1402-L1406
-	var init []map[string]string
-	device.Protocols[UsbProtocol][Paths] = init
-	allDevices, _ := usbdevice.GetAllDevicePaths()
-	for _, fdPath := range allDevices {
-		if ok := d.isVideoCaptureDevice(fdPath); ok {
-			cn, sn, err := getUSBDeviceIdInfo(fdPath)
-			if err != nil {
-				d.lc.Errorf("failed to get device serial number, path=%s, error: %s", fdPath, err.Error())
-				continue
-			}
-			path, err := d.getPathMap(fdPath)
-			if err != nil {
-				continue
-			}
-			if cn == device.Protocols[UsbProtocol][CardName] && sn == device.Protocols[UsbProtocol][SerialNumber] {
-				device.Protocols[UsbProtocol][Paths] = append(device.Protocols[UsbProtocol][Paths].([]map[string]string), path)
-			}
-		}
-	}
-	if err := d.ds.UpdateDevice(device); err != nil {
-		d.lc.Errorf("failed to update paths for the device %s", device.Name)
-	}
 }
 
 func getQueryParameters(req sdkModels.CommandRequest) (url.Values, errors.EdgeX) {
