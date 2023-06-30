@@ -477,7 +477,7 @@ func (d *Driver) RefreshDevicePaths(cd models.Device) {
 			d.lc.Errorf("failed to get the serial number of device %s, error: %s", cd.Name, err.Error())
 		}
 		// If the serial number is different, it means that the path of the device has changed.
-		if sn != cd.Protocols[UsbProtocol][SerialNumber] {
+		if sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath) {
 			// Delete the paths and start fresh
 			cd.Protocols[UsbProtocol][Paths] = nil
 			go d.updateDevicePaths(cd)
