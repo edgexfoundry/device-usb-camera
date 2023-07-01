@@ -13,7 +13,7 @@ import (
 )
 
 func (d *Driver) RefreshExistingDevicePathsRoute(writer http.ResponseWriter, request *http.Request) {
-	go d.RefreshExistingDevicePaths()
+	go d.RefreshAllDevicePaths()
 	correlationID := request.Header.Get(common.CorrelationHeader)
 	writer.Header().Set(common.CorrelationHeader, correlationID)
 	writer.Header().Set(common.ContentType, common.ContentTypeJSON)

@@ -9,10 +9,9 @@ package driver
 const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
-	Path                            = "Path"
+	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
-	BasePath                        = "/dev/video"
 	AutoStreaming                   = "AutoStreaming"
 	InputIndex                      = "InputIndex"
 	UrlRawQuery                     = "urlRawQuery"
