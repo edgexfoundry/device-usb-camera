@@ -16,7 +16,9 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 
+	"github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
+
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -87,6 +89,67 @@ func (dev *Device) StopStreaming() {
 		dev.lc.Errorf("Failed to stop video streaming transcoder for device %s, error: %s", dev.name, err)
 		return
 	}
+}
+
+func (dev *Device) SetFPS(fps uint32) (uint32, error) {
+	devPath := dev.paths[0]
+	device, err := device.Open(devPath)
+	if err != nil {
+		return 0, err
+	}
+	defer device.Close()
+	x, _ := device.GetVideoInputIndex()
+	test, _ := device.GetVideoInputInfo(uint32(x))
+	println(test.GetCapabilities())
+
+	origStreamParam, err := device.GetStreamParam()
+	if err != nil {
+		return 0, err
+	}
+	origStreamParam.Capture.TimePerFrame.Denominator = fps
+	err = device.SetStreamParam(origStreamParam)
+	// err = device.SetFrameRate(fps)
+	if err != nil {
+		return 0, err
+	}
+	newStreamParam, err := device.GetStreamParam()
+	if err != nil {
+		return 0, err
+	}
+	newFPS := newStreamParam.Capture.TimePerFrame.Denominator
+	if fps != newFPS {
+		return 0, err
+	}
+	return newFPS, nil
+}
+
+func (dev *Device) GetFPS(fps uint32) (uint32, error) {
+	devPath := dev.paths[0]
+	device, err := device.Open(devPath)
+	if err != nil {
+		return 0, err
+	}
+	defer device.Close()
+
+	origStreamParam, err := device.GetStreamParam()
+	if err != nil {
+		return 0, err
+	}
+	origStreamParam.Capture.TimePerFrame.Denominator = fps
+	err = device.SetStreamParam(origStreamParam)
+	// err = device.SetFrameRate(fps)
+	if err != nil {
+		return 0, err
+	}
+	newStreamParam, err := device.GetStreamParam()
+	if err != nil {
+		return 0, err
+	}
+	newFPS := newStreamParam.Capture.TimePerFrame.Denominator
+	if fps != newFPS {
+		return 0, err
+	}
+	return newFPS, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {

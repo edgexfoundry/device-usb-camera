@@ -46,6 +46,7 @@ const (
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
+	VideoSetFPS                 = "VIDEO_SET_FPS"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

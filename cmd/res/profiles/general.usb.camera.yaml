@@ -80,6 +80,13 @@ deviceResources:
       valueType: "Bool"
       readWrite: "W"
       defaultValue: "false"
+  - name: "SetFPS"
+    description: "Set the stream FPS rate"
+    attributes: 
+      { command: "VIDEO_SET_FPS"}
+    properties:
+      valueType: "Object"
+      readWrite: "W"
   - name: "StreamURI"
     description: "Get video-streaming URI."
     attributes:
