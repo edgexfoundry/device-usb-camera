@@ -368,7 +368,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			var frames uint32
 			frames, err = device.SetFPS(uint32(fps))
 			if err != nil {
-				d.lc.Errorf("Could not set the FPS to %d for device %s", fps, deviceName)
+				d.lc.Errorf("Could not set the FPS to %d for device %s due to error: %s", fps, deviceName, err)
 				return err
 			}
 			d.lc.Infof("Video FPS set to %d", frames)
@@ -915,4 +915,17 @@ func (d *Driver) ValidateDevice(device models.Device) error {
 		return errors.NewCommonEdgeXWrapper(err)
 	}
 	return nil
+}
+
+func (d *Driver) getSupportedFormats(devPath string) {
+	cmd := exec.Command("v4l2-ctl", "-d", devPath, "--list-formats-ex")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return
+	}
+	props := strings.Split(string(output), "\n")
+	// var x map[string](map[string][]string)
+	for _, line := range props {
+		d.lc.Info(line)
+	}
 }
