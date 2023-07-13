@@ -92,17 +92,19 @@ func (dev *Device) StopStreaming() {
 	}
 }
 
-func (dev *Device) SetFPS(fps uint32) (uint32, error) {
+// SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
+func (dev *Device) SetFps(fps uint32) (uint32, error) {
 	devPath := dev.paths[0]
 	device, err := device.Open(devPath)
 	if err != nil {
 		return 0, err
 	}
 	defer device.Close()
-	intervals, err := dev.getSupportedIntervalFormats()
+	dataFormat, err := getDataFormat(device)
 	if err != nil {
 		return 0, nil
 	}
+	intervals := dataFormat.(DataFormat).FpsIntervals
 	foundFlag := false
 	for _, interval := range intervals {
 		if fps == interval {
@@ -114,6 +116,7 @@ func (dev *Device) SetFPS(fps uint32) (uint32, error) {
 		return 0, errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %d not supported for current image format.", fps), nil)
 	}
 
+	// Update device fps for stream parameters
 	origStreamParam, err := device.GetStreamParam()
 	if err != nil {
 		return 0, err
@@ -123,73 +126,16 @@ func (dev *Device) SetFPS(fps uint32) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	// Set device fps
 	err = device.SetFrameRate(fps)
 	if err != nil {
 		return 0, err
 	}
-	dev.updateFFmpegOptions("InputFps", strconv.Itoa(int(fps)))
+
+	// Set input fps for ffmpeg to match new device fps
+	dev.updateFFmpegOptions(InputFps, strconv.Itoa(int(fps)))
 	return fps, nil
-}
-
-func (dev *Device) getSupportedIntervalFormats() ([]uint32, error) {
-	devPath := dev.paths[0]
-	device, err := device.Open(devPath)
-	if err != nil {
-		return nil, err
-	}
-	defer device.Close()
-	index, err := device.GetVideoInputIndex()
-	if err != nil {
-		return nil, err
-	}
-	pixFormat, err := device.GetPixFormat()
-	if err != nil {
-		return nil, err
-	}
-	format, err := device.GetFormatDescription(uint32(index))
-	if err != nil {
-		return nil, err
-	}
-	intervalCount := 0
-	var supportedFPSValues []uint32
-	for {
-		if interval, exit := v4l2.GetFormatFrameInterval(device.Fd(), uint32(intervalCount), format.PixelFormat, pixFormat.Width, pixFormat.Height); exit == nil {
-			supportedFPSValues = append(supportedFPSValues, interval.Interval.Max.Denominator)
-			intervalCount += 1
-		} else {
-			break
-		}
-	}
-	return supportedFPSValues, nil
-}
-
-func (dev *Device) GetFPS(fps uint32) (uint32, error) {
-	devPath := dev.paths[0]
-	device, err := device.Open(devPath)
-	if err != nil {
-		return 0, err
-	}
-	defer device.Close()
-
-	origStreamParam, err := device.GetStreamParam()
-	if err != nil {
-		return 0, err
-	}
-	origStreamParam.Capture.TimePerFrame.Denominator = fps
-	err = device.SetStreamParam(origStreamParam)
-	// err = device.SetFrameRate(fps)
-	if err != nil {
-		return 0, err
-	}
-	newStreamParam, err := device.GetStreamParam()
-	if err != nil {
-		return 0, err
-	}
-	newFPS := newStreamParam.Capture.TimePerFrame.Denominator
-	if fps != newFPS {
-		return 0, err
-	}
-	return newFPS, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {

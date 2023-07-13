@@ -34,6 +34,7 @@ type DataFormat struct {
 	XferFunc     string
 	YcbcrEnc     string
 	Quantization string
+	FpsIntervals []uint32
 }
 
 type CaptureMode struct {
@@ -135,6 +136,20 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 		}
 	}
 	result.Quantization = quant
+	intervalCount := 0
+	var intervals []uint32
+	for {
+		fd := d.Fd()
+		index := uint32(intervalCount)
+		encoding := fmt.PixelFormat
+		if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, fmt.Width, fmt.Height); exit == nil {
+			intervals = append(intervals, interval.Interval.Max.Denominator)
+			intervalCount += 1
+		} else {
+			break
+		}
+	}
+	result.FpsIntervals = intervals
 
 	return result, nil
 }
@@ -196,5 +211,45 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 			FrameSizes:  fss,
 		})
 	}
+	return r, nil
+}
+
+func getSupportedIntervalFormats(d *usbdevice.Device) (interface{}, error) {
+	descs, err := d.GetFormatDescriptions()
+	if err != nil {
+		return nil, err
+	}
+	type result struct {
+		IntervalFormats [][][]v4l2.FrameIntervalEnum
+	}
+	var r result
+	formats := make([][][]v4l2.FrameIntervalEnum, len(descs))
+	for i, desc := range descs {
+		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
+		if err != nil {
+			return nil, err
+		}
+		frameIntervals := make([][]v4l2.FrameIntervalEnum, len(fss))
+		for j, frameSize := range fss {
+			intervalCount := 0
+			var intervals []v4l2.FrameIntervalEnum
+			for {
+				fd := d.Fd()
+				index := uint32(intervalCount)
+				encoding := frameSize.PixelFormat
+				height := frameSize.Size.MaxHeight
+				width := frameSize.Size.MaxWidth
+				if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); exit == nil {
+					intervals = append(intervals, interval)
+					intervalCount += 1
+				} else {
+					break
+				}
+			}
+			frameIntervals[j] = intervals
+		}
+		formats[i] = frameIntervals
+	}
+	r.IntervalFormats = formats
 	return r, nil
 }

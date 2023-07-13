@@ -25,6 +25,7 @@ const (
 	Stream                          = "stream"
 	PrefixInput                     = "Input"
 	PrefixOutput                    = "Output"
+	FpsValue                        = "FpsValue"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
@@ -42,11 +43,12 @@ const (
 	MetadataCroppingAbility     = "METADATA_CROPPING_ABILITY"
 	MetadataStreamingParameters = "METADATA_STREAMING_PARAMETERS"
 	MetadataImageFormats        = "METADATA_IMAGE_FORMATS"
+	MetadataFpsFormats          = "METADATA_FPS_FORMATS"
 	VideoStartStreaming         = "VIDEO_START_STREAMING"
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
-	VideoSetFPS                 = "VIDEO_SET_FPS"
+	VideoSetFps                 = "VIDEO_SET_FPS"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"
@@ -65,6 +67,7 @@ const (
 
 	// Input option names
 	InputPixelFormat = "InputPixelFormat"
+	InputFps         = "InputFps"
 
 	// udev device properties
 	UdevSerialShort = "ID_SERIAL_SHORT"

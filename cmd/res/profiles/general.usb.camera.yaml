@@ -44,6 +44,13 @@ deviceResources:
     properties:
       valueType: "Object"
       readWrite: "R"
+  - name: "FpsFormats"
+    description: "Enumerate supported fps settings, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enum-frameintervals.html"
+    attributes:
+      { command: "METADATA_FPS_FORMATS" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
   - name: "DataFormat"
     description: "Get data format, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enuminput.html."
     attributes:
@@ -80,7 +87,7 @@ deviceResources:
       valueType: "Bool"
       readWrite: "W"
       defaultValue: "false"
-  - name: "SetFPS"
+  - name: "SetFps"
     description: "Set the stream FPS rate"
     attributes: 
       { command: "VIDEO_SET_FPS"}

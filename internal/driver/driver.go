@@ -286,6 +286,12 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+		case MetadataFpsFormats:
+			data, err = getSupportedIntervalFormats(cameraDevice)
+			if err != nil {
+				return responses, errorWrapper.CommandError(command, err)
+			}
+			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case MetadataDataFormat:
 			data, err = getDataFormat(cameraDevice)
 			if err != nil {
@@ -351,27 +357,27 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			}
 		case VideoStopStreaming:
 			device.StopStreaming()
-		case VideoSetFPS:
+		case VideoSetFps:
 			fpsParam, edgexErr := params[i].ObjectValue()
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
-			fpsValue, ok := fpsParam.(map[string]interface{})["FPSValue"]
+			fpsValue, ok := fpsParam.(map[string]interface{})[FpsValue]
 			if !ok {
-				return edgexErr
+				return errors.NewCommonEdgeXWrapper(nil)
 			}
 			fps, err := strconv.ParseUint(fpsValue.(string), 0, 32)
 			if err != nil {
-				d.lc.Errorf("Could not parse FPSValue %d to uint32", fps)
+				d.lc.Errorf("Could not parse FpsValue %d to uint32", fps)
 				return err
 			}
 			var frames uint32
-			frames, err = device.SetFPS(uint32(fps))
+			frames, err = device.SetFps(uint32(fps))
 			if err != nil {
 				d.lc.Errorf("Could not set the FPS to %d for device %s due to error: %s", fps, deviceName, err)
 				return err
 			}
-			d.lc.Infof("Video FPS set to %d", frames)
+			d.lc.Infof("Device FPS set to %d", frames)
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
@@ -915,17 +921,4 @@ func (d *Driver) ValidateDevice(device models.Device) error {
 		return errors.NewCommonEdgeXWrapper(err)
 	}
 	return nil
-}
-
-func (d *Driver) getSupportedFormats(devPath string) {
-	cmd := exec.Command("v4l2-ctl", "-d", devPath, "--list-formats-ex")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return
-	}
-	props := strings.Split(string(output), "\n")
-	// var x map[string](map[string][]string)
-	for _, line := range props {
-		d.lc.Info(line)
-	}
 }
