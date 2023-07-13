@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "75aba832-57a8-4306-b0ce-c4cb2d4ba785",
+		"_postman_id": "57da9c2a-e1d1-4c55-9ee4-304b0f4a8c8d",
 		"name": "USB-Camera-Collection",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19151794"
 	},
 	"item": [
 		{
@@ -252,6 +253,55 @@
 			"response": []
 		},
 		{
+			"name": "Get supported fps formats",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FpsFormats",
+					"protocol": "http",
+					"host": [
+						"{{command_host}}"
+					],
+					"port": "{{command_port}}",
+					"path": [
+						"api",
+						"v3",
+						"device",
+						"name",
+						"{{camera_name}}",
+						"FpsFormats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get video crop capability",
 			"event": [
 				{
@@ -493,6 +543,53 @@
 						"StreamingStatus"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set FPS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"SetFps\":\n{\"FpsValue\":\"5\"}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFps",
+					"protocol": "http",
+					"host": [
+						"{{command_host}}"
+					],
+					"port": "{{command_port}}",
+					"path": [
+						"api",
+						"v3",
+						"device",
+						"name",
+						"{{camera_name}}",
+						"SetFps"
+					]
+				},
+				"description": "Test steps:\n1) Execute get data format api to get the current fps values for current stream resolution \n2) Execute Get fps formats to see possible values of fps for each given resolution \n3) Execute set fps api with valid input"
 			},
 			"response": []
 		},
