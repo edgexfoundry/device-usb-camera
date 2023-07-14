@@ -566,7 +566,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"SetFps\":\n{\"FpsValue\":\"5\"}\n}",
+					"raw": "{\"SetFps\":\n{\"FpsValueDenominator\":\"10\",\n{\"FpsValueNumerator\":\"1\"}\n}",
 					"options": {
 						"raw": {
 							"language": "json"
