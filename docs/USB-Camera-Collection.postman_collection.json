@@ -253,7 +253,7 @@
 			"response": []
 		},
 		{
-			"name": "Get supported fps formats",
+			"name": "Get supported framerate formats",
 			"event": [
 				{
 					"listen": "test",
@@ -547,7 +547,7 @@
 			"response": []
 		},
 		{
-			"name": "Set FPS",
+			"name": "Set Framerate",
 			"event": [
 				{
 					"listen": "test",
@@ -566,7 +566,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"SetFramerate\":\n{\"FpsValueDenominator\":\"10\",\n{\"FpsValueNumerator\":\"1\"}\n}",
+					"raw": "{\"SetFramerate\":\n{\"FpsValueDenominator\":\"10\",\n\"FpsValueNumerator\":\"1\"}\n}",
 					"options": {
 						"raw": {
 							"language": "json"
