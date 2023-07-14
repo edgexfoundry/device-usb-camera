@@ -362,22 +362,32 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
-			fpsValue, ok := fpsParam.(map[string]interface{})[FpsValue]
+			fpsValueDenominator, ok := fpsParam.(map[string]interface{})[FpsValueDenominator]
 			if !ok {
 				return errors.NewCommonEdgeXWrapper(nil)
 			}
-			fps, err := strconv.ParseUint(fpsValue.(string), 0, 32)
+			fpsDenominator, err := strconv.ParseUint(fpsValueDenominator.(string), 0, 32)
 			if err != nil {
-				d.lc.Errorf("Could not parse FpsValue %d to uint32", fps)
+				d.lc.Errorf("Could not parse denominator %d to uint32", fpsDenominator)
 				return err
 			}
-			var frames uint32
-			frames, err = device.SetFps(uint32(fps))
+			var fpsNumerator uint64
+			fpsValueNumerator, ok := fpsParam.(map[string]interface{})[FpsValueNumerator]
+			if !ok {
+				fpsNumerator = 1
+			} else {
+				fpsNumerator, err = strconv.ParseUint(fpsValueNumerator.(string), 0, 32)
+				if err != nil {
+					d.lc.Errorf("Could not parse numerator %d to uint32", fpsNumerator)
+					return err
+				}
+			}
+			fps, err := device.SetFps(uint32(fpsNumerator), uint32(fpsDenominator))
 			if err != nil {
-				d.lc.Errorf("Could not set the FPS to %d for device %s due to error: %s", fps, deviceName, err)
+				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err
 			}
-			d.lc.Infof("Device FPS set to %d", frames)
+			d.lc.Infof("Device FPS set to %s", fps)
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}

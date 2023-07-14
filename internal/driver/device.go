@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -93,48 +92,45 @@ func (dev *Device) StopStreaming() {
 }
 
 // SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
-func (dev *Device) SetFps(fps uint32) (uint32, error) {
+func (dev *Device) SetFps(fpsNumerator uint32, fpsDenominator uint32) (string, error) {
 	devPath := dev.paths[0]
 	device, err := device.Open(devPath)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	defer device.Close()
+	fps := fmt.Sprintf("%f", float32(fpsDenominator)/float32(fpsNumerator))
+
 	dataFormat, err := getDataFormat(device)
 	if err != nil {
-		return 0, nil
+		return "", nil
 	}
 	intervals := dataFormat.(DataFormat).FpsIntervals
 	foundFlag := false
 	for _, interval := range intervals {
-		if fps == interval {
+		if fpsNumerator == interval.Numerator && fpsDenominator == interval.Denominator {
 			foundFlag = true
 			break
 		}
 	}
 	if !foundFlag {
-		return 0, errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %d not supported for current image format.", fps), nil)
+		return "", errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %d not supported for current image format.", fps), nil)
 	}
 
 	// Update device fps for stream parameters
 	origStreamParam, err := device.GetStreamParam()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	origStreamParam.Capture.TimePerFrame.Denominator = fps
+	origStreamParam.Capture.TimePerFrame.Denominator = fpsDenominator
+	origStreamParam.Capture.TimePerFrame.Numerator = fpsNumerator
 	err = device.SetStreamParam(origStreamParam)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-
-	// Set device fps
-	err = device.SetFrameRate(fps)
-	if err != nil {
-		return 0, err
-	}
-
 	// Set input fps for ffmpeg to match new device fps
-	dev.updateFFmpegOptions(InputFps, strconv.Itoa(int(fps)))
+	dev.updateFFmpegOptions(InputFps, fps)
+	dev.updateFFmpegOptions(OutputFps, fps)
 	return fps, nil
 }
 

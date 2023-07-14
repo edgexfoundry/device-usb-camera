@@ -49,6 +49,8 @@ const (
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
 	VideoSetFps                 = "VIDEO_SET_FPS"
+	FpsValueDenominator         = "FpsValueDenominator"
+	FpsValueNumerator           = "FpsValueNumerator"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"
@@ -68,6 +70,9 @@ const (
 	// Input option names
 	InputPixelFormat = "InputPixelFormat"
 	InputFps         = "InputFps"
+
+	// Output option names
+	OutputFps = "OutputFps"
 
 	// udev device properties
 	UdevSerialShort = "ID_SERIAL_SHORT"
