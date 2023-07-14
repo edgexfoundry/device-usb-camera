@@ -283,7 +283,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FpsFormats",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FramerateFormats",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -295,7 +295,7 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"FpsFormats"
+						"FramerateFormats"
 					]
 				}
 			},
@@ -566,7 +566,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"SetFps\":\n{\"FpsValueDenominator\":\"10\",\n{\"FpsValueNumerator\":\"1\"}\n}",
+					"raw": "{\"SetFramerate\":\n{\"FpsValueDenominator\":\"10\",\n{\"FpsValueNumerator\":\"1\"}\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -574,7 +574,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFps",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFramerate",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -586,7 +586,7 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"SetFps"
+						"SetFramerate"
 					]
 				},
 				"description": "Test steps:\n1) Execute get data format api to get the current fps values for current stream resolution \n2) Execute Get fps formats to see possible values of fps for each given resolution \n3) Execute set fps api with valid input"

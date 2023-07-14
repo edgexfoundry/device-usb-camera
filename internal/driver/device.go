@@ -114,7 +114,7 @@ func (dev *Device) SetFps(fpsNumerator uint32, fpsDenominator uint32) (string, e
 		}
 	}
 	if !foundFlag {
-		return "", errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %d not supported for current image format.", fps), nil)
+		return "", errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %s not supported for current image format.", fps), nil)
 	}
 
 	// Update device fps for stream parameters
