@@ -48,7 +48,7 @@ const (
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
-	VideoSetFps                 = "VIDEO_SET_FPS"
+	VideoSetFramerate           = "VIDEO_SET_FRAMERATE"
 	FpsValueDenominator         = "FpsValueDenominator"
 	FpsValueNumerator           = "FpsValueNumerator"
 

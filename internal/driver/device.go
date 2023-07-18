@@ -128,9 +128,7 @@ func (dev *Device) SetFps(fpsNumerator uint32, fpsDenominator uint32) (string, e
 	if err != nil {
 		return "", err
 	}
-	// Set input fps for ffmpeg to match new device fps
-	dev.updateFFmpegOptions(InputFps, fps)
-	dev.updateFFmpegOptions(OutputFps, fps)
+
 	return fps, nil
 }
 

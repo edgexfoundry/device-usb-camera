@@ -357,7 +357,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			}
 		case VideoStopStreaming:
 			device.StopStreaming()
-		case VideoSetFps:
+		case VideoSetFramerate:
 			fpsParam, edgexErr := params[i].ObjectValue()
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -387,7 +387,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err
 			}
-			d.lc.Infof("Device FPS set to %s", fps)
+			d.lc.Infof("Device framerate set to %s", fps)
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}

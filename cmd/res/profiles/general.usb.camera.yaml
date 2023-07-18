@@ -90,7 +90,7 @@ deviceResources:
   - name: "SetFramerate"
     description: "Set the stream Framerate rate"
     attributes: 
-      { command: "VIDEO_SET_FPS"}
+      { command: "VIDEO_SET_FRAMERATE"}
     properties:
       valueType: "Object"
       readWrite: "W"
