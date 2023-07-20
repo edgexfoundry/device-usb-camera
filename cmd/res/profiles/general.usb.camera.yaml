@@ -94,6 +94,13 @@ deviceResources:
     properties:
       valueType: "Object"
       readWrite: "W"
+  - name: "GetFramerate"
+    description: "Get the stream Framerate rate"
+    attributes: 
+      { command: "VIDEO_GET_FRAMERATE"}
+    properties:
+      valueType: "Object"
+      readWrite: "R"
   - name: "StreamURI"
     description: "Get video-streaming URI."
     attributes:

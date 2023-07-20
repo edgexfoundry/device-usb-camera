@@ -226,20 +226,13 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	reqs []sdkModels.CommandRequest) ([]*sdkModels.CommandValue, error) {
 	d.lc.Debugf("Driver.HandleReadCommands: protocols: %v resource: %v attributes: %v", protocols,
 		reqs[0].DeviceResourceName, reqs[0].Attributes)
-	var err error
+	// var err error
 	var responses = make([]*sdkModels.CommandValue, len(reqs))
 
 	device, edgexErr := d.getDevice(deviceName)
 	if edgexErr != nil {
 		return responses, edgexErr
 	}
-	// currently defaults to using the first available stream
-	cameraDevice, err := usbdevice.Open(device.paths[0])
-	if err != nil {
-		return responses, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to open the underlying device at specified path %s", device.paths[0]), err)
-	}
-	defer cameraDevice.Close()
 
 	var cv *sdkModels.CommandValue
 	var data interface{}
@@ -251,6 +244,26 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
+
+		queryParams, edgexErr := getQueryParameters(req)
+		if edgexErr != nil {
+			return responses, errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		var path string
+		pathIndex := queryParams.Get("PathIndex")
+		if len(pathIndex) == 0 {
+			path = device.paths[0]
+		} else {
+			path = "/dev/video" + pathIndex
+		}
+
+		// currently defaults to using the first available stream
+		cameraDevice, err := usbdevice.Open(path)
+		if err != nil {
+			return responses, errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("failed to open the underlying device at specified path %s", path), err)
+		}
+		defer cameraDevice.Close()
 
 		switch command := fmt.Sprintf("%v", command); command {
 		case MetadataDeviceCapability:
@@ -270,7 +283,6 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			if edgexErr != nil {
 				return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 			}
-
 			index := queryParams.Get(InputIndex)
 			if len(index) == 0 {
 				return responses, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
@@ -288,6 +300,12 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case MetadataFpsFormats:
 			data, err = getSupportedIntervalFormats(cameraDevice)
+			if err != nil {
+				return responses, errorWrapper.CommandError(command, err)
+			}
+			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+		case VideoGetFramerate:
+			data, err = cameraDevice.GetFrameRate()
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
@@ -341,6 +359,26 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
+		queryParams, edgexErr := getQueryParameters(req)
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		var path string
+		pathIndex := queryParams.Get("PathIndex")
+		if len(pathIndex) == 0 {
+			path = device.paths[0]
+		} else {
+			path = "/dev/video" + pathIndex
+		}
+
+		// currently defaults to using the first available stream
+		cameraDevice, err := usbdevice.Open(path)
+		if err != nil {
+			return errors.NewCommonEdgeX(errors.KindServerError,
+				fmt.Sprintf("failed to open the underlying device at specified path %s", path), err)
+		}
+		defer cameraDevice.Close()
+
 		switch command {
 		case VideoStartStreaming:
 			options, edgexErr := params[i].ObjectValue()
@@ -382,7 +420,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					return err
 				}
 			}
-			fps, err := device.SetFps(uint32(fpsNumerator), uint32(fpsDenominator))
+			fps, err := device.SetFps(cameraDevice, uint32(fpsNumerator), uint32(fpsDenominator))
 			if err != nil {
 				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err

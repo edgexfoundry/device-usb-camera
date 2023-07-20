@@ -16,7 +16,7 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 
-	"github.com/vladimirvivien/go4vl/device"
+	usbdevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
 
 	"github.com/xfrr/goffmpeg/transcoder"
@@ -92,13 +92,7 @@ func (dev *Device) StopStreaming() {
 }
 
 // SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
-func (dev *Device) SetFps(fpsNumerator uint32, fpsDenominator uint32) (string, error) {
-	devPath := dev.paths[0]
-	device, err := device.Open(devPath)
-	if err != nil {
-		return "", err
-	}
-	defer device.Close()
+func (dev *Device) SetFps(device *usbdevice.Device, fpsNumerator uint32, fpsDenominator uint32) (string, error) {
 	fps := fmt.Sprintf("%f", float32(fpsDenominator)/float32(fpsNumerator))
 
 	dataFormat, err := getDataFormat(device)

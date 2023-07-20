@@ -9,6 +9,7 @@ package driver
 const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
+	Path                            = "Path"
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
@@ -31,9 +32,11 @@ const (
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
 
 	// Metadata descriptions
-	DescNotSpecified = "not specified"
-	DescTimePerFrame = "time per frame"
-	DescHighQuality  = "high quality"
+	DescNotSpecified    = "not specified"
+	DescTimePerFrame    = "time per frame"
+	DescHighQuality     = "high quality"
+	FpsValueDenominator = "FpsValueDenominator"
+	FpsValueNumerator   = "FpsValueNumerator"
 
 	// Command names
 	MetadataDeviceCapability    = "METADATA_DEVICE_CAPABILITY"
@@ -49,8 +52,7 @@ const (
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
 	VideoSetFramerate           = "VIDEO_SET_FRAMERATE"
-	FpsValueDenominator         = "FpsValueDenominator"
-	FpsValueNumerator           = "FpsValueNumerator"
+	VideoGetFramerate           = "VIDEO_GET_FRAMERATE"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "57da9c2a-e1d1-4c55-9ee4-304b0f4a8c8d",
+		"_postman_id": "0b15519a-2feb-4028-bdef-c91b7cb8b16c",
 		"name": "USB-Camera-Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "19151794"
@@ -283,7 +283,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FramerateFormats",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FramerateFormats?PathIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -296,6 +296,12 @@
 						"name",
 						"{{camera_name}}",
 						"FramerateFormats"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "0"
+						}
 					]
 				}
 			},
@@ -547,6 +553,61 @@
 			"response": []
 		},
 		{
+			"name": "Get Framerate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/GetFramerate?PathIndex=0",
+					"protocol": "http",
+					"host": [
+						"{{command_host}}"
+					],
+					"port": "{{command_port}}",
+					"path": [
+						"api",
+						"v3",
+						"device",
+						"name",
+						"{{camera_name}}",
+						"GetFramerate"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Set Framerate",
 			"event": [
 				{
@@ -566,7 +627,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"SetFramerate\":\n{\"FpsValueDenominator\":\"10\",\n\"FpsValueNumerator\":\"1\"}\n}",
+					"raw": "{\n\"SetFramerate\": {\n        \"FpsValueDenominator\":\"15\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -574,7 +635,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFramerate",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFramerate?PathIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -587,6 +648,12 @@
 						"name",
 						"{{camera_name}}",
 						"SetFramerate"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "0"
+						}
 					]
 				},
 				"description": "Test steps:\n1) Execute get data format api to get the current fps values for current stream resolution \n2) Execute Get fps formats to see possible values of fps for each given resolution \n3) Execute set fps api with valid input"
