@@ -252,7 +252,7 @@
 			"response": []
 		},
 		{
-			"name": "Get supported framerate formats",
+			"name": "Get supported frame rate formats",
 			"event": [
 				{
 					"listen": "test",
@@ -282,7 +282,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FramerateFormats?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRateFormats?PathIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -294,7 +294,7 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"FramerateFormats"
+						"FrameRateFormats"
 					],
 					"query": [
 						{
@@ -552,7 +552,7 @@
 			"response": []
 		},
 		{
-			"name": "Get Framerate",
+			"name": "Get Frame Rate",
 			"event": [
 				{
 					"listen": "test",
@@ -582,7 +582,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/GetFramerate?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/GetFrameRate?PathIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -594,7 +594,7 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"GetFramerate"
+						"GetFrameRate"
 					],
 					"query": [
 						{
@@ -607,7 +607,7 @@
 			"response": []
 		},
 		{
-			"name": "Set Framerate",
+			"name": "Set Frame Rate",
 			"event": [
 				{
 					"listen": "test",
@@ -626,7 +626,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"SetFramerate\": {\n        \"FpsValueDenominator\":\"15\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
+					"raw": "{\n\"SetFrameRate\": {\n        \"FpsValueDenominator\":\"15\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -634,7 +634,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFramerate?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFrameRate?PathIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -646,7 +646,7 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"SetFramerate"
+						"SetFrameRate"
 					],
 					"query": [
 						{

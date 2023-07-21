@@ -45,13 +45,13 @@ const (
 	MetadataCroppingAbility     = "METADATA_CROPPING_ABILITY"
 	MetadataStreamingParameters = "METADATA_STREAMING_PARAMETERS"
 	MetadataImageFormats        = "METADATA_IMAGE_FORMATS"
-	MetadataFramerateFormats    = "METADATA_FRAMERATE_FORMATS"
+	MetadataFrameRateFormats    = "METADATA_FRAMERATE_FORMATS"
 	VideoStartStreaming         = "VIDEO_START_STREAMING"
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
-	VideoSetFramerate           = "VIDEO_SET_FRAMERATE"
-	VideoGetFramerate           = "VIDEO_GET_FRAMERATE"
+	VideoSetFrameRate           = "VIDEO_SET_FRAMERATE"
+	VideoGetFrameRate           = "VIDEO_GET_FRAMERATE"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

@@ -298,13 +298,13 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataFramerateFormats:
+		case MetadataFrameRateFormats:
 			data, err = getSupportedIntervalFormats(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VideoGetFramerate:
+		case VideoGetFrameRate:
 			data, err = cameraDevice.GetFrameRate()
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
@@ -395,7 +395,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			}
 		case VideoStopStreaming:
 			device.StopStreaming()
-		case VideoSetFramerate:
+		case VideoSetFrameRate:
 			fpsParam, edgexErr := params[i].ObjectValue()
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -425,7 +425,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err
 			}
-			d.lc.Infof("Device framerate set to %s", fps)
+			d.lc.Infof("Device frame rate set to %s", fps)
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
