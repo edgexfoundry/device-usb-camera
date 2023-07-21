@@ -298,7 +298,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				return responses, errorWrapper.CommandError(command, err)
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataFpsFormats:
+		case MetadataFramerateFormats:
 			data, err = getSupportedIntervalFormats(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)

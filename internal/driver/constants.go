@@ -26,17 +26,16 @@ const (
 	Stream                          = "stream"
 	PrefixInput                     = "Input"
 	PrefixOutput                    = "Output"
-	FpsValue                        = "FpsValue"
+	FpsValueDenominator             = "FpsValueDenominator"
+	FpsValueNumerator               = "FpsValueNumerator"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
 
 	// Metadata descriptions
-	DescNotSpecified    = "not specified"
-	DescTimePerFrame    = "time per frame"
-	DescHighQuality     = "high quality"
-	FpsValueDenominator = "FpsValueDenominator"
-	FpsValueNumerator   = "FpsValueNumerator"
+	DescNotSpecified = "not specified"
+	DescTimePerFrame = "time per frame"
+	DescHighQuality  = "high quality"
 
 	// Command names
 	MetadataDeviceCapability    = "METADATA_DEVICE_CAPABILITY"
@@ -46,7 +45,7 @@ const (
 	MetadataCroppingAbility     = "METADATA_CROPPING_ABILITY"
 	MetadataStreamingParameters = "METADATA_STREAMING_PARAMETERS"
 	MetadataImageFormats        = "METADATA_IMAGE_FORMATS"
-	MetadataFpsFormats          = "METADATA_FPS_FORMATS"
+	MetadataFramerateFormats    = "METADATA_FRAMERATE_FORMATS"
 	VideoStartStreaming         = "VIDEO_START_STREAMING"
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"

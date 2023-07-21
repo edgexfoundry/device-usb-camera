@@ -2,8 +2,7 @@
 	"info": {
 		"_postman_id": "0b15519a-2feb-4028-bdef-c91b7cb8b16c",
 		"name": "USB-Camera-Collection",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "19151794"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{

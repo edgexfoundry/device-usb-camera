@@ -47,7 +47,7 @@ deviceResources:
   - name: "FramerateFormats"
     description: "Enumerate supported framerate settings, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enum-frameintervals.html"
     attributes:
-      { command: "METADATA_FPS_FORMATS" }
+      { command: "METADATA_FRAMERATE_FORMATS" }
     properties:
       valueType: "Object"
       readWrite: "R"
