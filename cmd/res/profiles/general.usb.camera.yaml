@@ -88,14 +88,14 @@ deviceResources:
       readWrite: "W"
       defaultValue: "false"
   - name: "SetFrameRate"
-    description: "Set the stream frame rate rate"
+    description: "Set the stream frame rate"
     attributes: 
       { command: "VIDEO_SET_FRAMERATE"}
     properties:
       valueType: "Object"
       readWrite: "W"
   - name: "GetFrameRate"
-    description: "Get the stream frame rate rate"
+    description: "Get the stream frame rate"
     attributes: 
       { command: "VIDEO_GET_FRAMERATE"}
     properties:
