@@ -370,6 +370,16 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		} else {
 			path = "/dev/video" + pathIndex
 		}
+		pathExists := false
+		for _, currentPath := range device.paths {
+			if currentPath == path {
+				pathExists = true
+				break
+			}
+		}
+		if !pathExists {
+			return errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Path Index %s not valid for selected device %s", path, deviceName), nil)
+		}
 
 		// currently defaults to using the first available stream
 		cameraDevice, err := usbdevice.Open(path)
