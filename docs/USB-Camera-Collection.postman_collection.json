@@ -246,6 +246,12 @@
 						"name",
 						"{{camera_name}}",
 						"DataFormat"
+					],
+                    "query": [
+						{
+							"key": "PathIndex",
+							"value": "0"
+						}
 					]
 				}
 			},
