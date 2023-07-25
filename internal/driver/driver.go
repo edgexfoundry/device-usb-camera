@@ -260,7 +260,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			if pathIndexConv >= len(device.paths) {
 				return nil, errors.NewCommonEdgeX(errors.KindIOError,
-					fmt.Sprintf("PathIndex %d exceeds array bounds", pathIndexConv), nil)
+					fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 			}
 			path = device.paths[pathIndexConv]
 		}
