@@ -254,17 +254,15 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 		if len(pathIndex) == 0 {
 			path = device.paths[0]
 		} else {
-			path = "/dev/video" + pathIndex
-		}
-		pathExists := false
-		for _, currentPath := range device.paths {
-			if currentPath == path {
-				pathExists = true
-				break
+			pathIndexConv, err := strconv.Atoi(pathIndex)
+			if err != nil {
+				return nil, err
 			}
-		}
-		if !pathExists {
-			return nil, errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Path Index %s not valid for selected device %s", path, deviceName), nil)
+			if pathIndexConv >= len(device.paths) {
+				return nil, errors.NewCommonEdgeX(errors.KindIOError,
+					fmt.Sprintf("PathIndex %d exceeds array bounds", pathIndexConv), nil)
+			}
+			path = device.paths[pathIndexConv]
 		}
 
 		// currently defaults to using the first available stream
@@ -378,17 +376,15 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		if len(pathIndex) == 0 {
 			path = device.paths[0]
 		} else {
-			path = "/dev/video" + pathIndex
-		}
-		pathExists := false
-		for _, currentPath := range device.paths {
-			if currentPath == path {
-				pathExists = true
-				break
+			pathIndexConv, err := strconv.Atoi(pathIndex)
+			if err != nil {
+				return err
 			}
-		}
-		if !pathExists {
-			return errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Path Index %s not valid for selected device %s", path, deviceName), nil)
+			if pathIndexConv >= len(device.paths) {
+				return errors.NewCommonEdgeX(errors.KindIOError,
+					fmt.Sprintf("PathIndex %d exceeds array bounds", pathIndexConv), nil)
+			}
+			path = device.paths[pathIndexConv]
 		}
 
 		// currently defaults to using the first available stream

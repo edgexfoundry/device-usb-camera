@@ -94,7 +94,6 @@ func (dev *Device) StopStreaming() {
 // SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
 func (dev *Device) SetFps(device *usbdevice.Device, fpsNumerator uint32, fpsDenominator uint32) (string, error) {
 	fps := fmt.Sprintf("%f", float32(fpsDenominator)/float32(fpsNumerator))
-
 	dataFormat, err := getDataFormat(device)
 	if err != nil {
 		return "", nil
