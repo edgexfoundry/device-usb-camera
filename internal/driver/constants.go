@@ -29,6 +29,7 @@ const (
 	FpsValueDenominator             = "FpsValueDenominator"
 	FpsValueNumerator               = "FpsValueNumerator"
 	URLRawQuery                     = "urlRawQuery"
+	PathIndex                       = "PathIndex"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"

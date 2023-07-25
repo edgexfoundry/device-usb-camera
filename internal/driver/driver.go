@@ -249,8 +249,12 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 		if edgexErr != nil {
 			return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
+
+		// flush out the query so it resets with new calls
+		req.Attributes[UrlRawQuery] = ""
+
 		var path string
-		pathIndex := queryParams.Get("PathIndex")
+		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
 			path = device.paths[0]
 		} else {
@@ -348,8 +352,6 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			return responses, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
 		}
 		responses[i] = cv
-		// flush out the query so it resets with new calls
-		req.Attributes[UrlRawQuery] = ""
 	}
 
 	return responses, nil
@@ -373,8 +375,12 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
+
+		// flush out the query so it resets with new calls
+		req.Attributes[UrlRawQuery] = ""
+
 		var path string
-		pathIndex := queryParams.Get("PathIndex")
+		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
 			path = device.paths[0]
 		} else {
@@ -447,8 +453,6 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		default:
 			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 		}
-		// flush out the query so it resets with new calls
-		req.Attributes[UrlRawQuery] = ""
 	}
 
 	return nil
