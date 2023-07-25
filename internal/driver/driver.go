@@ -250,8 +250,9 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
 
-		// flush out the query so it resets with new calls
-		req.Attributes[UrlRawQuery] = ""
+		if _, ok := req.Attributes[UrlRawQuery]; ok {
+			req.Attributes[UrlRawQuery] = ""
+		}
 
 		var path string
 		pathIndex := queryParams.Get(PathIndex)
@@ -291,10 +292,6 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
 		case MetadataCameraStatus:
-			queryParams, edgexErr := getQueryParameters(req)
-			if edgexErr != nil {
-				return responses, errors.NewCommonEdgeXWrapper(edgexErr)
-			}
 			index := queryParams.Get(InputIndex)
 			if len(index) == 0 {
 				return responses, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
@@ -377,7 +374,9 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		}
 
 		// flush out the query so it resets with new calls
-		req.Attributes[UrlRawQuery] = ""
+		if _, ok := req.Attributes[UrlRawQuery]; ok {
+			req.Attributes[UrlRawQuery] = ""
+		}
 
 		var path string
 		pathIndex := queryParams.Get(PathIndex)
