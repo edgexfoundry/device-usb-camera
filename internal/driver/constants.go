@@ -9,7 +9,6 @@ package driver
 const (
 	Command                         = "command"
 	UsbProtocol                     = "USB"
-	Path                            = "Path"
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
@@ -28,7 +27,6 @@ const (
 	PrefixOutput                    = "Output"
 	FpsValueDenominator             = "FpsValueDenominator"
 	FpsValueNumerator               = "FpsValueNumerator"
-	URLRawQuery                     = "urlRawQuery"
 	PathIndex                       = "PathIndex"
 
 	// API route specific to Device Service
@@ -72,10 +70,6 @@ const (
 
 	// Input option names
 	InputPixelFormat = "InputPixelFormat"
-	InputFps         = "InputFps"
-
-	// Output option names
-	OutputFps = "OutputFps"
 
 	// udev device properties
 	UdevSerialShort = "ID_SERIAL_SHORT"

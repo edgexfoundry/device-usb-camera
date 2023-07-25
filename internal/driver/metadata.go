@@ -101,35 +101,35 @@ func getInputStatus(d *usbdevice.Device, index string) (uint32, error) {
 }
 
 func getDataFormat(d *usbdevice.Device) (interface{}, error) {
-	fmt, err := d.GetPixFormat()
+	pixFmt, err := d.GetPixFormat()
 	if err != nil {
 		return nil, err
 	}
 
 	result := DataFormat{}
-	result.Height = fmt.Height
-	result.Width = fmt.Width
-	result.PixelFormat = v4l2.PixelFormats[fmt.PixelFormat]
-	result.Field = v4l2.Fields[fmt.Field]
-	result.BytesPerLine = fmt.BytesPerLine
-	result.SizeImage = fmt.SizeImage
-	result.Colorspace = v4l2.Colorspaces[fmt.Colorspace]
+	result.Height = pixFmt.Height
+	result.Width = pixFmt.Width
+	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
+	result.Field = v4l2.Fields[pixFmt.Field]
+	result.BytesPerLine = pixFmt.BytesPerLine
+	result.SizeImage = pixFmt.SizeImage
+	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
 
-	xfunc := v4l2.XferFunctions[fmt.XferFunc]
-	if fmt.XferFunc == v4l2.XferFuncDefault {
-		xfunc = v4l2.XferFunctions[v4l2.ColorspaceToXferFunc(fmt.XferFunc)]
+	xfunc := v4l2.XferFunctions[pixFmt.XferFunc]
+	if pixFmt.XferFunc == v4l2.XferFuncDefault {
+		xfunc = v4l2.XferFunctions[v4l2.ColorspaceToXferFunc(pixFmt.XferFunc)]
 	}
 	result.XferFunc = xfunc
 
-	ycbcr := v4l2.YCbCrEncodings[fmt.YcbcrEnc]
-	if fmt.YcbcrEnc == v4l2.YCbCrEncodingDefault {
-		ycbcr = v4l2.YCbCrEncodings[v4l2.ColorspaceToYCbCrEnc(fmt.YcbcrEnc)]
+	ycbcr := v4l2.YCbCrEncodings[pixFmt.YcbcrEnc]
+	if pixFmt.YcbcrEnc == v4l2.YCbCrEncodingDefault {
+		ycbcr = v4l2.YCbCrEncodings[v4l2.ColorspaceToYCbCrEnc(pixFmt.YcbcrEnc)]
 	}
 	result.YcbcrEnc = ycbcr
 
-	quant := v4l2.Quantizations[fmt.Quantization]
-	if fmt.Quantization == v4l2.QuantizationDefault {
-		if v4l2.IsPixYUVEncoded(fmt.PixelFormat) {
+	quant := v4l2.Quantizations[pixFmt.Quantization]
+	if pixFmt.Quantization == v4l2.QuantizationDefault {
+		if v4l2.IsPixYUVEncoded(pixFmt.PixelFormat) {
 			quant = v4l2.Quantizations[v4l2.QuantizationLimitedRange]
 		} else {
 			quant = v4l2.Quantizations[v4l2.QuantizationFullRange]
@@ -141,8 +141,8 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	for {
 		fd := d.Fd()
 		index := uint32(intervalCount)
-		encoding := fmt.PixelFormat
-		if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, fmt.Width, fmt.Height); exit == nil {
+		encoding := pixFmt.PixelFormat
+		if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); exit == nil {
 			intervalCount += 1
 			intervals = append(intervals, interval.Interval.Max)
 		} else {

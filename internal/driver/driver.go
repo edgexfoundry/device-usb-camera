@@ -32,7 +32,7 @@ import (
 	"github.com/edgexfoundry/device-sdk-go/v3/pkg/interfaces"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
 
-	usbdevice "github.com/vladimirvivien/go4vl/device"
+	usbDevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -253,10 +253,10 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 		// flush out the query so it resets with new calls
 		req.Attributes[UrlRawQuery] = ""
 
-		var path string
+		var videoPath string
 		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
-			path = device.paths[0]
+			videoPath = device.paths[0]
 		} else {
 			pathIndexConv, err := strconv.Atoi(pathIndex)
 			if err != nil {
@@ -266,14 +266,14 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				return nil, errors.NewCommonEdgeX(errors.KindIOError,
 					fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 			}
-			path = device.paths[pathIndexConv]
+			videoPath = device.paths[pathIndexConv]
 		}
 
 		// currently defaults to using the first available stream
-		cameraDevice, err := usbdevice.Open(path)
+		cameraDevice, err := usbDevice.Open(videoPath)
 		if err != nil {
 			return responses, errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to open the underlying device at specified path %s", path), err)
+				fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
 		}
 		defer cameraDevice.Close()
 
@@ -379,10 +379,10 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		// flush out the query so it resets with new calls
 		req.Attributes[UrlRawQuery] = ""
 
-		var path string
+		var videoPath string
 		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
-			path = device.paths[0]
+			videoPath = device.paths[0]
 		} else {
 			pathIndexConv, err := strconv.Atoi(pathIndex)
 			if err != nil {
@@ -390,16 +390,16 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			}
 			if pathIndexConv >= len(device.paths) {
 				return errors.NewCommonEdgeX(errors.KindIOError,
-					fmt.Sprintf("PathIndex %d exceeds array bounds", pathIndexConv), nil)
+					fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 			}
-			path = device.paths[pathIndexConv]
+			videoPath = device.paths[pathIndexConv]
 		}
 
 		// currently defaults to using the first available stream
-		cameraDevice, err := usbdevice.Open(path)
+		cameraDevice, err := usbDevice.Open(videoPath)
 		if err != nil {
 			return errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to open the underlying device at specified path %s", path), err)
+				fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
 		}
 		defer cameraDevice.Close()
 
@@ -496,15 +496,15 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]models.Protoc
 
 // addDeviceInternal attempts to add a device to the device service's active devices
 func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]models.ProtocolProperties) (*Device, error) {
-	path, err := d.getPaths(protocols)
+	paths, err := d.getPaths(protocols)
 	if err != nil {
 		return nil, err
 	}
 
-	_, sn, error := getUSBDeviceIdInfo(path[0])
-	if err != nil {
+	_, sn, edgexErr := getUSBDeviceIdInfo(paths[0])
+	if edgexErr != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("could not find the serial number of the device %s", deviceName), error)
+			fmt.Sprintf("could not find the serial number of the device %s", deviceName), edgexErr)
 	}
 	for _, ad := range d.activeDevices {
 		if ad.serialNumber == sn {
@@ -594,7 +594,7 @@ func (d *Driver) Discover() error {
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
 	currentDevices := d.cachedDeviceMap()
 
-	allDevices, _ := usbdevice.GetAllDevicePaths()
+	allDevices, _ := usbDevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
 			cn, sn, err := getUSBDeviceIdInfo(fdPath)
@@ -736,7 +736,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		d.lc.Warnf("there is no device resource representing StreamingStatus of the device %s, so the StreamingStatus won't be published automatically", name)
 	}
 
-	cameraDevice, err := usbdevice.Open(fdPath)
+	cameraDevice, err := usbDevice.Open(fdPath)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", fdPath), err)
@@ -914,7 +914,7 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 }
 
 func (d *Driver) isVideoCaptureDevice(path string) bool {
-	cameraDevice, err := usbdevice.Open(path)
+	cameraDevice, err := usbDevice.Open(path)
 	if err != nil {
 		d.lc.Debugf("there is no USB camera at specified path %s, error: %s", path, err.Error())
 		return false
@@ -927,7 +927,7 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 func (d *Driver) updateDevicePaths(device models.Device) {
 	var init []string
 	device.Protocols[UsbProtocol][Paths] = init
-	allDevices, _ := usbdevice.GetAllDevicePaths()
+	allDevices, _ := usbDevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
 			cn, sn, err := getUSBDeviceIdInfo(fdPath)
