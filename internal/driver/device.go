@@ -92,15 +92,15 @@ func (dev *Device) StopStreaming() {
 }
 
 // SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
-func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, intervalNumerator uint32, intervalDenominator uint32) (string, error) {
-	fps := fmt.Sprintf("%f", float32(intervalDenominator)/float32(intervalNumerator))
+func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator uint32, frameRateDenominator uint32) (string, error) {
+	fps := fmt.Sprintf("%f", float32(frameRateNumerator)/float32(frameRateDenominator))
 	dataFormat, err := getDataFormat(usbDevice)
 	if err != nil {
 		return "", err
 	}
 	found := false
 	for _, frameRate := range dataFormat.(DataFormat).FrameRates {
-		if intervalNumerator == frameRate.Denominator && intervalDenominator == frameRate.Numerator {
+		if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
 			found = true
 			break
 		}
@@ -114,8 +114,10 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, intervalNumerator u
 	if err != nil {
 		return "", err
 	}
-	origStreamParam.Capture.TimePerFrame.Denominator = intervalDenominator
-	origStreamParam.Capture.TimePerFrame.Numerator = intervalNumerator
+	// this swaps user-friendly frame rate (frames per second) to
+	// the internally track frame interval (seconds per frame)
+	origStreamParam.Capture.TimePerFrame.Denominator = frameRateNumerator
+	origStreamParam.Capture.TimePerFrame.Numerator = frameRateDenominator
 	err = usbDevice.SetStreamParam(origStreamParam)
 	if err != nil {
 		return "", err

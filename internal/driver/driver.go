@@ -241,7 +241,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 					req.DeviceResourceName), nil)
 		}
 
-		cv, err := d.SelectReadCommands(device, req, command)
+		cv, err := d.ExecuteReadCommands(device, req, command)
 		if err != nil {
 			return responses, err
 		}
@@ -254,7 +254,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	return responses, nil
 }
 
-func (d *Driver) SelectReadCommands(device *Device, req sdkModels.CommandRequest, command interface{}) (*sdkModels.CommandValue, error) {
+func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandRequest, command interface{}) (*sdkModels.CommandValue, error) {
 	var cv *sdkModels.CommandValue
 	var data interface{}
 	errorWrapper := EdgeXErrorWrapper{}
@@ -364,7 +364,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					req.DeviceResourceName), nil)
 		}
 
-		err := d.SelectWriteCommands(device, req, i, params, command)
+		err := d.ExecuteWriteCommands(device, req, i, params, command)
 		if err != nil {
 			return err
 		}
@@ -377,7 +377,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	return nil
 }
 
-func (d *Driver) SelectWriteCommands(device *Device, req sdkModels.CommandRequest, i int, params []*sdkModels.CommandValue, command interface{}) error {
+func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, i int, params []*sdkModels.CommandValue, command interface{}) error {
 	queryParams, edgexErr := getQueryParameters(req)
 	if edgexErr != nil {
 		return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -412,31 +412,31 @@ func (d *Driver) SelectWriteCommands(device *Device, req sdkModels.CommandReques
 	case VideoStopStreaming:
 		device.StopStreaming()
 	case VideoSetFrameRate:
-		intervalParam, edgexErr := params[i].ObjectValue()
+		frameRateParam, edgexErr := params[i].ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
-		intervalValueDenominator, ok := intervalParam.(map[string]interface{})[FpsValueNumerator]
+		frameRateValueDenominator, ok := frameRateParam.(map[string]interface{})[FrameRateValueDenominator]
 		if !ok {
 			return errors.NewCommonEdgeXWrapper(nil)
 		}
-		intervalDenominator, err := strconv.ParseUint(intervalValueDenominator.(string), 0, 32)
+		frameRateDenominator, err := strconv.ParseUint(frameRateValueDenominator.(string), 0, 32)
 		if err != nil {
-			d.lc.Errorf("Could not parse denominator %d to uint32", intervalDenominator)
+			d.lc.Errorf("Could not parse denominator %d to uint32", frameRateDenominator)
 			return err
 		}
-		var intervalNumerator uint64
-		intervalValueNumerator, ok := intervalParam.(map[string]interface{})[FpsValueDenominator]
+		var frameRateNumerator uint64
+		frameRateValueNumerator, ok := frameRateParam.(map[string]interface{})[FrameRateValueDenominator]
 		if !ok {
-			intervalNumerator = 1
+			frameRateNumerator = 1
 		} else {
-			intervalNumerator, err = strconv.ParseUint(intervalValueNumerator.(string), 0, 32)
+			frameRateNumerator, err = strconv.ParseUint(frameRateValueNumerator.(string), 0, 32)
 			if err != nil {
-				d.lc.Errorf("Could not parse numerator %d to uint32", intervalNumerator)
+				d.lc.Errorf("Could not parse numerator %d to uint32", frameRateNumerator)
 				return err
 			}
 		}
-		fps, err := device.SetFrameRate(cameraDevice, uint32(intervalNumerator), uint32(intervalDenominator))
+		fps, err := device.SetFrameRate(cameraDevice, uint32(frameRateNumerator), uint32(frameRateDenominator))
 		if err != nil {
 			d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, device.name, err)
 			return err
