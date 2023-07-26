@@ -34,7 +34,7 @@ type DataFormat struct {
 	XferFunc     string
 	YcbcrEnc     string
 	Quantization string
-	FpsIntervals []v4l2.Fract
+	FrameRates   []v4l2.Fract
 }
 
 type CaptureMode struct {
@@ -137,14 +137,14 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	}
 	result.Quantization = quant
 	intervalCount := 0
-	var intervals []v4l2.Fract
+	var frameRates []v4l2.Fract
 	for {
 		fd := d.Fd()
 		index := uint32(intervalCount)
 		encoding := pixFmt.PixelFormat
 		if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); err == nil {
 			intervalCount += 1
-			intervals = append(intervals, v4l2.Fract{
+			frameRates = append(frameRates, v4l2.Fract{
 				Denominator: interval.Interval.Max.Numerator,
 				Numerator:   interval.Interval.Max.Denominator,
 			})
@@ -152,7 +152,7 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 			break
 		}
 	}
-	result.FpsIntervals = intervals
+	result.FrameRates = frameRates
 
 	return result, nil
 }

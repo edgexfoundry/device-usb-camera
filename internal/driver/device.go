@@ -99,7 +99,7 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, intervalNumerator u
 		return "", err
 	}
 	found := false
-	for _, frameRate := range dataFormat.(DataFormat).FpsIntervals {
+	for _, frameRate := range dataFormat.(DataFormat).FrameRates {
 		if intervalNumerator == frameRate.Denominator && intervalDenominator == frameRate.Numerator {
 			found = true
 			break
