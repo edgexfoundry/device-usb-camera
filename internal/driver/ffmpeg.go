@@ -127,7 +127,7 @@ func setupFFmpegOptions(dev *Device, opts interface{}, attr map[string]interface
 
 	// obtain default FFmpeg options defined in resource attributes
 	for name, value := range attr {
-		if name == Command {
+		if name == SetFunction {
 			continue
 		}
 		optName := strings.ReplaceAll(name, "default", "")

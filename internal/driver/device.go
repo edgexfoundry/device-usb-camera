@@ -92,32 +92,31 @@ func (dev *Device) StopStreaming() {
 }
 
 // SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
-func (dev *Device) SetFps(device *usbdevice.Device, fpsNumerator uint32, fpsDenominator uint32) (string, error) {
+func (dev *Device) SetFps(usbdevice *usbdevice.Device, fpsNumerator uint32, fpsDenominator uint32) (string, error) {
 	fps := fmt.Sprintf("%f", float32(fpsDenominator)/float32(fpsNumerator))
-	dataFormat, err := getDataFormat(device)
+	dataFormat, err := getDataFormat(usbdevice)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
-	intervals := dataFormat.(DataFormat).FpsIntervals
-	foundFlag := false
-	for _, interval := range intervals {
+	found := false
+	for _, interval := range dataFormat.(DataFormat).FpsIntervals {
 		if fpsNumerator == interval.Numerator && fpsDenominator == interval.Denominator {
-			foundFlag = true
+			found = true
 			break
 		}
 	}
-	if !foundFlag {
+	if !found {
 		return "", errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %s not supported for current image format.", fps), nil)
 	}
 
 	// Update device fps for stream parameters
-	origStreamParam, err := device.GetStreamParam()
+	origStreamParam, err := usbdevice.GetStreamParam()
 	if err != nil {
 		return "", err
 	}
 	origStreamParam.Capture.TimePerFrame.Denominator = fpsDenominator
 	origStreamParam.Capture.TimePerFrame.Numerator = fpsNumerator
-	err = device.SetStreamParam(origStreamParam)
+	err = usbdevice.SetStreamParam(origStreamParam)
 	if err != nil {
 		return "", err
 	}

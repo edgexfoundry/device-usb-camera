@@ -7,7 +7,8 @@
 package driver
 
 const (
-	Command                         = "command"
+	GetFunction                     = "getFunction"
+	SetFunction                     = "setFunction"
 	UsbProtocol                     = "USB"
 	Paths                           = "Paths"
 	SerialNumber                    = "SerialNumber"
@@ -50,8 +51,8 @@ const (
 	VideoStopStreaming          = "VIDEO_STOP_STREAMING"
 	VideoStreamUri              = "VIDEO_STREAM_URI"
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
-	VideoSetFrameRate           = "VIDEO_SET_FRAMERATE"
 	VideoGetFrameRate           = "VIDEO_GET_FRAMERATE"
+	VideoSetFrameRate           = "VIDEO_SET_FRAMERATE"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

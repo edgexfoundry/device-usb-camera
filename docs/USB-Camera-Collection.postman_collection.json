@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "0b15519a-2feb-4028-bdef-c91b7cb8b16c",
+		"_postman_id": "1cd1947d-95fa-456b-ae95-54b38b90723d",
 		"name": "USB-Camera-Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -233,7 +233,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/DataFormat",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/DataFormat?PathIndex={{path_index}}",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -247,10 +247,10 @@
 						"{{camera_name}}",
 						"DataFormat"
 					],
-                    "query": [
+					"query": [
 						{
 							"key": "PathIndex",
-							"value": "0"
+							"value": "{{path_index}}"
 						}
 					]
 				}
@@ -288,7 +288,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRateFormats?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRateFormats?PathIndex={{path_index}}",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -305,7 +305,7 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "0"
+							"value": "{{path_index}}"
 						}
 					]
 				}
@@ -588,7 +588,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/GetFrameRate?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate?PathIndex={{path_index}}",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -600,12 +600,12 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"GetFrameRate"
+						"FrameRate"
 					],
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "0"
+							"value": "{{path_index}}"
 						}
 					]
 				}
@@ -632,7 +632,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"SetFrameRate\": {\n        \"FpsValueDenominator\":\"15\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
+					"raw": "{\n\"FrameRate\": {\n        \"FpsValueDenominator\":\"30\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -640,7 +640,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/SetFrameRate?PathIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate?PathIndex={{path_index}}",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -652,12 +652,12 @@
 						"device",
 						"name",
 						"{{camera_name}}",
-						"SetFrameRate"
+						"FrameRate"
 					],
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "0"
+							"value": "{{path_index}}"
 						}
 					]
 				},

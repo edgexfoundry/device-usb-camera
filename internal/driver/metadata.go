@@ -142,7 +142,7 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 		fd := d.Fd()
 		index := uint32(intervalCount)
 		encoding := pixFmt.PixelFormat
-		if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); exit == nil {
+		if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); err == nil {
 			intervalCount += 1
 			intervals = append(intervals, interval.Interval.Max)
 		} else {

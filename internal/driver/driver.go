@@ -226,7 +226,6 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	reqs []sdkModels.CommandRequest) ([]*sdkModels.CommandValue, error) {
 	d.lc.Debugf("Driver.HandleReadCommands: protocols: %v resource: %v attributes: %v", protocols,
 		reqs[0].DeviceResourceName, reqs[0].Attributes)
-	// var err error
 	var responses = make([]*sdkModels.CommandValue, len(reqs))
 
 	device, edgexErr := d.getDevice(deviceName)
@@ -238,7 +237,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	var data interface{}
 	errorWrapper := EdgeXErrorWrapper{}
 	for i, req := range reqs {
-		command, ok := req.Attributes[Command]
+		command, ok := req.Attributes[GetFunction]
 		if !ok {
 			return responses, errors.NewCommonEdgeX(errors.KindContractInvalid,
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
@@ -362,7 +361,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	}
 
 	for i, req := range reqs {
-		command, ok := req.Attributes[Command]
+		command, ok := req.Attributes[SetFunction]
 		if !ok {
 			return errors.NewCommonEdgeX(errors.KindContractInvalid,
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
@@ -381,6 +380,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		var videoPath string
 		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
+			// currently defaults to using the first available stream
 			videoPath = device.paths[0]
 		} else {
 			pathIndexConv, err := strconv.Atoi(pathIndex)
@@ -394,7 +394,6 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			videoPath = device.paths[pathIndexConv]
 		}
 
-		// currently defaults to using the first available stream
 		cameraDevice, err := usbDevice.Open(videoPath)
 		if err != nil {
 			return errors.NewCommonEdgeX(errors.KindServerError,
@@ -725,7 +724,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 
 	var streamingStatusResourceName string
 	for _, r := range profile.DeviceResources {
-		command, ok := r.Attributes[Command]
+		command, ok := r.Attributes[GetFunction]
 		if ok && command == VideoStreamingStatus {
 			streamingStatusResourceName = r.Name
 			break
