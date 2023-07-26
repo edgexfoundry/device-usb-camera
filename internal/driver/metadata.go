@@ -144,7 +144,10 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 		encoding := pixFmt.PixelFormat
 		if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); err == nil {
 			intervalCount += 1
-			intervals = append(intervals, interval.Interval.Max)
+			intervals = append(intervals, v4l2.Fract{
+				Denominator: interval.Interval.Max.Numerator,
+				Numerator:   interval.Interval.Max.Denominator,
+			})
 		} else {
 			break
 		}
@@ -214,29 +217,18 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 	return r, nil
 }
 
-func getSupportedIntervalFormats(d *usbdevice.Device) (interface{}, error) {
+func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 	descs, err := d.GetFormatDescriptions()
 	if err != nil {
 		return nil, err
 	}
-	type intervalsInfo struct {
-		Index       uint32
-		FrameType   uint32
-		PixelFormat uint32
-		Height      uint32
-		Width       uint32
-		Interval    []v4l2.Fract
-	}
-	type frameFormat struct {
-		Description string
-		Intervals   []intervalsInfo
-	}
+
 	type result struct {
-		IntervalFormats []frameFormat
+		FrameRateFormats []FrameRateFormat
 	}
 	var r result
 	for _, desc := range descs {
-		var format frameFormat
+		var format FrameRateFormat
 		format.Description = desc.String()
 		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
@@ -244,28 +236,31 @@ func getSupportedIntervalFormats(d *usbdevice.Device) (interface{}, error) {
 		}
 		for _, frameSize := range fss {
 			intervalCount := 0
-			var frameIntervals intervalsInfo
+			var frameInfo FrameInfo
 			encoding := frameSize.PixelFormat
 			height := frameSize.Size.MaxHeight
 			width := frameSize.Size.MaxWidth
-			frameIntervals.FrameType = frameSize.Type
-			frameIntervals.Height = height
-			frameIntervals.Width = width
-			frameIntervals.PixelFormat = encoding
-			frameIntervals.Index = frameSize.Index
+			frameInfo.FrameType = frameSize.Type
+			frameInfo.Height = height
+			frameInfo.Width = width
+			frameInfo.PixelFormat = encoding
+			frameInfo.Index = frameSize.Index
 			for {
 				fd := d.Fd()
 				index := uint32(intervalCount)
-				if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); exit == nil {
-					frameIntervals.Interval = append(frameIntervals.Interval, interval.Interval.Max)
+				if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); err == nil {
+					frameInfo.Rates = append(frameInfo.Rates, v4l2.Fract{
+						Denominator: interval.Interval.Max.Numerator,
+						Numerator:   interval.Interval.Max.Denominator,
+					})
 					intervalCount += 1
 				} else {
 					break
 				}
 			}
-			format.Intervals = append(format.Intervals, frameIntervals)
+			format.FrameRates = append(format.FrameRates, frameInfo)
 		}
-		r.IntervalFormats = append(r.IntervalFormats, format)
+		r.FrameRateFormats = append(r.FrameRateFormats, format)
 	}
 	return r, nil
 }

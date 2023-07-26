@@ -91,16 +91,16 @@ func (dev *Device) StopStreaming() {
 	}
 }
 
-// SetFps updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
-func (dev *Device) SetFrameRate(usbdevice *usbdevice.Device, fpsNumerator uint32, fpsDenominator uint32) (string, error) {
-	fps := fmt.Sprintf("%f", float32(fpsDenominator)/float32(fpsNumerator))
-	dataFormat, err := getDataFormat(usbdevice)
+// SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
+func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, intervalNumerator uint32, intervalDenominator uint32) (string, error) {
+	fps := fmt.Sprintf("%f", float32(intervalDenominator)/float32(intervalNumerator))
+	dataFormat, err := getDataFormat(usbDevice)
 	if err != nil {
 		return "", err
 	}
 	found := false
-	for _, interval := range dataFormat.(DataFormat).FpsIntervals {
-		if fpsNumerator == interval.Numerator && fpsDenominator == interval.Denominator {
+	for _, frameRate := range dataFormat.(DataFormat).FpsIntervals {
+		if intervalNumerator == frameRate.Denominator && intervalDenominator == frameRate.Numerator {
 			found = true
 			break
 		}
@@ -110,13 +110,13 @@ func (dev *Device) SetFrameRate(usbdevice *usbdevice.Device, fpsNumerator uint32
 	}
 
 	// Update device fps for stream parameters
-	origStreamParam, err := usbdevice.GetStreamParam()
+	origStreamParam, err := usbDevice.GetStreamParam()
 	if err != nil {
 		return "", err
 	}
-	origStreamParam.Capture.TimePerFrame.Denominator = fpsDenominator
-	origStreamParam.Capture.TimePerFrame.Numerator = fpsNumerator
-	err = usbdevice.SetStreamParam(origStreamParam)
+	origStreamParam.Capture.TimePerFrame.Denominator = intervalDenominator
+	origStreamParam.Capture.TimePerFrame.Numerator = intervalNumerator
+	err = usbDevice.SetStreamParam(origStreamParam)
 	if err != nil {
 		return "", err
 	}
@@ -124,8 +124,8 @@ func (dev *Device) SetFrameRate(usbdevice *usbdevice.Device, fpsNumerator uint32
 	return fps, nil
 }
 
-func (dev *Device) GetFrameRate(usbdevice *usbdevice.Device) (v4l2.Fract, error) {
-	streamParam, err := usbdevice.GetStreamParam()
+func (dev *Device) GetFrameRate(usbDevice *usbdevice.Device) (v4l2.Fract, error) {
+	streamParam, err := usbDevice.GetStreamParam()
 	if err != nil {
 		return v4l2.Fract{}, err
 	}
