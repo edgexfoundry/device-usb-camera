@@ -129,7 +129,11 @@ func (dev *Device) GetFrameRate(usbdevice *usbdevice.Device) (v4l2.Fract, error)
 	if err != nil {
 		return v4l2.Fract{}, err
 	}
-	return streamParam.Capture.TimePerFrame, nil
+	timePerFrame := streamParam.Capture.TimePerFrame
+	var fps v4l2.Fract
+	fps.Denominator = timePerFrame.Numerator
+	fps.Numerator = timePerFrame.Denominator
+	return fps, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {

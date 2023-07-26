@@ -418,31 +418,31 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		case VideoStopStreaming:
 			device.StopStreaming()
 		case VideoSetFrameRate:
-			fpsParam, edgexErr := params[i].ObjectValue()
+			intervalParam, edgexErr := params[i].ObjectValue()
 			if edgexErr != nil {
 				return errors.NewCommonEdgeXWrapper(edgexErr)
 			}
-			fpsValueDenominator, ok := fpsParam.(map[string]interface{})[FpsValueDenominator]
+			intervalValueDenominator, ok := intervalParam.(map[string]interface{})[FpsValueNumerator]
 			if !ok {
 				return errors.NewCommonEdgeXWrapper(nil)
 			}
-			fpsDenominator, err := strconv.ParseUint(fpsValueDenominator.(string), 0, 32)
+			intervalDenominator, err := strconv.ParseUint(intervalValueDenominator.(string), 0, 32)
 			if err != nil {
-				d.lc.Errorf("Could not parse denominator %d to uint32", fpsDenominator)
+				d.lc.Errorf("Could not parse denominator %d to uint32", intervalDenominator)
 				return err
 			}
-			var fpsNumerator uint64
-			fpsValueNumerator, ok := fpsParam.(map[string]interface{})[FpsValueNumerator]
+			var intervalNumerator uint64
+			intervalValueNumerator, ok := intervalParam.(map[string]interface{})[FpsValueDenominator]
 			if !ok {
-				fpsNumerator = 1
+				intervalNumerator = 1
 			} else {
-				fpsNumerator, err = strconv.ParseUint(fpsValueNumerator.(string), 0, 32)
+				intervalNumerator, err = strconv.ParseUint(intervalValueNumerator.(string), 0, 32)
 				if err != nil {
-					d.lc.Errorf("Could not parse numerator %d to uint32", fpsNumerator)
+					d.lc.Errorf("Could not parse numerator %d to uint32", intervalNumerator)
 					return err
 				}
 			}
-			fps, err := device.SetFrameRate(cameraDevice, uint32(fpsNumerator), uint32(fpsDenominator))
+			fps, err := device.SetFrameRate(cameraDevice, uint32(intervalNumerator), uint32(intervalDenominator))
 			if err != nil {
 				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err

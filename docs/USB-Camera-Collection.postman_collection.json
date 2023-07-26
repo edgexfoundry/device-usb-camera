@@ -632,7 +632,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"FrameRate\": {\n        \"FpsValueDenominator\":\"30\",\n        \"FpsValueNumerator\":\"1\"\n    }\n}",
+					"raw": "{\n\"FrameRate\": {\n        \"FpsValueDenominator\":\"1\",\n        \"FpsValueNumerator\":\"30\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"

@@ -219,37 +219,53 @@ func getSupportedIntervalFormats(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	type intervalsInfo struct {
+		Index       uint32
+		FrameType   uint32
+		PixelFormat uint32
+		Height      uint32
+		Width       uint32
+		Interval    []v4l2.Fract
+	}
+	type frameFormat struct {
+		Description string
+		Intervals   []intervalsInfo
+	}
 	type result struct {
-		IntervalFormats [][][]v4l2.FrameIntervalEnum
+		IntervalFormats []frameFormat
 	}
 	var r result
-	formats := make([][][]v4l2.FrameIntervalEnum, len(descs))
-	for i, desc := range descs {
+	for _, desc := range descs {
+		var format frameFormat
+		format.Description = desc.String()
 		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
 			return nil, err
 		}
-		frameIntervals := make([][]v4l2.FrameIntervalEnum, len(fss))
-		for j, frameSize := range fss {
+		for _, frameSize := range fss {
 			intervalCount := 0
-			var intervals []v4l2.FrameIntervalEnum
+			var frameIntervals intervalsInfo
+			encoding := frameSize.PixelFormat
+			height := frameSize.Size.MaxHeight
+			width := frameSize.Size.MaxWidth
+			frameIntervals.FrameType = frameSize.Type
+			frameIntervals.Height = height
+			frameIntervals.Width = width
+			frameIntervals.PixelFormat = encoding
+			frameIntervals.Index = frameSize.Index
 			for {
 				fd := d.Fd()
 				index := uint32(intervalCount)
-				encoding := frameSize.PixelFormat
-				height := frameSize.Size.MaxHeight
-				width := frameSize.Size.MaxWidth
 				if interval, exit := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); exit == nil {
-					intervals = append(intervals, interval)
+					frameIntervals.Interval = append(frameIntervals.Interval, interval.Interval.Max)
 					intervalCount += 1
 				} else {
 					break
 				}
 			}
-			frameIntervals[j] = intervals
+			format.Intervals = append(format.Intervals, frameIntervals)
 		}
-		formats[i] = frameIntervals
+		r.IntervalFormats = append(r.IntervalFormats, format)
 	}
-	r.IntervalFormats = formats
 	return r, nil
 }
