@@ -249,6 +249,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			return responses, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
 
+		// flush out the query so it resets with new calls
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
@@ -269,11 +270,11 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			videoPath = device.paths[pathIndexConv]
 		}
 
-		// currently defaults to using the first available stream
+		// currently defaults to using the first available stream if the user does not provide input
 		cameraDevice, err := usbDevice.Open(videoPath)
 		if err != nil {
 			return responses, errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
+				fmt.Sprintf("failed to open the underlying device for streaming at specified path %s", videoPath), err)
 		}
 		defer cameraDevice.Close()
 
@@ -380,7 +381,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		var videoPath string
 		pathIndex := queryParams.Get(PathIndex)
 		if len(pathIndex) == 0 {
-			// currently defaults to using the first available stream
+			// currently defaults to using the first available stream if the user does not provide input
 			videoPath = device.paths[0]
 		} else {
 			pathIndexConv, err := strconv.Atoi(pathIndex)
@@ -397,7 +398,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 		cameraDevice, err := usbDevice.Open(videoPath)
 		if err != nil {
 			return errors.NewCommonEdgeX(errors.KindServerError,
-				fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
+				fmt.Sprintf("failed to open the underlying device for streaming at specified path %s", videoPath), err)
 		}
 		defer cameraDevice.Close()
 
