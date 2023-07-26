@@ -88,7 +88,7 @@ deviceResources:
       readWrite: "W"
       defaultValue: "false"
   - name: "FrameRate"
-    description: "Set the stream frame rate"
+    description: "Set and get the stream frame rate"
     attributes: 
         getFunction: "VIDEO_GET_FRAMERATE"
         setFunction: "VIDEO_SET_FRAMERATE"
