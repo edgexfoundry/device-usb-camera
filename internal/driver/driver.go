@@ -313,7 +313,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 		case VideoGetFrameRate:
-			data, err = cameraDevice.GetFrameRate()
+			data, err = device.GetFrameRate(cameraDevice)
 			if err != nil {
 				return responses, errorWrapper.CommandError(command, err)
 			}
@@ -442,7 +442,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					return err
 				}
 			}
-			fps, err := device.SetFps(cameraDevice, uint32(fpsNumerator), uint32(fpsDenominator))
+			fps, err := device.SetFrameRate(cameraDevice, uint32(fpsNumerator), uint32(fpsDenominator))
 			if err != nil {
 				d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, deviceName, err)
 				return err
