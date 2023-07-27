@@ -110,7 +110,7 @@ deviceResources:
       valueType: "Object"
       readWrite: "RW"
 
-devicegetFunctions:
+deviceCommands:
   - name: "GetCameraMetaData"
     readWrite: "R"
     isHidden: false
