@@ -26,8 +26,8 @@ const (
 	Stream                          = "stream"
 	PrefixInput                     = "Input"
 	PrefixOutput                    = "Output"
-	FrameRateValueDenominator       = "FpsValueDenominator"
-	FrameRateValueNumerator         = "FpsValueNumerator"
+	FrameRateValueDenominator       = "FrameRateValueDenominator"
+	FrameRateValueNumerator         = "FrameRateValueNumerator"
 	PathIndex                       = "PathIndex"
 
 	// API route specific to Device Service

@@ -416,25 +416,26 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
+		var frameRateDenominator uint64
 		frameRateValueDenominator, ok := frameRateParam.(map[string]interface{})[FrameRateValueDenominator]
+		if !ok {
+			frameRateDenominator = 1
+		} else {
+			frameRateDenominator, err = strconv.ParseUint(frameRateValueDenominator.(string), 0, 32)
+			if err != nil {
+				d.lc.Errorf("Could not parse numerator %d to uint32", frameRateValueDenominator)
+				return err
+			}
+		}
+
+		frameRateValueNumerator, ok := frameRateParam.(map[string]interface{})[FrameRateValueNumerator]
 		if !ok {
 			return errors.NewCommonEdgeXWrapper(nil)
 		}
-		frameRateDenominator, err := strconv.ParseUint(frameRateValueDenominator.(string), 0, 32)
+		frameRateNumerator, err := strconv.ParseUint(frameRateValueNumerator.(string), 0, 32)
 		if err != nil {
-			d.lc.Errorf("Could not parse denominator %d to uint32", frameRateDenominator)
+			d.lc.Errorf("Could not parse denominator %d to uint32", frameRateNumerator)
 			return err
-		}
-		var frameRateNumerator uint64
-		frameRateValueNumerator, ok := frameRateParam.(map[string]interface{})[FrameRateValueDenominator]
-		if !ok {
-			frameRateNumerator = 1
-		} else {
-			frameRateNumerator, err = strconv.ParseUint(frameRateValueNumerator.(string), 0, 32)
-			if err != nil {
-				d.lc.Errorf("Could not parse numerator %d to uint32", frameRateNumerator)
-				return err
-			}
 		}
 		fps, err := device.SetFrameRate(cameraDevice, uint32(frameRateNumerator), uint32(frameRateDenominator))
 		if err != nil {
