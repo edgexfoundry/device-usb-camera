@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -34,6 +34,7 @@ type DataFormat struct {
 	XferFunc     string
 	YcbcrEnc     string
 	Quantization string
+	FrameRates   []v4l2.Fract
 }
 
 type CaptureMode struct {
@@ -100,41 +101,60 @@ func getInputStatus(d *usbdevice.Device, index string) (uint32, error) {
 }
 
 func getDataFormat(d *usbdevice.Device) (interface{}, error) {
-	fmt, err := d.GetPixFormat()
+	pixFmt, err := d.GetPixFormat()
 	if err != nil {
 		return nil, err
 	}
 
 	result := DataFormat{}
-	result.Height = fmt.Height
-	result.Width = fmt.Width
-	result.PixelFormat = v4l2.PixelFormats[fmt.PixelFormat]
-	result.Field = v4l2.Fields[fmt.Field]
-	result.BytesPerLine = fmt.BytesPerLine
-	result.SizeImage = fmt.SizeImage
-	result.Colorspace = v4l2.Colorspaces[fmt.Colorspace]
+	result.Height = pixFmt.Height
+	result.Width = pixFmt.Width
+	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
+	result.Field = v4l2.Fields[pixFmt.Field]
+	result.BytesPerLine = pixFmt.BytesPerLine
+	result.SizeImage = pixFmt.SizeImage
+	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
 
-	xfunc := v4l2.XferFunctions[fmt.XferFunc]
-	if fmt.XferFunc == v4l2.XferFuncDefault {
-		xfunc = v4l2.XferFunctions[v4l2.ColorspaceToXferFunc(fmt.XferFunc)]
+	xfunc := v4l2.XferFunctions[pixFmt.XferFunc]
+	if pixFmt.XferFunc == v4l2.XferFuncDefault {
+		xfunc = v4l2.XferFunctions[v4l2.ColorspaceToXferFunc(pixFmt.XferFunc)]
 	}
 	result.XferFunc = xfunc
 
-	ycbcr := v4l2.YCbCrEncodings[fmt.YcbcrEnc]
-	if fmt.YcbcrEnc == v4l2.YCbCrEncodingDefault {
-		ycbcr = v4l2.YCbCrEncodings[v4l2.ColorspaceToYCbCrEnc(fmt.YcbcrEnc)]
+	ycbcr := v4l2.YCbCrEncodings[pixFmt.YcbcrEnc]
+	if pixFmt.YcbcrEnc == v4l2.YCbCrEncodingDefault {
+		ycbcr = v4l2.YCbCrEncodings[v4l2.ColorspaceToYCbCrEnc(pixFmt.YcbcrEnc)]
 	}
 	result.YcbcrEnc = ycbcr
 
-	quant := v4l2.Quantizations[fmt.Quantization]
-	if fmt.Quantization == v4l2.QuantizationDefault {
-		if v4l2.IsPixYUVEncoded(fmt.PixelFormat) {
+	quant := v4l2.Quantizations[pixFmt.Quantization]
+	if pixFmt.Quantization == v4l2.QuantizationDefault {
+		if v4l2.IsPixYUVEncoded(pixFmt.PixelFormat) {
 			quant = v4l2.Quantizations[v4l2.QuantizationLimitedRange]
 		} else {
 			quant = v4l2.Quantizations[v4l2.QuantizationFullRange]
 		}
 	}
 	result.Quantization = quant
+	intervalCount := 0
+	var frameRates []v4l2.Fract
+	for {
+		fd := d.Fd()
+		index := uint32(intervalCount)
+		encoding := pixFmt.PixelFormat
+		if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); err == nil {
+			intervalCount += 1
+			// this swaps the internally track frame interval (seconds per frame)
+			// to user-friendly frame rate (frames per second)
+			frameRates = append(frameRates, v4l2.Fract{
+				Denominator: interval.Interval.Max.Numerator,
+				Numerator:   interval.Interval.Max.Denominator,
+			})
+		} else {
+			break
+		}
+	}
+	result.FrameRates = frameRates
 
 	return result, nil
 }
@@ -195,6 +215,56 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 			MbusCode:    desc.MBusCode,
 			FrameSizes:  fss,
 		})
+	}
+	return r, nil
+}
+
+func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
+	descs, err := d.GetFormatDescriptions()
+	if err != nil {
+		return nil, err
+	}
+
+	type result struct {
+		FrameRateFormats []FrameRateFormat
+	}
+	var r result
+	for _, desc := range descs {
+		var format FrameRateFormat
+		format.Description = desc.String()
+		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
+		if err != nil {
+			return nil, err
+		}
+		for _, frameSize := range fss {
+			intervalCount := 0
+			var frameInfo FrameInfo
+			encoding := frameSize.PixelFormat
+			height := frameSize.Size.MaxHeight
+			width := frameSize.Size.MaxWidth
+			frameInfo.FrameType = frameSize.Type
+			frameInfo.Height = height
+			frameInfo.Width = width
+			frameInfo.PixelFormat = encoding
+			frameInfo.Index = frameSize.Index
+			for {
+				fd := d.Fd()
+				index := uint32(intervalCount)
+				if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); err == nil {
+					frameInfo.Rates = append(frameInfo.Rates, v4l2.Fract{
+						// this swaps the internally track frame interval (seconds per frame)
+						// to user-friendly frame rate (frames per second)
+						Denominator: interval.Interval.Max.Numerator,
+						Numerator:   interval.Interval.Max.Denominator,
+					})
+					intervalCount += 1
+				} else {
+					break
+				}
+			}
+			format.FrameRates = append(format.FrameRates, frameInfo)
+		}
+		r.FrameRateFormats = append(r.FrameRateFormats, format)
 	}
 	return r, nil
 }

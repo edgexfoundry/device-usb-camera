@@ -16,7 +16,9 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 
+	usbdevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
+
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -87,6 +89,53 @@ func (dev *Device) StopStreaming() {
 		dev.lc.Errorf("Failed to stop video streaming transcoder for device %s, error: %s", dev.name, err)
 		return
 	}
+}
+
+// SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
+func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator uint32, frameRateDenominator uint32) (string, error) {
+	fps := fmt.Sprintf("%f", float32(frameRateNumerator)/float32(frameRateDenominator))
+	dataFormat, err := getDataFormat(usbDevice)
+	if err != nil {
+		return "", err
+	}
+	found := false
+	for _, frameRate := range dataFormat.(DataFormat).FrameRates {
+		if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return "", errors.NewCommonEdgeX(errors.KindCommunicationError, fmt.Sprintf("FPS value %s not supported for current image format.", fps), nil)
+	}
+
+	// Update device fps for stream parameters
+	origStreamParam, err := usbDevice.GetStreamParam()
+	if err != nil {
+		return "", err
+	}
+	// this swaps user-friendly frame rate (frames per second) to
+	// the internally track frame interval (seconds per frame)
+	origStreamParam.Capture.TimePerFrame.Denominator = frameRateNumerator
+	origStreamParam.Capture.TimePerFrame.Numerator = frameRateDenominator
+	err = usbDevice.SetStreamParam(origStreamParam)
+	if err != nil {
+		return "", err
+	}
+
+	return fps, nil
+}
+
+func (dev *Device) GetFrameRate(usbDevice *usbdevice.Device) (v4l2.Fract, error) {
+	streamParam, err := usbDevice.GetStreamParam()
+	if err != nil {
+		return v4l2.Fract{}, err
+	}
+	timePerFrame := streamParam.Capture.TimePerFrame
+	var fps v4l2.Fract
+	fps.Denominator = timePerFrame.Numerator
+	fps.Numerator = timePerFrame.Denominator
+	return fps, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {

@@ -12,7 +12,7 @@ deviceResources:
       Camera information including driver name, device name, bus info, and capabilities.
       See https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-querycap.html.
     attributes:
-      { command: "METADATA_DEVICE_CAPABILITY" }
+      { getFunction: "METADATA_DEVICE_CAPABILITY" }
     properties:
       valueType: "Object"
       readWrite: "R"
@@ -21,7 +21,7 @@ deviceResources:
       Query or select the current video input.
       See https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-g-input.html.
     attributes:
-      { command: "METADATA_CURRENT_VIDEO_INPUT" }
+      { getFunction: "METADATA_CURRENT_VIDEO_INPUT" }
     properties:
       valueType: "Int8"
       readWrite: "R"
@@ -33,64 +33,79 @@ deviceResources:
       0x00000002 - No Signal
       0x00000003 - No Color
     attributes:
-      { command: "METADATA_CAMERA_STATUS" }
+      { getFunction: "METADATA_CAMERA_STATUS" }
     properties:
       valueType: "Uint32"
       readWrite: "R"
   - name: "ImageFormats"
     description: "Enumerate image formats, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enum-fmt.html."
     attributes:
-      { command: "METADATA_IMAGE_FORMATS" }
+      { getFunction: "METADATA_IMAGE_FORMATS" }
+    properties:
+      valueType: "Object"
+      readWrite: "R"
+  - name: "FrameRateFormats"
+    description: "Enumerate supported frame rate settings, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enum-frameintervals.html"
+    attributes:
+      { getFunction: "METADATA_FRAMERATE_FORMATS" }
     properties:
       valueType: "Object"
       readWrite: "R"
   - name: "DataFormat"
     description: "Get data format, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-enuminput.html."
     attributes:
-      { command: "METADATA_DATA_FORMAT" }
+      { getFunction: "METADATA_DATA_FORMAT" }
     properties:
       valueType: "Object"
       readWrite: "R"
   - name: "CropCapability"
     description: "Information about the video cropping and scaling abilities, see https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-cropcap.html."
     attributes:
-      { command: "METADATA_CROPPING_ABILITY" }
+      { getFunction: "METADATA_CROPPING_ABILITY" }
     properties:
       valueType: "Object"
       readWrite: "R"
   - name: "StreamingParam"
     description: "Get streaming parameters, see https://linuxtv.org/downloads/v4l-dvb-apis/userspace-api/v4l/vidioc-g-parm.html."
     attributes:
-      { command: "METADATA_STREAMING_PARAMETERS" }
+      { getFunction: "METADATA_STREAMING_PARAMETERS" }
     properties:
       valueType: "Object"
       readWrite: "R"
   - name: "StartStreaming"
     description: "Start streaming process."
     attributes:
-      { command: "VIDEO_START_STREAMING" }
+      { setFunction: "VIDEO_START_STREAMING" }
     properties:
       valueType: "Object"
       readWrite: "W"
   - name: "StopStreaming"
     description: "Stop streaming process."
     attributes:
-      { command: "VIDEO_STOP_STREAMING" }
+      { setFunction: "VIDEO_STOP_STREAMING" }
     properties:
       valueType: "Bool"
       readWrite: "W"
       defaultValue: "false"
+  - name: "FrameRate"
+    description: "Set and get the stream frame rate"
+    attributes: 
+        getFunction: "VIDEO_GET_FRAMERATE"
+        setFunction: "VIDEO_SET_FRAMERATE"
+    properties:
+      valueType: "Object"
+      readWrite: "RW"
   - name: "StreamURI"
     description: "Get video-streaming URI."
     attributes:
-      { command: "VIDEO_STREAM_URI" }
+      { getFunction: "VIDEO_STREAM_URI" }
     properties:
       valueType: "String"
       readWrite: "R"
   - name: "StreamingStatus"
     description: "Get streaming status, including FFmpeg options"
     attributes:
-      { command: "VIDEO_STREAMING_STATUS" }
+      { getFunction: "VIDEO_STREAMING_STATUS" }
     properties:
       valueType: "Object"
       readWrite: "RW"

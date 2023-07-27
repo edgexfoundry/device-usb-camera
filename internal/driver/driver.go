@@ -32,7 +32,7 @@ import (
 	"github.com/edgexfoundry/device-sdk-go/v3/pkg/interfaces"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
 
-	usbdevice "github.com/vladimirvivien/go4vl/device"
+	usbDevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -226,99 +226,127 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	reqs []sdkModels.CommandRequest) ([]*sdkModels.CommandValue, error) {
 	d.lc.Debugf("Driver.HandleReadCommands: protocols: %v resource: %v attributes: %v", protocols,
 		reqs[0].DeviceResourceName, reqs[0].Attributes)
-	var err error
 	var responses = make([]*sdkModels.CommandValue, len(reqs))
 
 	device, edgexErr := d.getDevice(deviceName)
 	if edgexErr != nil {
 		return responses, edgexErr
 	}
-	// currently defaults to using the first available stream
-	cameraDevice, err := usbdevice.Open(device.paths[0])
-	if err != nil {
-		return responses, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to open the underlying device at specified path %s", device.paths[0]), err)
-	}
-	defer cameraDevice.Close()
 
-	var cv *sdkModels.CommandValue
-	var data interface{}
-	errorWrapper := EdgeXErrorWrapper{}
 	for i, req := range reqs {
-		command, ok := req.Attributes[Command]
+		command, ok := req.Attributes[GetFunction]
 		if !ok {
 			return responses, errors.NewCommonEdgeX(errors.KindContractInvalid,
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
 
-		switch command := fmt.Sprintf("%v", command); command {
-		case MetadataDeviceCapability:
-			data, err = getCapability(cameraDevice)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataCurrentVideoInput:
-			data, err = cameraDevice.GetVideoInputIndex()
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
-		case MetadataCameraStatus:
-			queryParams, edgexErr := getQueryParameters(req)
-			if edgexErr != nil {
-				return responses, errors.NewCommonEdgeXWrapper(edgexErr)
-			}
-
-			index := queryParams.Get(InputIndex)
-			if len(index) == 0 {
-				return responses, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
-			}
-			data, err = getInputStatus(cameraDevice, index)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
-		case MetadataImageFormats:
-			data, err = getImageFormats(cameraDevice)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataDataFormat:
-			data, err = getDataFormat(cameraDevice)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataCroppingAbility:
-			data, err = getCropInfo(cameraDevice)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case MetadataStreamingParameters:
-			data, err = getStreamingParameters(cameraDevice)
-			if err != nil {
-				return responses, errorWrapper.CommandError(command, err)
-			}
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
-		case VideoStreamUri:
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
-
-		case VideoStreamingStatus:
-			cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
-		default:
-			return responses, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
-		}
+		cv, err := d.ExecuteReadCommands(device, req, command)
 		if err != nil {
-			return responses, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
+			return responses, err
+		}
+		if _, ok := req.Attributes[UrlRawQuery]; ok {
+			req.Attributes[UrlRawQuery] = ""
 		}
 		responses[i] = cv
 	}
 
 	return responses, nil
+}
+
+func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandRequest, command interface{}) (*sdkModels.CommandValue, error) {
+	var cv *sdkModels.CommandValue
+	var data interface{}
+	errorWrapper := EdgeXErrorWrapper{}
+
+	queryParams, edgexErr := getQueryParameters(req)
+	if edgexErr != nil {
+		return cv, errors.NewCommonEdgeXWrapper(edgexErr)
+	}
+
+	videoPath, err := d.getPathName(device, queryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	cameraDevice, err := usbDevice.Open(videoPath)
+	if err != nil {
+		return cv, errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
+	}
+	defer cameraDevice.Close()
+
+	switch command := fmt.Sprintf("%v", command); command {
+	case MetadataDeviceCapability:
+		data, err = getCapability(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case MetadataCurrentVideoInput:
+		data, err = cameraDevice.GetVideoInputIndex()
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
+	case MetadataCameraStatus:
+		index := queryParams.Get(InputIndex)
+		if len(index) == 0 {
+			return cv, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
+		}
+		data, err = getInputStatus(cameraDevice, index)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
+	case MetadataImageFormats:
+		data, err = getImageFormats(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case MetadataFrameRateFormats:
+		data, err = getSupportedFrameRateFormats(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case VideoGetFrameRate:
+		data, err = device.GetFrameRate(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case MetadataDataFormat:
+		data, err = getDataFormat(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case MetadataCroppingAbility:
+		data, err = getCropInfo(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case MetadataStreamingParameters:
+		data, err = getStreamingParameters(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case VideoStreamUri:
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
+
+	case VideoStreamingStatus:
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
+	default:
+		return cv, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
+	}
+	if err != nil {
+		return cv, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
+	}
+	return cv, nil
 }
 
 func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]models.ProtocolProperties,
@@ -329,33 +357,95 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	}
 
 	for i, req := range reqs {
-		command, ok := req.Attributes[Command]
+		command, ok := req.Attributes[SetFunction]
 		if !ok {
 			return errors.NewCommonEdgeX(errors.KindContractInvalid,
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
-		switch command {
-		case VideoStartStreaming:
-			options, edgexErr := params[i].ObjectValue()
-			if edgexErr != nil {
-				return errors.NewCommonEdgeXWrapper(edgexErr)
-			}
-			edgexErr = setupFFmpegOptions(device, options, req.Attributes)
-			if edgexErr != nil {
-				return errors.NewCommonEdgeXWrapper(edgexErr)
-			}
-			edgexErr = d.startStreaming(device)
-			if edgexErr != nil {
-				return errors.NewCommonEdgeXWrapper(edgexErr)
-			}
-		case VideoStopStreaming:
-			device.StopStreaming()
-		default:
-			return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
+
+		err := d.ExecuteWriteCommands(device, req, i, params, command)
+		if err != nil {
+			return err
 		}
+		// flush query parameter
+		if _, ok := req.Attributes[UrlRawQuery]; ok {
+			req.Attributes[UrlRawQuery] = ""
+		}
+
+	}
+	return nil
+}
+
+func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, i int, params []*sdkModels.CommandValue, command interface{}) error {
+	queryParams, edgexErr := getQueryParameters(req)
+	if edgexErr != nil {
+		return errors.NewCommonEdgeXWrapper(edgexErr)
 	}
 
+	videoPath, err := d.getPathName(device, queryParams)
+	if err != nil {
+		return err
+	}
+
+	cameraDevice, err := usbDevice.Open(videoPath)
+	if err != nil {
+		return errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("failed to open the underlying device at specified path %s", videoPath), err)
+	}
+	defer cameraDevice.Close()
+
+	switch command {
+	case VideoStartStreaming:
+		options, edgexErr := params[i].ObjectValue()
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		edgexErr = setupFFmpegOptions(device, options, req.Attributes)
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		edgexErr = d.startStreaming(device)
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+	case VideoStopStreaming:
+		device.StopStreaming()
+	case VideoSetFrameRate:
+		frameRateParam, edgexErr := params[i].ObjectValue()
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		var frameRateDenominator uint64
+		frameRateValueDenominator, ok := frameRateParam.(map[string]interface{})[FrameRateValueDenominator]
+		if !ok {
+			frameRateDenominator = 1
+		} else {
+			frameRateDenominator, err = strconv.ParseUint(frameRateValueDenominator.(string), 0, 32)
+			if err != nil {
+				d.lc.Errorf("Could not parse numerator %d to uint32", frameRateValueDenominator)
+				return err
+			}
+		}
+
+		frameRateValueNumerator, ok := frameRateParam.(map[string]interface{})[FrameRateValueNumerator]
+		if !ok {
+			return errors.NewCommonEdgeXWrapper(nil)
+		}
+		frameRateNumerator, err := strconv.ParseUint(frameRateValueNumerator.(string), 0, 32)
+		if err != nil {
+			d.lc.Errorf("Could not parse denominator %d to uint32", frameRateNumerator)
+			return err
+		}
+		fps, err := device.SetFrameRate(cameraDevice, uint32(frameRateNumerator), uint32(frameRateDenominator))
+		if err != nil {
+			d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, device.name, err)
+			return err
+		}
+		d.lc.Infof("Device frame rate set to %s", fps)
+	default:
+		return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
+	}
 	return nil
 }
 
@@ -385,6 +475,26 @@ func (d *Driver) Stop(force bool) error {
 	return nil
 }
 
+func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, error) {
+	var videoPath string
+	pathIndex := queryParams.Get(PathIndex)
+	if len(pathIndex) == 0 {
+		// currently defaults to using the first available stream
+		videoPath = device.paths[0]
+	} else {
+		pathIndexConv, err := strconv.Atoi(pathIndex)
+		if err != nil {
+			return "", err
+		}
+		if pathIndexConv >= len(device.paths) {
+			return "", errors.NewCommonEdgeX(errors.KindIOError,
+				fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
+		}
+		videoPath = device.paths[pathIndexConv]
+	}
+	return videoPath, nil
+}
+
 // AddDevice is a callback function that is invoked
 // when a new Device associated with this Device Service is added
 func (d *Driver) AddDevice(deviceName string, protocols map[string]models.ProtocolProperties,
@@ -397,15 +507,15 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]models.Protoc
 
 // addDeviceInternal attempts to add a device to the device service's active devices
 func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]models.ProtocolProperties) (*Device, error) {
-	path, err := d.getPaths(protocols)
+	paths, err := d.getPaths(protocols)
 	if err != nil {
 		return nil, err
 	}
 
-	_, sn, error := getUSBDeviceIdInfo(path[0])
-	if err != nil {
+	_, sn, edgexErr := getUSBDeviceIdInfo(paths[0])
+	if edgexErr != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("could not find the serial number of the device %s", deviceName), error)
+			fmt.Sprintf("could not find the serial number of the device %s", deviceName), edgexErr)
 	}
 	for _, ad := range d.activeDevices {
 		if ad.serialNumber == sn {
@@ -495,7 +605,7 @@ func (d *Driver) Discover() error {
 	// Convert the slice of cached devices to map in order to improve the performance in the subsequent for loop.
 	currentDevices := d.cachedDeviceMap()
 
-	allDevices, _ := usbdevice.GetAllDevicePaths()
+	allDevices, _ := usbDevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
 			cn, sn, err := getUSBDeviceIdInfo(fdPath)
@@ -627,7 +737,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 
 	var streamingStatusResourceName string
 	for _, r := range profile.DeviceResources {
-		command, ok := r.Attributes[Command]
+		command, ok := r.Attributes[GetFunction]
 		if ok && command == VideoStreamingStatus {
 			streamingStatusResourceName = r.Name
 			break
@@ -637,7 +747,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		d.lc.Warnf("there is no device resource representing StreamingStatus of the device %s, so the StreamingStatus won't be published automatically", name)
 	}
 
-	cameraDevice, err := usbdevice.Open(fdPath)
+	cameraDevice, err := usbDevice.Open(fdPath)
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to open the underlying device at specified path %s", fdPath), err)
@@ -815,7 +925,7 @@ func (d *Driver) cachedDeviceMap() map[string]models.Device {
 }
 
 func (d *Driver) isVideoCaptureDevice(path string) bool {
-	cameraDevice, err := usbdevice.Open(path)
+	cameraDevice, err := usbDevice.Open(path)
 	if err != nil {
 		d.lc.Debugf("there is no USB camera at specified path %s, error: %s", path, err.Error())
 		return false
@@ -828,7 +938,7 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 func (d *Driver) updateDevicePaths(device models.Device) {
 	var init []string
 	device.Protocols[UsbProtocol][Paths] = init
-	allDevices, _ := usbdevice.GetAllDevicePaths()
+	allDevices, _ := usbDevice.GetAllDevicePaths()
 	for _, fdPath := range allDevices {
 		if ok := d.isVideoCaptureDevice(fdPath); ok {
 			cn, sn, err := getUSBDeviceIdInfo(fdPath)
