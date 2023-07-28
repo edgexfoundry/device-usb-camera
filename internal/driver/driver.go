@@ -304,7 +304,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 
 	videoPath, err := d.getPathName(device, queryParams)
 	if err != nil {
-		return nil, err
+		return cv, err
 	}
 
 	cameraDevice, err := usbDevice.Open(videoPath)
@@ -385,7 +385,6 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 				"rtsp server is not enabled, cannot get stream URI for device %s", device.name), nil)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
-
 	case VideoStreamingStatus:
 		if !d.enableRtspServer {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
@@ -449,6 +448,10 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 
 	switch command {
 	case VideoStartStreaming:
+		err = d.updateTranscoder(device, videoPath)
+		if err != nil {
+			return err
+		}
 		options, edgexErr := params[i].ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -876,6 +879,24 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		autoStreaming:               autoStreaming,
 		streamingStatusResourceName: streamingStatusResourceName,
 	}, nil
+}
+
+func (d *Driver) updateTranscoder(device *Device, fdPath string) error {
+	trans := device.transcoder
+	err := trans.SetInputPath(fdPath)
+	// err := trans.Stop()
+	if err != nil {
+		return errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("failed to initialize new transcoder for device %s", device.name), err)
+	}
+	// // Initialize transcoder passing the input path and output path, along with the credentials
+	// err = trans.Initialize(fdPath, d.getAuthenticatedRTSPUri(name))
+	// if err != nil {
+	// 	return errors.NewCommonEdgeX(errors.KindServerError,
+	// 		fmt.Sprintf("failed to initialize new transcoder for device %s", name), err)
+	// }
+	// trans.MediaFile().SetOutputFormat(RtspUriScheme)
+	return nil
 }
 
 func (d *Driver) getAuthenticatedRTSPUri(name string) string {
