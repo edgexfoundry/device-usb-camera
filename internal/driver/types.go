@@ -19,6 +19,7 @@ type RTSPAuthRequest struct {
 	Query    string `json:"query"`
 }
 
+
 type FrameInfo struct {
 	Index       uint32
 	FrameType   uint32

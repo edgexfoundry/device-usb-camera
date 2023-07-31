@@ -350,7 +350,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoGetFrameRate:
-		data, err = device.GetFrameRate(cameraDevice)
+		data, err = GetFrameRate(cameraDevice)
 		if err != nil {
 			return nil, errorWrapper.CommandError(command, err)
 		}
@@ -415,7 +415,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					req.DeviceResourceName), nil)
 		}
 
-		err := d.ExecuteWriteCommands(device, req, i, params, command)
+		err := d.ExecuteWriteCommands(device, req, params[i], command)
 		if err != nil {
 			return err
 		}
@@ -428,7 +428,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	return nil
 }
 
-func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, i int, params []*sdkModels.CommandValue, command interface{}) error {
+func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, param *sdkModels.CommandValue, command interface{}) error {
 	queryParams, edgexErr := getQueryParameters(req)
 	if edgexErr != nil {
 		return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -452,7 +452,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		if err != nil {
 			return err
 		}
-		options, edgexErr := params[i].ObjectValue()
+		options, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
@@ -471,7 +471,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		}
 		device.StopStreaming()
 	case VideoSetFrameRate:
-		frameRateParam, edgexErr := params[i].ObjectValue()
+		frameRateParam, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}

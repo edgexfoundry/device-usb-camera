@@ -154,10 +154,12 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator 
 		return "", err
 	}
 	found := false
-	for _, frameRate := range dataFormat.(DataFormat).FrameRates {
-		if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
-			found = true
-			break
+	for _, format := range dataFormat.(map[string]DataFormat) {
+		for _, frameRate := range format.FrameRates {
+			if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
+				found = true
+				break
+			}
 		}
 	}
 	if !found {
