@@ -34,6 +34,7 @@ import (
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
 
 	usbDevice "github.com/vladimirvivien/go4vl/device"
+	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
@@ -555,6 +556,20 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 	if len(pathIndex) == 0 {
 		// currently defaults to using the first available stream
 		videoPath = device.paths[0]
+		// pixFormats := v4l2.PixelFormats[]
+		streamFormat := queryParams.Get("StreamFormat")
+		for _, path := range device.paths {
+			formatDevice, err := usbDevice.Open(path)
+			if err != nil {
+				return "", err
+			}
+			formatDescriptions, _ := formatDevice.GetFormatDescriptions()
+			if formatMap(formatDescriptions[0].PixelFormat) == streamFormat {
+				videoPath = path
+				break
+			}
+			formatDevice.Close()
+		}
 	} else {
 		pathIndexConv, err := strconv.Atoi(pathIndex)
 		if err != nil {
@@ -567,6 +582,24 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 		videoPath = device.paths[pathIndexConv]
 	}
 	return videoPath, nil
+}
+
+func formatMap(key uint32) string {
+	// innerMap is captured in the closure returned below
+	innerMap := map[uint32]string{
+		v4l2.PixelFmtRGB24: "RGB",
+		v4l2.PixelFmtGrey:  "Greyscale",
+		v4l2.PixelFmtYUYV:  "RGB",
+		v4l2.PixelFmtMJPEG: "RGB",
+		v4l2.PixelFmtJPEG:  "RGB",
+		v4l2.PixelFmtMPEG:  "RGB",
+		v4l2.PixelFmtH264:  "RGB",
+		v4l2.PixelFmtMPEG4: "RGB",
+		PixelFmtDepth:      "Depth",
+	}
+
+	return innerMap[key]
+
 }
 
 // AddDevice is a callback function that is invoked

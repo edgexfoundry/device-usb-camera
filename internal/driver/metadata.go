@@ -24,18 +24,19 @@ type Capability struct {
 }
 
 type DataFormat struct {
-	Path         string
-	Width        uint32
-	Height       uint32
-	PixelFormat  string
-	Field        string
-	BytesPerLine uint32
-	SizeImage    uint32
-	Colorspace   string
-	XferFunc     string
-	YcbcrEnc     string
-	Quantization string
-	FrameRates   []v4l2.Fract
+	Path                   string
+	Width                  uint32
+	Height                 uint32
+	PixelFormat            uint32
+	PixelFormatDescription string
+	Field                  string
+	BytesPerLine           uint32
+	SizeImage              uint32
+	Colorspace             string
+	XferFunc               string
+	YcbcrEnc               string
+	Quantization           string
+	FrameRates             []v4l2.Fract
 }
 
 type CaptureMode struct {
@@ -60,7 +61,7 @@ type ImageFormat struct {
 	BufType     v4l2.BufType
 	Flags       v4l2.FmtDescFlag
 	Description string
-	PixelFormat string
+	PixelFormat uint32
 	MbusCode    uint32
 	FrameSizes  []v4l2.FrameSizeEnum
 }
@@ -106,11 +107,17 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var pixDescription string
+	if pixFmt.PixelFormat == 540422490 {
+		pixDescription = PixelFmtDepthDesc
+	} else {
+		pixDescription = v4l2.PixelFormats[pixFmt.PixelFormat]
+	}
 	dataFormat := DataFormat{}
 	dataFormat.Height = pixFmt.Height
 	dataFormat.Width = pixFmt.Width
-	dataFormat.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
+	dataFormat.PixelFormat = pixFmt.PixelFormat
+	dataFormat.PixelFormatDescription = pixDescription
 	dataFormat.Field = v4l2.Fields[pixFmt.Field]
 	dataFormat.BytesPerLine = pixFmt.BytesPerLine
 	dataFormat.SizeImage = pixFmt.SizeImage
@@ -213,12 +220,18 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		var pixDescription string
+		if desc.PixelFormat == 540422490 {
+			pixDescription = PixelFmtDepthDesc
+		} else {
+			pixDescription = desc.Description
+		}
 		r.ImageFormats = append(r.ImageFormats, ImageFormat{
 			Index:       desc.Index,
 			BufType:     desc.StreamType,
 			Flags:       desc.Flags,
-			Description: desc.Description,
-			PixelFormat: v4l2.PixelFormats[desc.PixelFormat],
+			Description: pixDescription,
+			PixelFormat: desc.PixelFormat,
 			MbusCode:    desc.MBusCode,
 			FrameSizes:  fss,
 		})
