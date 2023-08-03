@@ -53,6 +53,8 @@ const (
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
 	VideoGetFrameRate           = "VIDEO_GET_FRAMERATE"
 	VideoSetFrameRate           = "VIDEO_SET_FRAMERATE"
+	VideoGetPixelFormat         = "VIDEO_GET_PIXELFORMAT"
+	VideoSetPixelFormat         = "VIDEO_SET_PIXELFORMAT"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"

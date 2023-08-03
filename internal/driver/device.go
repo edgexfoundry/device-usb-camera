@@ -91,6 +91,10 @@ func (dev *Device) StopStreaming() {
 	}
 }
 
+func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) (string, error) {
+	return "", nil
+}
+
 // SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
 func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator uint32, frameRateDenominator uint32) (string, error) {
 	fps := fmt.Sprintf("%f", float32(frameRateNumerator)/float32(frameRateDenominator))
@@ -115,7 +119,7 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator 
 		return "", err
 	}
 	// this swaps user-friendly frame rate (frames per second) to
-	// the internally track frame interval (seconds per frame)
+	// the internally tracked frame interval (seconds per frame)
 	origStreamParam.Capture.TimePerFrame.Denominator = frameRateNumerator
 	origStreamParam.Capture.TimePerFrame.Numerator = frameRateDenominator
 	err = usbDevice.SetStreamParam(origStreamParam)
@@ -136,6 +140,24 @@ func (dev *Device) GetFrameRate(usbDevice *usbdevice.Device) (v4l2.Fract, error)
 	fps.Denominator = timePerFrame.Numerator
 	fps.Numerator = timePerFrame.Denominator
 	return fps, nil
+}
+
+func (dev *Device) GetPixelFormat(usbdevice *usbdevice.Device) (interface{}, error) {
+	pixFmt, err := usbdevice.GetPixFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	result := PixelFormat{}
+	result.Height = pixFmt.Height
+	result.Width = pixFmt.Width
+	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
+	result.Field = v4l2.Fields[pixFmt.Field]
+	result.BytesPerLine = pixFmt.BytesPerLine
+	result.SizeImage = pixFmt.SizeImage
+	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
+
+	return result, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {

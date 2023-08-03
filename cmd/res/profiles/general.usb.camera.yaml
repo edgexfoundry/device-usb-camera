@@ -95,6 +95,14 @@ deviceResources:
     properties:
       valueType: "Object"
       readWrite: "RW"
+  - name: "PixelFormat"
+    description: "Set and get the pixel format, height and width"
+    attributes:
+      getFunction: "VIDEO_GET_PIXELFORMAT"
+      setFunction: "VIDEO_SET_PIXELFORMAT"
+    properties:
+      valueType: "Object"
+      readWrite: "RW"
   - name: "StreamURI"
     description: "Get video-streaming URI."
     attributes:

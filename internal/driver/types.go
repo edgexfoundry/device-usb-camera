@@ -31,3 +31,13 @@ type FrameRateFormat struct {
 	Description string
 	FrameRates  []FrameInfo
 }
+
+type PixelFormat struct {
+	Width        uint32 `json:"Width"`
+	Height       uint32 `json:"Height"`
+	PixelFormat  string `json:"PixelFormat"`
+	Field        string `json:"Field"`
+	BytesPerLine uint32 `json:"BytesPerLine"`
+	SizeImage    uint32 `json:"SizeImage"`
+	Colorspace   string `json:"Colorspace"`
+}

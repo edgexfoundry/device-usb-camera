@@ -317,6 +317,12 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 			return cv, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
+	case VideoGetPixelFormat:
+		data, err = device.GetPixelFormat(cameraDevice)
+		if err != nil {
+			return cv, errorWrapper.CommandError(command, err)
+		}
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataDataFormat:
 		data, err = getDataFormat(cameraDevice)
 		if err != nil {
@@ -443,6 +449,16 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 			return err
 		}
 		d.lc.Infof("Device frame rate set to %s", fps)
+	case VideoSetPixelFormat:
+		params, edgexErr := params[i].ObjectValue()
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		pix, edgexErr := device.SetPixelFormat(cameraDevice, params)
+		if edgexErr != nil {
+			return errors.NewCommonEdgeXWrapper(edgexErr)
+		}
+		d.lc.Infof("Device pixel format set to %s", pix)
 	default:
 		return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 	}
