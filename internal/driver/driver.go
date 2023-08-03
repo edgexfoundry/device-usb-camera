@@ -556,16 +556,33 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 	if len(pathIndex) == 0 {
 		// currently defaults to using the first available stream
 		videoPath = device.paths[0]
-		// pixFormats := v4l2.PixelFormats[]
 		streamFormat := queryParams.Get("StreamFormat")
 		for _, path := range device.paths {
 			formatDevice, err := usbDevice.Open(path)
 			if err != nil {
 				return "", err
 			}
-			formatDescriptions, _ := formatDevice.GetFormatDescriptions()
-			if formatMap(formatDescriptions[0].PixelFormat) == streamFormat {
+			formatDescriptions, err := formatDevice.GetFormatDescriptions()
+			if err != nil {
+				return "", err
+			}
+			formatTypeMap := map[uint32]string{
+				v4l2.PixelFmtRGB24: "RGB",
+				v4l2.PixelFmtGrey:  "Greyscale",
+				v4l2.PixelFmtYUYV:  "RGB",
+				v4l2.PixelFmtMJPEG: "RGB",
+				v4l2.PixelFmtJPEG:  "RGB",
+				v4l2.PixelFmtMPEG:  "RGB",
+				v4l2.PixelFmtH264:  "RGB",
+				v4l2.PixelFmtMPEG4: "RGB",
+				PixelFmtDepth:      "Depth",
+				PixelFmtUYVY:       "Greyscale",
+				PixelFmtGrey8:      "Greyscale",
+				PixelFmtGrey12:     "Greyscale",
+			}
+			if formatTypeMap[formatDescriptions[0].PixelFormat] == streamFormat {
 				videoPath = path
+				formatDevice.Close()
 				break
 			}
 			formatDevice.Close()
@@ -584,22 +601,20 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 	return videoPath, nil
 }
 
-func formatMap(key uint32) string {
-	// innerMap is captured in the closure returned below
-	innerMap := map[uint32]string{
-		v4l2.PixelFmtRGB24: "RGB",
-		v4l2.PixelFmtGrey:  "Greyscale",
-		v4l2.PixelFmtYUYV:  "RGB",
-		v4l2.PixelFmtMJPEG: "RGB",
-		v4l2.PixelFmtJPEG:  "RGB",
-		v4l2.PixelFmtMPEG:  "RGB",
-		v4l2.PixelFmtH264:  "RGB",
-		v4l2.PixelFmtMPEG4: "RGB",
-		PixelFmtDepth:      "Depth",
+func completeFormatMap(key uint32) (string, bool) {
+	unsupported := map[uint32]string{
+		PixelFmtDepth:  PixelFmtDepthDesc,
+		PixelFmtUYVY:   PixelFmtUYVYDesc,
+		PixelFmtGrey8:  PixelFmtGrey8Desc,
+		PixelFmtGrey12: PixelFmtGrey12Desc,
 	}
-
-	return innerMap[key]
-
+	if value, ok := unsupported[key]; ok {
+		return value, ok
+	}
+	if value, ok := v4l2.PixelFormats[key]; ok {
+		return value, ok
+	}
+	return "", false
 }
 
 // AddDevice is a callback function that is invoked

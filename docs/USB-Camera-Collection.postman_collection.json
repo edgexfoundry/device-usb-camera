@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "1cd1947d-95fa-456b-ae95-54b38b90723d",
+		"_postman_id": "12557ee1-fc0d-4e65-80f6-22633bc34747",
 		"name": "USB-Camera-Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -99,6 +99,18 @@
 						"name",
 						"{{camera_name}}",
 						"CameraInfo"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -148,6 +160,18 @@
 						"name",
 						"{{camera_name}}",
 						"VideoInputIndex"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -197,6 +221,18 @@
 						"name",
 						"{{camera_name}}",
 						"ImageFormats"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -233,7 +269,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/DataFormat?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/DataFormat",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -250,7 +286,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				}
@@ -288,7 +330,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRateFormats?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRateFormats",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -305,7 +347,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				}
@@ -356,6 +404,18 @@
 						"name",
 						"{{camera_name}}",
 						"CropCapability"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -405,6 +465,18 @@
 						"name",
 						"{{camera_name}}",
 						"StreamingParam"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -454,6 +526,18 @@
 						"name",
 						"{{camera_name}}",
 						"StreamURI"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -503,6 +587,18 @@
 						"name",
 						"{{camera_name}}",
 						"GetCameraMetaData"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -552,6 +648,18 @@
 						"name",
 						"{{camera_name}}",
 						"StreamingStatus"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -588,7 +696,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -605,7 +713,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				}
@@ -640,7 +754,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/FrameRate",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -657,7 +771,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				},
@@ -814,6 +934,18 @@
 						"name",
 						"{{camera_name}}",
 						"StartStreaming"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				},
 				"description": "Test steps:\n1) Execute start streaming api with valid input and outputs\n2) Execute get stream status api and verify that \"IsStreaming\" set to true \nNote: Camera shows green light in front when streaming started"
@@ -861,6 +993,18 @@
 						"name",
 						"{{camera_name}}",
 						"StopStreaming"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				},
 				"description": "Test steps:\n\n1) Execute start streaming api with valid input and outputs\n2) Execute get stream status api and verify that \"IsStreaming\" set to true\n3) Execute stop stream api\n4) Execute get stream status api and verify that \"IsStreaming\" set to false\nNote: Camera shows green light in front when streaming started"
@@ -898,7 +1042,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraStatus?InputIndex=0",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraStatus",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -915,7 +1059,13 @@
 					"query": [
 						{
 							"key": "InputIndex",
-							"value": "0"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				}
@@ -963,6 +1113,18 @@
 						"name",
 						"{{camera_name}}",
 						"StartStreaming"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
+						}
 					]
 				},
 				"description": "Test steps:\n\n1) Execute start streaming api with invalid input and outputs\n2) Execute get stream status api and verify that \"IsStreaming\" set to false and also see error in get stream status\n\nNote; Though it gives 200 it wont actually start streaming with invalid inputs this can be verified with get stream status api"

@@ -107,12 +107,7 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var pixDescription string
-	if pixFmt.PixelFormat == 540422490 {
-		pixDescription = PixelFmtDepthDesc
-	} else {
-		pixDescription = v4l2.PixelFormats[pixFmt.PixelFormat]
-	}
+	pixDescription, _ := completeFormatMap(pixFmt.PixelFormat)
 	dataFormat := DataFormat{}
 	dataFormat.Height = pixFmt.Height
 	dataFormat.Width = pixFmt.Width
@@ -220,12 +215,7 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		var pixDescription string
-		if desc.PixelFormat == 540422490 {
-			pixDescription = PixelFmtDepthDesc
-		} else {
-			pixDescription = desc.Description
-		}
+		pixDescription, _ := completeFormatMap(desc.PixelFormat)
 		r.ImageFormats = append(r.ImageFormats, ImageFormat{
 			Index:       desc.Index,
 			BufType:     desc.StreamType,
@@ -254,7 +244,7 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 	var r result
 	for _, desc := range descs {
 		var format FrameRateFormat
-		format.Description = desc.String()
+		format.Description, _ = completeFormatMap(desc.PixelFormat)
 		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
 			return nil, err
