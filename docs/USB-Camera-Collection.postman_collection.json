@@ -51,7 +51,7 @@
 						"{{device_service_name}}"
 					]
 				},
-				"description": "To get all onvif devices change {device_service_name} environment varibale to device-onvif-camera"
+				"description": "To get all USB devices change {device_service_name} environment varibale to device-usb-camera"
 			},
 			"response": []
 		},
