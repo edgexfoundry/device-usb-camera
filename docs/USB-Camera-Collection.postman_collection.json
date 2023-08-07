@@ -993,18 +993,6 @@
 						"name",
 						"{{camera_name}}",
 						"StopStreaming"
-					],
-					"query": [
-						{
-							"key": "PathIndex",
-							"value": "{{path_index}}",
-							"disabled": true
-						},
-						{
-							"key": "StreamFormat",
-							"value": "{{stream_format}}",
-							"disabled": true
-						}
 					]
 				},
 				"description": "Test steps:\n\n1) Execute start streaming api with valid input and outputs\n2) Execute get stream status api and verify that \"IsStreaming\" set to true\n3) Execute stop stream api\n4) Execute get stream status api and verify that \"IsStreaming\" set to false\nNote: Camera shows green light in front when streaming started"

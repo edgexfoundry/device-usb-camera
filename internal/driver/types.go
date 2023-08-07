@@ -19,7 +19,6 @@ type RTSPAuthRequest struct {
 	Query    string `json:"query"`
 }
 
-
 type FrameInfo struct {
 	Index       uint32
 	FrameType   uint32
@@ -28,6 +27,7 @@ type FrameInfo struct {
 	Width       uint32
 	Rates       []v4l2.Fract
 }
+
 type FrameRateFormat struct {
 	Description string
 	FrameRates  []FrameInfo

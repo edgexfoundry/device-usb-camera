@@ -34,6 +34,10 @@ const (
 	Width                           = "Width"
 	Height                          = "Height"
 	PixelFormat                     = "PixelFormat"
+	StreamFormat                    = "StreamFormat"
+	RGB                             = "RGB"
+	Greyscale                       = "Greyscale"
+	Depth                           = "Depth"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"

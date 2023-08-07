@@ -553,41 +553,12 @@ func (d *Driver) Stop(force bool) error {
 func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, error) {
 	var videoPath string
 	pathIndex := queryParams.Get(PathIndex)
-	if len(pathIndex) == 0 {
-		// currently defaults to using the first available stream
+	streamFormat := queryParams.Get(StreamFormat)
+	if len(pathIndex) == 0 && len(streamFormat) == 0 { // most common case
 		videoPath = device.paths[0]
-		streamFormat := queryParams.Get("StreamFormat")
-		for _, path := range device.paths {
-			formatDevice, err := usbDevice.Open(path)
-			if err != nil {
-				return "", err
-			}
-			formatDescriptions, err := formatDevice.GetFormatDescriptions()
-			if err != nil {
-				return "", err
-			}
-			formatTypeMap := map[uint32]string{
-				v4l2.PixelFmtRGB24: "RGB",
-				v4l2.PixelFmtGrey:  "Greyscale",
-				v4l2.PixelFmtYUYV:  "RGB",
-				v4l2.PixelFmtMJPEG: "RGB",
-				v4l2.PixelFmtJPEG:  "RGB",
-				v4l2.PixelFmtMPEG:  "RGB",
-				v4l2.PixelFmtH264:  "RGB",
-				v4l2.PixelFmtMPEG4: "RGB",
-				PixelFmtDepth:      "Depth",
-				PixelFmtUYVY:       "Greyscale",
-				PixelFmtGrey8:      "Greyscale",
-				PixelFmtGrey12:     "Greyscale",
-			}
-			if formatTypeMap[formatDescriptions[0].PixelFormat] == streamFormat {
-				videoPath = path
-				formatDevice.Close()
-				break
-			}
-			formatDevice.Close()
-		}
-	} else {
+	} else if len(pathIndex) != 0 && len(streamFormat) != 0 { // both cannot be provided
+		return "", errors.NewCommonEdgeX(errors.KindIOError, "Cannot provide both PathIndex and StreamFormat query parameters to command", nil)
+	} else if len(pathIndex) != 0 { // use path index video path value
 		pathIndexConv, err := strconv.Atoi(pathIndex)
 		if err != nil {
 			return "", err
@@ -597,24 +568,59 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 				fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 		}
 		videoPath = device.paths[pathIndexConv]
+	} else if len(streamFormat) != 0 { // use stream format video path value
+		if streamFormat == RGB || streamFormat == Greyscale || streamFormat == Depth {
+			for _, path := range device.paths {
+				videoPath, err := getStreamFormatPath(path, streamFormat)
+				if err != nil {
+					continue
+				} else {
+					return videoPath, nil
+				}
+			}
+			return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
+		} else {
+			return "", errors.NewCommonEdgeX(errors.KindIOError, "Invalid stream format. Valid options are 'RGB', 'Greyscale', or 'Depth.'", nil)
+		}
 	}
 	return videoPath, nil
 }
 
-func completeFormatMap(key uint32) (string, bool) {
-	unsupported := map[uint32]string{
-		PixelFmtDepth:  PixelFmtDepthDesc,
-		PixelFmtUYVY:   PixelFmtUYVYDesc,
-		PixelFmtGrey8:  PixelFmtGrey8Desc,
-		PixelFmtGrey12: PixelFmtGrey12Desc,
+func getStreamFormatPath(path string, streamFormat string) (string, error) {
+	formatDevice, err := usbDevice.Open(path)
+	if err != nil {
+		return "", err
 	}
-	if value, ok := unsupported[key]; ok {
-		return value, ok
+	defer formatDevice.Close()
+	formatDescriptions, err := formatDevice.GetFormatDescriptions()
+	if err != nil {
+		return "", err
 	}
-	if value, ok := v4l2.PixelFormats[key]; ok {
-		return value, ok
+	currentType, _ := getStreamFormatType(formatDescriptions[0].PixelFormat)
+	if currentType == streamFormat {
+		return path, nil
+	} else {
+		return "", errors.NewCommonEdgeX(errors.KindInvalidId, "Provided stream format does not match current stream format type.", nil)
 	}
-	return "", false
+}
+
+func getStreamFormatType(key uint32) (string, bool) {
+	streamFormatTypeMap := map[uint32]string{
+		v4l2.PixelFmtRGB24: RGB,
+		v4l2.PixelFmtGrey:  Greyscale,
+		v4l2.PixelFmtYUYV:  RGB,
+		v4l2.PixelFmtMJPEG: RGB,
+		v4l2.PixelFmtJPEG:  RGB,
+		v4l2.PixelFmtMPEG:  RGB,
+		v4l2.PixelFmtH264:  RGB,
+		v4l2.PixelFmtMPEG4: RGB,
+		PixelFmtDepth:      Depth,
+		PixelFmtUYVY:       Greyscale,
+		PixelFmtGrey8:      Greyscale,
+		PixelFmtGrey12:     Greyscale,
+	}
+	value, ok := streamFormatTypeMap[key]
+	return value, ok
 }
 
 // AddDevice is a callback function that is invoked
