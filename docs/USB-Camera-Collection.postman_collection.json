@@ -666,6 +666,114 @@
 			"response": []
 		},
 		{
+			"name": "Get Pixel Format",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat?PathIndex={{path_index}}",
+					"protocol": "http",
+					"host": [
+						"{{command_host}}"
+					],
+					"port": "{{command_port}}",
+					"path": [
+						"api",
+						"v3",
+						"device",
+						"name",
+						"{{camera_name}}",
+						"PixelFormat"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set Pixel Format",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"PixelFormat\": {\n        \"Width\":\"640\",\n        \"Height\":\"480\",\n        \"PixelFormat\": \"RGB\",\n        \"Field\": \"ANY\",\n        \"BytesPerLine\":\"7\",\n        \"SizeImage\": \"100\",\n        \"Colorspace\":\"DEFAULT\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat?PathIndex={{path_index}}",
+					"protocol": "http",
+					"host": [
+						"{{command_host}}"
+					],
+					"port": "{{command_port}}",
+					"path": [
+						"api",
+						"v3",
+						"device",
+						"name",
+						"{{camera_name}}",
+						"PixelFormat"
+					],
+					"query": [
+						{
+							"key": "PathIndex",
+							"value": "{{path_index}}"
+						}
+					]
+				},
+				"description": "Test steps:\n\n1) Execute get pixel format api to get the current pixel format values  \n2) Execute set pixel format api with valid input\n\nNote, valid input values and highly dependant on the camera."
+			},
+			"response": []
+		},
+		{
 			"name": "Start streaming with valid input and output",
 			"event": [
 				{
