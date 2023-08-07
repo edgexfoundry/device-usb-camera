@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -92,7 +93,104 @@ func (dev *Device) StopStreaming() {
 }
 
 func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) (string, error) {
-	return "", nil
+	v4l2PixelFormat, err := usbDevice.GetPixFormat()
+	if err != nil {
+		dev.lc.Errorf("Could not get pixel format, error: %s", err)
+		return "", err
+	}
+
+	var width uint64
+	widthValue, ok := params.(map[string]interface{})[PixFmtWidth]
+	if !ok {
+		width = uint64(v4l2PixelFormat.Width)
+	} else {
+		width, err = strconv.ParseUint(widthValue.(string), 0, 32)
+		if err != nil {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var height uint64
+	heightValue, ok := params.(map[string]interface{})[PixFmtHeight]
+	if !ok {
+		height = uint64(v4l2PixelFormat.Height)
+	} else {
+		height, err = strconv.ParseUint(heightValue.(string), 0, 32)
+		if err != nil {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var pixelFormat uint32
+	pixelFormatValue, ok := params.(map[string]interface{})[PixFmtPixFmt]
+	if !ok {
+		pixelFormat = v4l2PixelFormat.PixelFormat
+	} else {
+		pixelFormat, ok = PixelFormatPixelFormats[fmt.Sprint(pixelFormatValue)]
+		if !ok {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var field uint32
+	fieldValue, ok := params.(map[string]interface{})[PixFmtField]
+	if !ok {
+		field = v4l2PixelFormat.Field
+	} else {
+		field, ok = PixelFormatFields[fmt.Sprint(fieldValue)]
+		if !ok {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var bytesPerLine uint64
+	bytesPerLineValue, ok := params.(map[string]interface{})[PixFmtBytesPerLine]
+	if !ok {
+		bytesPerLine = uint64(v4l2PixelFormat.BytesPerLine)
+	} else {
+		bytesPerLine, err = strconv.ParseUint(bytesPerLineValue.(string), 0, 32)
+		if err != nil {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var sizeImage uint64
+	sizeImageValue, ok := params.(map[string]interface{})[PixFmtSizeImage]
+	if !ok {
+		sizeImage = uint64(v4l2PixelFormat.SizeImage)
+	} else {
+		sizeImage, err = strconv.ParseUint(sizeImageValue.(string), 0, 32)
+		if err != nil {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	var colorspace uint32
+	colorspaceValue, ok := params.(map[string]interface{})[PixFmtColorspace]
+	if !ok {
+		colorspace = v4l2PixelFormat.Colorspace
+	} else {
+		colorspace, ok = PixelFormatColorspaces[fmt.Sprint(colorspaceValue)]
+		if !ok {
+			return "", errors.NewCommonEdgeXWrapper(nil)
+		}
+	}
+
+	v4l2PixelFormat.Width = uint32(width)
+	v4l2PixelFormat.Height = uint32(height)
+	v4l2PixelFormat.PixelFormat = pixelFormat
+	v4l2PixelFormat.Field = field
+	v4l2PixelFormat.BytesPerLine = uint32(bytesPerLine)
+	v4l2PixelFormat.SizeImage = uint32(sizeImage)
+	v4l2PixelFormat.Colorspace = uint32(colorspace)
+
+	err = usbDevice.SetPixFormat(v4l2PixelFormat)
+	if err != nil {
+		dev.lc.Errorf("Could not set pixel format, error: %s", err)
+		return "", err
+	}
+
+	return "", err
 }
 
 // SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps

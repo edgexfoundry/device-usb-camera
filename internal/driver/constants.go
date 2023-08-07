@@ -29,6 +29,13 @@ const (
 	FrameRateValueDenominator       = "FrameRateValueDenominator"
 	FrameRateValueNumerator         = "FrameRateValueNumerator"
 	PathIndex                       = "PathIndex"
+	PixFmtWidth                     = "Width"
+	PixFmtHeight                    = "Height"
+	PixFmtField                     = "Field"
+	PixFmtPixFmt                    = "PixelFormat"
+	PixFmtBytesPerLine              = "BytesPerLine"
+	PixFmtSizeImage                 = "SizeImage"
+	PixFmtColorspace                = "Colorspace"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
