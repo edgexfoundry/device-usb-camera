@@ -454,11 +454,11 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
-		pix, edgexErr := device.SetPixelFormat(cameraDevice, params)
+		edgexErr = device.SetPixelFormat(cameraDevice, params)
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
-		d.lc.Infof("Device pixel format set to %s", pix)
+		d.lc.Infof("Pixel format set for the device %s", device.name)
 	default:
 		return errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 	}
