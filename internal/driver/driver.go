@@ -282,6 +282,12 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 
 		cv, err := d.ExecuteReadCommands(device, req, command)
 		if err != nil {
+			// flush query parameter for remaining reqs
+			for _, req := range reqs {
+				if _, ok := req.Attributes[UrlRawQuery]; ok {
+					req.Attributes[UrlRawQuery] = ""
+				}
+			}
 			return responses, err
 		}
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
@@ -418,13 +424,17 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 
 		err := d.ExecuteWriteCommands(device, req, params[i], command)
 		if err != nil {
+			// flush query parameter for remaining reqs
+			for _, req := range reqs {
+				if _, ok := req.Attributes[UrlRawQuery]; ok {
+					req.Attributes[UrlRawQuery] = ""
+				}
+			}
 			return err
 		}
-		// flush query parameter
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
-
 	}
 	return nil
 }
