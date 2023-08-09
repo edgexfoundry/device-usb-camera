@@ -93,80 +93,38 @@ func (dev *Device) StopStreaming() {
 }
 
 func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) error {
-	var v4l2PixFormat v4l2.PixFormat
-	var err error
+	v4l2PixFormat, err := usbDevice.GetPixFormat()
+	if err != nil {
+		dev.lc.Errorf("Could not get pixel format for setting new values, error: %s", err)
+		return err
+	}
 
-	var width uint64
 	widthValue, ok := params.(map[string]interface{})[PixFmtWidth]
 	if ok {
-		width, err = strconv.ParseUint(widthValue.(string), 0, 32)
+		width, err := strconv.ParseUint(widthValue.(string), 0, 32)
 		if err != nil {
-			return fmt.Errorf("error parsing width into int for device %s, error: %s", dev.name, err)
+			return fmt.Errorf("invalid input: error parsing width into int for device %s, error: %s", dev.name, err)
 		}
+		v4l2PixFormat.Width = uint32(width)
 	}
 
-	var height uint64
 	heightValue, ok := params.(map[string]interface{})[PixFmtHeight]
 	if ok {
-		height, err = strconv.ParseUint(heightValue.(string), 0, 32)
+		height, err := strconv.ParseUint(heightValue.(string), 0, 32)
 		if err != nil {
-			return fmt.Errorf("error parsing height into int for device %s, error: %s", dev.name, err)
-
+			return fmt.Errorf("invalid input: error parsing height into int for device %s, error: %s", dev.name, err)
 		}
+		v4l2PixFormat.Height = uint32(height)
 	}
 
-	var pixelFormat uint32
 	pixelFormatValue, ok := params.(map[string]interface{})[PixFmtPixFmt]
 	if ok {
-		pixelFormat, ok = PixelFormatPixelFormats[fmt.Sprint(pixelFormatValue)]
+		pixelFormat, ok := PixelFormatPixelFormats[fmt.Sprint(pixelFormatValue)]
 		if !ok {
-			return fmt.Errorf("error parsing pixelFormat for device %s", dev.name)
+			return fmt.Errorf("invalid input: error parsing pixelFormat for device %s", dev.name)
 		}
+		v4l2PixFormat.PixelFormat = pixelFormat
 	}
-
-	//fieldValue, ok := params.(map[string]interface{})[PixFmtField]
-	//if !ok {
-	//	return fmt.Errorf("error in pixel format input request for field")
-	//}
-	//field, ok := PixelFormatFields[fmt.Sprint(fieldValue)]
-	//if !ok {
-	//	return fmt.Errorf("error parsing field into string for device %s", dev.name)
-	//}
-	//
-	//bytesPerLineValue, ok := params.(map[string]interface{})[PixFmtBytesPerLine]
-	//if !ok {
-	//	return fmt.Errorf("error in pixel format input request for bytesPerLine")
-	//}
-	//bytesPerLine, err := strconv.ParseUint(bytesPerLineValue.(string), 0, 32)
-	//if err != nil {
-	//	return fmt.Errorf("error parsing bytesPerLine into int for device %s, error: %s", dev.name, err)
-	//}
-	//
-	//sizeImageValue, ok := params.(map[string]interface{})[PixFmtSizeImage]
-	//if !ok {
-	//	return fmt.Errorf("error in pixel format input request for sizeImage")
-	//}
-	//sizeImage, err := strconv.ParseUint(sizeImageValue.(string), 0, 32)
-	//if err != nil {
-	//	return fmt.Errorf("error parsing sizeImage into int for device %s, error: %s", dev.name, err)
-	//}
-	//
-	//colorspaceValue, ok := params.(map[string]interface{})[PixFmtColorspace]
-	//if !ok {
-	//	return fmt.Errorf("error in pixel format input request for colorSpace")
-	//}
-	//colorspace, ok := PixelFormatColorspaces[fmt.Sprint(colorspaceValue)]
-	//if !ok {
-	//	return fmt.Errorf("error parsing colorSpace into string for device %s", dev.name)
-	//}
-
-	v4l2PixFormat.Width = uint32(width)
-	v4l2PixFormat.Height = uint32(height)
-	v4l2PixFormat.PixelFormat = pixelFormat
-	//v4l2PixFormat.Field = field
-	//v4l2PixFormat.BytesPerLine = uint32(bytesPerLine)
-	//v4l2PixFormat.SizeImage = uint32(sizeImage)
-	//v4l2PixFormat.Colorspace = uint32(colorspace)
 
 	err = usbDevice.SetPixFormat(v4l2PixFormat)
 	if err != nil {
@@ -238,6 +196,12 @@ func (dev *Device) GetPixelFormat(usbdevice *usbdevice.Device) (interface{}, err
 	result.BytesPerLine = pixFmt.BytesPerLine
 	result.SizeImage = pixFmt.SizeImage
 	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
+	result.Priv = pixFmt.Priv
+	result.Flags = pixFmt.Flags
+	result.YcbcrEnc = v4l2.YCbCrEncodings[pixFmt.YcbcrEnc]
+	result.HSVEnc = v4l2.YCbCrEncodings[pixFmt.HSVEnc]
+	result.Quantization = v4l2.Quantizations[pixFmt.Quantization]
+	result.XferFunc = v4l2.XferFunctions[pixFmt.XferFunc]
 
 	return result, nil
 }
