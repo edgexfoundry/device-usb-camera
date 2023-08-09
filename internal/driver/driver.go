@@ -306,71 +306,79 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 	case MetadataDeviceCapability:
 		data, err = getCapability(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataCurrentVideoInput:
 		data, err = cameraDevice.GetVideoInputIndex()
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
 	case MetadataCameraStatus:
 		index := queryParams.Get(InputIndex)
 		if len(index) == 0 {
-			return cv, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
+			return nil, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
 		}
 		data, err = getInputStatus(cameraDevice, index)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
 	case MetadataImageFormats:
 		data, err = getImageFormats(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataFrameRateFormats:
 		data, err = getSupportedFrameRateFormats(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoGetFrameRate:
 		data, err = device.GetFrameRate(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataDataFormat:
 		data, err = getDataFormat(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataCroppingAbility:
 		data, err = getCropInfo(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataStreamingParameters:
 		data, err = getStreamingParameters(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoStreamUri:
+		if !d.enableRtspServer {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+				"rtsp server is not enabled, cannot get stream URI for device %s", device.name), nil)
+		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
 
 	case VideoStreamingStatus:
+		if !d.enableRtspServer {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+				"rtsp server is not enabled, cannot get streaming status for device %s", device.name), nil)
+		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
 	default:
-		return cv, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 	}
 	if err != nil {
-		return cv, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
+		return nil, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
 	}
 	return cv, nil
 }
