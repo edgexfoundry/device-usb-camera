@@ -57,4 +57,5 @@ var PixelFormatPixelFormats = map[string]uint32{
 	"MPEG":  v4l2.PixelFmtMPEG,
 	"H264":  v4l2.PixelFmtH264,
 	"MPEG4": v4l2.PixelFmtMPEG4,
+	"UYVY":  v4l2.PixelFmtUYVY,
 }
