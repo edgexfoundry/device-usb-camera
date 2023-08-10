@@ -740,7 +740,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"PixelFormat\": {\n        \"Width\":\"640\",\n        \"Height\":\"480\",\n        \"PixelFormat\": \"RGB\",\n        \"Field\": \"ANY\",\n        \"BytesPerLine\":\"7\",\n        \"SizeImage\": \"100\",\n        \"Colorspace\":\"DEFAULT\"\n    }\n}",
+					"raw": "{\n\"PixelFormat\": {\n        \"Width\":\"640\",\n        \"Height\":\"480\",\n        \"PixelFormat\": \"YUYV\"\n   }\n}",
 					"options": {
 						"raw": {
 							"language": "json"

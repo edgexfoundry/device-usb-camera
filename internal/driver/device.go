@@ -121,9 +121,19 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 	if ok {
 		pixelFormat, ok := PixelFormatPixelFormats[fmt.Sprint(pixelFormatValue)]
 		if !ok {
-			return fmt.Errorf("invalid input: error parsing pixelFormat for device %s", dev.name)
+			return fmt.Errorf("invalid input: error parsing pixelFormat or setting this pixel format not supported for device %s", dev.name)
 		}
-		v4l2PixFormat.PixelFormat = pixelFormat
+
+		// check if the given pixelFormat input for the video streaming path is supported by the device
+		supported, err := isPixFormatSupported(pixelFormat, usbDevice)
+		if err != nil {
+			return err
+		}
+		if supported {
+			v4l2PixFormat.PixelFormat = pixelFormat
+		} else {
+			return fmt.Errorf("invalid input: provided pixel format for the path not supported by the device %s", dev.name)
+		}
 	}
 
 	err = usbDevice.SetPixFormat(v4l2PixFormat)
@@ -182,8 +192,8 @@ func (dev *Device) GetFrameRate(usbDevice *usbdevice.Device) (v4l2.Fract, error)
 	return fps, nil
 }
 
-func (dev *Device) GetPixelFormat(usbdevice *usbdevice.Device) (interface{}, error) {
-	pixFmt, err := usbdevice.GetPixFormat()
+func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, error) {
+	pixFmt, err := usbDevice.GetPixFormat()
 	if err != nil {
 		return nil, err
 	}

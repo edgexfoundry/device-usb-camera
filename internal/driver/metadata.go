@@ -219,6 +219,21 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 	return r, nil
 }
 
+func isPixFormatSupported(input uint32, d *usbdevice.Device) (bool, error) {
+	pixformats, err := d.GetFormatDescriptions()
+	if err != nil {
+		return false, err
+	}
+
+	for _, format := range pixformats {
+		if input == format.PixelFormat {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 	descs, err := d.GetFormatDescriptions()
 	if err != nil {
