@@ -58,4 +58,9 @@ var PixelFormatPixelFormats = map[string]uint32{
 	"H264":  v4l2.PixelFmtH264,
 	"MPEG4": v4l2.PixelFmtMPEG4,
 	"UYVY":  v4l2.PixelFmtUYVY,
+	// pixel formats not directly included as part of v4l2 pixel format definitions
+	"BYR2": 844257602,
+	"Z16":  540422490,
+	"Y8I":  541669465,
+	"Y12I": 1228026201,
 }
