@@ -202,6 +202,20 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 	result.Height = pixFmt.Height
 	result.Width = pixFmt.Width
 	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
+	// Since the v4l2 library has limited pre-defined Pixel Format descriptions
+	// get the missing pixel format description using GetFormatDescriptions().
+	if result.PixelFormat == "" {
+		descs, err := usbDevice.GetFormatDescriptions()
+		if err != nil {
+			return nil, err
+		}
+		for _, desc := range descs {
+			if pixFmt.PixelFormat == desc.PixelFormat {
+				result.PixelFormat = desc.Description
+				break
+			}
+		}
+	}
 	result.Field = v4l2.Fields[pixFmt.Field]
 	result.BytesPerLine = pixFmt.BytesPerLine
 	result.SizeImage = pixFmt.SizeImage
