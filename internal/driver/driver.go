@@ -106,7 +106,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		_, err := os.Stat(RtspServerCmd)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return fmt.Errorf("%s file canont be found: %s", RtspServerCmd, err.Error())
+				return fmt.Errorf("%s file cannot be found: %s", RtspServerCmd, err.Error())
 			}
 		}
 		rtspProc := exec.Command(RtspServerCmd)
