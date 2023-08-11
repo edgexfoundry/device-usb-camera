@@ -101,47 +101,55 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse EnableRtspServer config: %s", err.Error())
 	}
-	if d.enableRtspServer {
-		// check to see if rtsp-simple-server file/binary exists
-		_, err := os.Stat(RtspServerCmd)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return fmt.Errorf("%s file cannot be found: %s", RtspServerCmd, err.Error())
-			}
-		}
-		rtspProc := exec.Command(RtspServerCmd)
-		rtspProc.Stdout = os.Stdout
-		err = rtspProc.Start()
-		if err != nil {
-			return fmt.Errorf("unable to start %s process: %s", RtspServerCmd, err.Error())
-		}
-		rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
-		if !ok {
-			rtspServerHostName = DefaultRtspServerHostName
-			d.lc.Warnf("service config %s not found. Use the default value: %s", RtspServerHostName, DefaultRtspServerHostName)
-		}
-		d.lc.Infof("RTSP server hostname: %s", rtspServerHostName)
-		d.rtspHostName = rtspServerHostName
+	if !d.enableRtspServer {
+		return nil
+	}
 
-		rtspPort, ok := d.ds.DriverConfigs()[RtspTcpPort]
-		if !ok {
-			rtspPort = DefaultRtspTcpPort
-			d.lc.Warnf("service config %s not found. Use the default value: %s", RtspTcpPort, DefaultRtspTcpPort)
-		}
-		d.lc.Infof("RTSP TCP port: %s", rtspPort)
-		d.rtspTcpPort = rtspPort
+	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
+	if !ok {
+		rtspServerHostName = DefaultRtspServerHostName
+		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspServerHostName, DefaultRtspServerHostName)
+	}
+	d.lc.Infof("RTSP server hostname: %s", rtspServerHostName)
+	d.rtspHostName = rtspServerHostName
 
-		rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
-		if !ok {
-			rtspAuthenticationServerUri = DefaultRtspAuthenticationServer
-			d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
-		}
-		d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
-		d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
+	rtspPort, ok := d.ds.DriverConfigs()[RtspTcpPort]
+	if !ok {
+		rtspPort = DefaultRtspTcpPort
+		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspTcpPort, DefaultRtspTcpPort)
+	}
+	d.lc.Infof("RTSP TCP port: %s", rtspPort)
+	d.rtspTcpPort = rtspPort
 
-		if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
-			d.lc.Errorf("failed to register secret update callback: %v", err)
+	rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
+	if !ok {
+		rtspAuthenticationServerUri = DefaultRtspAuthenticationServer
+		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
+	}
+	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
+	d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
+
+	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
+		d.lc.Errorf("failed to register secret update callback: %v", err)
+	}
+
+	// check to see if rtsp-simple-server file/binary exists
+	_, err = os.Stat(RtspServerCmd)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("%s file cannot be found: %s", RtspServerCmd, err.Error())
+		} else if os.IsPermission(err) {
+			return fmt.Errorf("permission denied for %s: %s", RtspServerCmd, err.Error())
+		} else {
+			return fmt.Errorf("failed to validate file %s: %s", RtspServerCmd, err.Error())
 		}
+	}
+
+	rtspProc := exec.Command(RtspServerCmd)
+	rtspProc.Stdout = os.Stdout
+	err = rtspProc.Start()
+	if err != nil {
+		return fmt.Errorf("unable to start %s process: %s", RtspServerCmd, err.Error())
 	}
 
 	return nil
@@ -162,17 +170,22 @@ func (d *Driver) Start() error {
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshAllDevicePaths()
 
-	if d.enableRtspServer {
+	if !d.enableRtspServer {
+		d.lc.Info("Rtsp server is disabled")
+		return nil
+	}
 
-		d.wg.Add(1)
-		go d.StartRTSPCredentialServer()
+	d.wg.Add(1)
+	go func() {
+		defer d.wg.Done()
+		d.StartRTSPCredentialServer()
+	}()
 
-		for _, dev := range d.activeDevices {
-			if dev.autoStreaming {
-				edgexErr := d.startStreaming(dev)
-				if edgexErr != nil {
-					d.lc.Errorf("failed to start video streaming for device %s, error: %s", dev.name, edgexErr)
-				}
+	for _, dev := range d.activeDevices {
+		if dev.autoStreaming {
+			edgexErr := d.startStreaming(dev)
+			if edgexErr != nil {
+				d.lc.Errorf("failed to start video streaming for device %s, error: %s", dev.name, edgexErr)
 			}
 		}
 	}
@@ -495,23 +508,24 @@ func (d *Driver) Stop(force bool) error {
 	// The call to Wait() waits for StopStreaming to return and startStreaming to end.
 	defer d.wg.Wait()
 
-	if d.enableRtspServer {
+	if !d.enableRtspServer {
+		return nil
+	}
 
-		if d.rtspAuthServer != nil {
-			err := d.rtspAuthServer.Shutdown(context.Background())
-			if err != nil {
-				d.lc.Errorf("Error occurred while shutting down the rtsp auth server: %v", err)
-			}
+	if d.rtspAuthServer != nil {
+		err := d.rtspAuthServer.Shutdown(context.Background())
+		if err != nil {
+			d.lc.Errorf("Error occurred while shutting down the rtsp auth server: %v", err)
 		}
+	}
 
-		d.wg.Add(len(d.activeDevices))
+	d.wg.Add(len(d.activeDevices))
 
-		for _, device := range d.activeDevices {
-			go func(device *Device) {
-				device.StopStreaming()
-				d.wg.Done()
-			}(device)
-		}
+	for _, device := range d.activeDevices {
+		go func(device *Device) {
+			device.StopStreaming()
+			d.wg.Done()
+		}(device)
 	}
 	return nil
 
