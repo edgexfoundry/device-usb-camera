@@ -96,7 +96,7 @@ deviceResources:
       valueType: "Object"
       readWrite: "RW"
   - name: "PixelFormat"
-    description: "Set and get the pixel format, height and width"
+    description: "Set and get the video pixel format"
     attributes:
       getFunction: "VIDEO_GET_PIXELFORMAT"
       setFunction: "VIDEO_SET_PIXELFORMAT"

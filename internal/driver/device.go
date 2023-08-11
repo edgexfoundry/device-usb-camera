@@ -93,9 +93,10 @@ func (dev *Device) StopStreaming() {
 }
 
 func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) error {
-	v4l2PixFormat, err := usbDevice.GetPixFormat()
+	// Get the current video pixel format to populate the fields missing from the input
+	v4l2PixelFormat, err := usbDevice.GetPixFormat()
 	if err != nil {
-		dev.lc.Errorf("Could not get pixel format for setting new values, error: %s", err)
+		dev.lc.Errorf("error getting current pixel format for the device %s, error: %s", dev.name, err)
 		return err
 	}
 
@@ -103,42 +104,42 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 	if ok {
 		width, err := strconv.ParseUint(widthValue.(string), 0, 32)
 		if err != nil {
-			return fmt.Errorf("invalid input: error parsing width into int for device %s, error: %s", dev.name, err)
+			return fmt.Errorf("invalid input: error parsing width for the device %s, error: %s", dev.name, err)
 		}
-		v4l2PixFormat.Width = uint32(width)
+		v4l2PixelFormat.Width = uint32(width)
 	}
 
 	heightValue, ok := params.(map[string]interface{})[PixFmtHeight]
 	if ok {
 		height, err := strconv.ParseUint(heightValue.(string), 0, 32)
 		if err != nil {
-			return fmt.Errorf("invalid input: error parsing height into int for device %s, error: %s", dev.name, err)
+			return fmt.Errorf("invalid input: error parsing height for the device %s, error: %s", dev.name, err)
 		}
-		v4l2PixFormat.Height = uint32(height)
+		v4l2PixelFormat.Height = uint32(height)
 	}
 
-	pixelFormatValue, ok := params.(map[string]interface{})[PixFmtPixFmt]
+	pixFormatValue, ok := params.(map[string]interface{})[PixFmtPixFmt]
 	if ok {
-		pixelFormat, ok := PixelFormatPixelFormats[fmt.Sprint(pixelFormatValue)]
+		pixelFormat, ok := PixelFormatV4l2Mappings[fmt.Sprint(pixFormatValue)]
 		if !ok {
-			return fmt.Errorf("invalid input: error parsing pixelFormat or setting this pixel format not supported for device %s", dev.name)
+			return fmt.Errorf("invalid input: error parsing pixelFormat for the device %s, error: %s", dev.name, err)
 		}
 
-		// check if the given pixelFormat input for the video streaming path is supported by the device
+		// Check if the given pixelFormat is supported for the device video streaming path
 		supported, err := isPixFormatSupported(pixelFormat, usbDevice)
 		if err != nil {
 			return err
 		}
 		if supported {
-			v4l2PixFormat.PixelFormat = pixelFormat
+			v4l2PixelFormat.PixelFormat = pixelFormat
 		} else {
-			return fmt.Errorf("invalid input: provided pixel format for the path not supported by the device %s", dev.name)
+			return fmt.Errorf("invalid input: pixelFormat for the given path not supported by the device %s", dev.name)
 		}
 	}
 
-	err = usbDevice.SetPixFormat(v4l2PixFormat)
+	err = usbDevice.SetPixFormat(v4l2PixelFormat)
 	if err != nil {
-		dev.lc.Errorf("Could not set pixel format for device %s, error: %s", dev.name, err)
+		dev.lc.Errorf("error setting pixel format for the device %s, error: %s", dev.name, err)
 		return err
 	}
 
@@ -252,4 +253,19 @@ func buildDeviceName(cardName, serialNumber string) string {
 		// replace all the reserved chars with an underscore, and trim any leftovers
 		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(cardName, "_"), "_"),
 		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(serialNumber, "_"), "_"))
+}
+
+func isPixFormatSupported(input uint32, d *usbdevice.Device) (bool, error) {
+	pixFormats, err := d.GetFormatDescriptions()
+	if err != nil {
+		return false, err
+	}
+
+	for _, pix := range pixFormats {
+		if input == pix.PixelFormat {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

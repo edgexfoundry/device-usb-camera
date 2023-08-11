@@ -48,7 +48,7 @@ type PixelFormat struct {
 	XferFunc     string `json:"XferFunc"`
 }
 
-var PixelFormatPixelFormats = map[string]uint32{
+var PixelFormatV4l2Mappings = map[string]uint32{
 	"RGB":   v4l2.PixelFmtRGB24,
 	"GREY":  v4l2.PixelFmtGrey,
 	"YUYV":  v4l2.PixelFmtYUYV,
