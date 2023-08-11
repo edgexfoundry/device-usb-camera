@@ -29,9 +29,9 @@ const (
 	FrameRateValueDenominator       = "FrameRateValueDenominator"
 	FrameRateValueNumerator         = "FrameRateValueNumerator"
 	PathIndex                       = "PathIndex"
-	PixFmtWidth                     = "Width"
-	PixFmtHeight                    = "Height"
-	PixFmtPixFmt                    = "PixelFormat"
+	Width                           = "Width"
+	Height                          = "Height"
+	PixFormat                       = "PixelFormat"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
@@ -81,4 +81,10 @@ const (
 	UdevSerialShort = "ID_SERIAL_SHORT"
 	UdevSerial      = "ID_SERIAL"
 	UdevV4lProduct  = "ID_V4L_PRODUCT"
+
+	// Pixel Formats not supported by go4vl pre-defined pixel format definitions
+	BYR2PixFmt     = 844257602
+	DepthZ16PixFmt = 540422490
+	Y8IPixFmt      = 541669465
+	Y12IPixFmt     = 28026201
 )

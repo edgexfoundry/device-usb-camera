@@ -100,7 +100,7 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 		return err
 	}
 
-	widthValue, ok := params.(map[string]interface{})[PixFmtWidth]
+	widthValue, ok := params.(map[string]interface{})[Width]
 	if ok {
 		width, err := strconv.ParseUint(widthValue.(string), 0, 32)
 		if err != nil {
@@ -109,7 +109,7 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 		v4l2PixelFormat.Width = uint32(width)
 	}
 
-	heightValue, ok := params.(map[string]interface{})[PixFmtHeight]
+	heightValue, ok := params.(map[string]interface{})[Height]
 	if ok {
 		height, err := strconv.ParseUint(heightValue.(string), 0, 32)
 		if err != nil {
@@ -118,7 +118,7 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 		v4l2PixelFormat.Height = uint32(height)
 	}
 
-	pixFormatValue, ok := params.(map[string]interface{})[PixFmtPixFmt]
+	pixFormatValue, ok := params.(map[string]interface{})[PixFormat]
 	if ok {
 		pixelFormat, ok := PixelFormatV4l2Mappings[fmt.Sprint(pixFormatValue)]
 		if !ok {
@@ -199,11 +199,23 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 		return nil, err
 	}
 
-	result := PixelFormat{}
-	result.Height = pixFmt.Height
-	result.Width = pixFmt.Width
-	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
-	// Since the v4l2 library has limited pre-defined Pixel Format descriptions
+	result := PixelFormat{
+		Width:        pixFmt.Width,
+		Height:       pixFmt.Height,
+		PixelFormat:  v4l2.PixelFormats[pixFmt.PixelFormat],
+		Field:        v4l2.Fields[pixFmt.Field],
+		BytesPerLine: pixFmt.BytesPerLine,
+		SizeImage:    pixFmt.SizeImage,
+		Colorspace:   v4l2.Colorspaces[pixFmt.Colorspace],
+		Priv:         pixFmt.Priv,
+		Flags:        pixFmt.Flags,
+		YcbcrEnc:     v4l2.YCbCrEncodings[pixFmt.YcbcrEnc],
+		HSVEnc:       v4l2.YCbCrEncodings[pixFmt.HSVEnc],
+		Quantization: v4l2.Quantizations[pixFmt.Quantization],
+		XferFunc:     v4l2.XferFunctions[pixFmt.XferFunc],
+	}
+
+	// Since the go4vl library has limited pre-defined Pixel Format descriptions
 	// get the missing pixel format description using GetFormatDescriptions().
 	if result.PixelFormat == "" {
 		descs, err := usbDevice.GetFormatDescriptions()
@@ -217,16 +229,6 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 			}
 		}
 	}
-	result.Field = v4l2.Fields[pixFmt.Field]
-	result.BytesPerLine = pixFmt.BytesPerLine
-	result.SizeImage = pixFmt.SizeImage
-	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
-	result.Priv = pixFmt.Priv
-	result.Flags = pixFmt.Flags
-	result.YcbcrEnc = v4l2.YCbCrEncodings[pixFmt.YcbcrEnc]
-	result.HSVEnc = v4l2.YCbCrEncodings[pixFmt.HSVEnc]
-	result.Quantization = v4l2.Quantizations[pixFmt.Quantization]
-	result.XferFunc = v4l2.XferFunctions[pixFmt.XferFunc]
 
 	return result, nil
 }
