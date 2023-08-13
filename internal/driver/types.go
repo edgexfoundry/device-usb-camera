@@ -32,7 +32,7 @@ type FrameRateFormat struct {
 	FrameRates  []FrameInfo
 }
 
-type PixelFormat struct {
+type VideoPixelFormat struct {
 	Width        uint32 `json:"Width"`
 	Height       uint32 `json:"Height"`
 	PixelFormat  string `json:"PixelFormat"`
@@ -59,8 +59,8 @@ var PixelFormatV4l2Mappings = map[string]uint32{
 	"MPEG4": v4l2.PixelFmtMPEG4,
 	"UYVY":  v4l2.PixelFmtUYVY,
 	// pixel formats not supported by go4vl pixel format definitions
-	"BYR2": BYR2PixFmt,
-	"Z16":  DepthZ16PixFmt,
-	"Y8I":  Y8IPixFmt,
-	"Y12I": Y12IPixFmt,
+	"BYR2": PixFmtBYR2,
+	"Z16":  PixFmtDepthZ16,
+	"Y8I":  PixFmtY8I,
+	"Y12I": PixFmtY12I,
 }

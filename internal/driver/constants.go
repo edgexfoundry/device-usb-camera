@@ -31,7 +31,7 @@ const (
 	PathIndex                       = "PathIndex"
 	Width                           = "Width"
 	Height                          = "Height"
-	PixFormat                       = "PixelFormat"
+	PixelFormat                     = "PixelFormat"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
@@ -83,8 +83,8 @@ const (
 	UdevV4lProduct  = "ID_V4L_PRODUCT"
 
 	// Pixel Formats not supported by go4vl pre-defined pixel format definitions
-	BYR2PixFmt     = 844257602
-	DepthZ16PixFmt = 540422490
-	Y8IPixFmt      = 541669465
-	Y12IPixFmt     = 28026201
+	PixFmtBYR2     = 844257602
+	PixFmtDepthZ16 = 540422490
+	PixFmtY8I      = 541669465
+	PixFmtY12I     = 28026201
 )

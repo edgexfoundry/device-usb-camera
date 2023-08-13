@@ -320,7 +320,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 	case VideoGetPixelFormat:
 		data, err = device.GetPixelFormat(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataDataFormat:

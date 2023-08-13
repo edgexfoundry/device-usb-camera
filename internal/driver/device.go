@@ -118,7 +118,7 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 		v4l2PixelFormat.Height = uint32(height)
 	}
 
-	pixFormatValue, ok := params.(map[string]interface{})[PixFormat]
+	pixFormatValue, ok := params.(map[string]interface{})[PixelFormat]
 	if ok {
 		pixelFormat, ok := PixelFormatV4l2Mappings[fmt.Sprint(pixFormatValue)]
 		if !ok {
@@ -199,7 +199,7 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 		return nil, err
 	}
 
-	result := PixelFormat{
+	result := VideoPixelFormat{
 		Width:        pixFmt.Width,
 		Height:       pixFmt.Height,
 		PixelFormat:  v4l2.PixelFormats[pixFmt.PixelFormat],
