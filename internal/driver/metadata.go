@@ -107,16 +107,17 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	pixDescription, _ := getCompleteFormatMapEntry(pixFmt.PixelFormat)
-	dataFormat := DataFormat{}
-	dataFormat.Height = pixFmt.Height
-	dataFormat.Width = pixFmt.Width
-	dataFormat.PixelFormat = pixFmt.PixelFormat
-	dataFormat.PixelFormatDescription = pixDescription
-	dataFormat.Field = v4l2.Fields[pixFmt.Field]
-	dataFormat.BytesPerLine = pixFmt.BytesPerLine
-	dataFormat.SizeImage = pixFmt.SizeImage
-	dataFormat.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
+	pixDescription := getCompleteFormatMapEntry(d, pixFmt.PixelFormat)
+	dataFormat := DataFormat{
+		Height:                 pixFmt.Height,
+		Width:                  pixFmt.Width,
+		PixelFormat:            pixFmt.PixelFormat,
+		PixelFormatDescription: pixDescription,
+		Field:                  v4l2.Fields[pixFmt.Field],
+		BytesPerLine:           pixFmt.BytesPerLine,
+		SizeImage:              pixFmt.SizeImage,
+		Colorspace:             v4l2.Colorspaces[pixFmt.Colorspace],
+	}
 
 	xfunc := v4l2.XferFunctions[pixFmt.XferFunc]
 	if pixFmt.XferFunc == v4l2.XferFuncDefault {
@@ -215,7 +216,7 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		pixDescription, _ := getCompleteFormatMapEntry(desc.PixelFormat)
+		pixDescription := getCompleteFormatMapEntry(d, desc.PixelFormat)
 		r.ImageFormats = append(r.ImageFormats, ImageFormat{
 			Index:       desc.Index,
 			BufType:     desc.StreamType,
@@ -244,7 +245,7 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 	var r result
 	for _, desc := range descs {
 		var format FrameRateFormat
-		format.Description, _ = getCompleteFormatMapEntry(desc.PixelFormat)
+		format.Description = getCompleteFormatMapEntry(d, desc.PixelFormat)
 		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
 			return nil, err
@@ -287,7 +288,7 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 func GetFrameRate(d *usbdevice.Device) (interface{}, error) {
 	streamParam, err := d.GetStreamParam()
 	if err != nil {
-		return v4l2.Fract{}, err
+		return nil, err
 	}
 	timePerFrame := streamParam.Capture.TimePerFrame
 	var fps v4l2.Fract
@@ -298,18 +299,15 @@ func GetFrameRate(d *usbdevice.Device) (interface{}, error) {
 	return result, nil
 }
 
-func getCompleteFormatMapEntry(key uint32) (string, bool) {
-	unsupported := map[uint32]string{
-		PixelFmtDepth:  PixelFmtDepthDesc,
-		PixelFmtUYVY:   PixelFmtUYVYDesc,
-		PixelFmtGrey8:  PixelFmtGrey8Desc,
-		PixelFmtGrey12: PixelFmtGrey12Desc,
+func getCompleteFormatMapEntry(usbDevice *usbdevice.Device, pixFmt uint32) string {
+	descs, err := usbDevice.GetFormatDescriptions()
+	if err != nil {
+		return ""
 	}
-	if value, ok := unsupported[key]; ok {
-		return value, ok
+	for _, desc := range descs {
+		if pixFmt == desc.PixelFormat {
+			return desc.Description
+		}
 	}
-	if value, ok := v4l2.PixelFormats[key]; ok {
-		return value, ok
-	}
-	return "", false
+	return ""
 }

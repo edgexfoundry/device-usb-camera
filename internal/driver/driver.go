@@ -279,7 +279,6 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
-
 		cv, err := d.ExecuteReadCommands(device, req, command)
 		if err != nil {
 			// flush query parameter for remaining reqs
@@ -564,11 +563,11 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 	var videoPath string
 	pathIndex := queryParams.Get(PathIndex)
 	streamFormat := queryParams.Get(StreamFormat)
-	if len(pathIndex) == 0 && len(streamFormat) == 0 { // most common case
+	if pathIndex == "" && streamFormat == "" { // most common case
 		videoPath = device.paths[0]
-	} else if len(pathIndex) != 0 && len(streamFormat) != 0 { // both cannot be provided
+	} else if pathIndex != "" && streamFormat != "" { // both cannot be provided
 		return "", errors.NewCommonEdgeX(errors.KindIOError, "Cannot provide both PathIndex and StreamFormat query parameters to command", nil)
-	} else if len(pathIndex) != 0 { // use path index video path value
+	} else if pathIndex != "" { // use path index video path value
 		pathIndexConv, err := strconv.Atoi(pathIndex)
 		if err != nil {
 			return "", err
@@ -578,20 +577,19 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 				fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 		}
 		videoPath = device.paths[pathIndexConv]
-	} else if len(streamFormat) != 0 { // use stream format video path value
-		if streamFormat == RGB || streamFormat == Greyscale || streamFormat == Depth {
-			for _, path := range device.paths {
-				videoPath, err := getStreamFormatPath(path, streamFormat)
-				if err != nil {
-					continue
-				} else {
-					return videoPath, nil
-				}
-			}
-			return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
-		} else {
+	} else if streamFormat != "" { // use stream format video path value
+		if streamFormat != RGB && streamFormat != Greyscale && streamFormat != Depth {
 			return "", errors.NewCommonEdgeX(errors.KindIOError, "Invalid stream format. Valid options are 'RGB', 'Greyscale', or 'Depth.'", nil)
 		}
+		for _, path := range device.paths {
+			videoPath, err := getStreamFormatPath(path, streamFormat)
+			if err != nil {
+				continue
+			} else {
+				return videoPath, nil
+			}
+		}
+		return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
 	}
 	return videoPath, nil
 }
@@ -948,18 +946,10 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 func (d *Driver) updateTranscoder(device *Device, fdPath string) error {
 	trans := device.transcoder
 	err := trans.SetInputPath(fdPath)
-	// err := trans.Stop()
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to initialize new transcoder for device %s", device.name), err)
+			fmt.Sprintf("failed to set new path for transcoder for device %s", device.name), err)
 	}
-	// // Initialize transcoder passing the input path and output path, along with the credentials
-	// err = trans.Initialize(fdPath, d.getAuthenticatedRTSPUri(name))
-	// if err != nil {
-	// 	return errors.NewCommonEdgeX(errors.KindServerError,
-	// 		fmt.Sprintf("failed to initialize new transcoder for device %s", name), err)
-	// }
-	// trans.MediaFile().SetOutputFormat(RtspUriScheme)
 	return nil
 }
 

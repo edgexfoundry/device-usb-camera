@@ -93,4 +93,9 @@ const (
 	PixFmtDepthZ16 = 540422490
 	PixFmtY8I      = 541669465
 	PixFmtY12I     = 28026201
+	// unsupported pixel formats
+	PixelFmtDepth  = 540422490
+	PixelFmtUYVY   = 1498831189
+	PixelFmtGrey8  = 541669465
+	PixelFmtGrey12 = 1228026201
 )
