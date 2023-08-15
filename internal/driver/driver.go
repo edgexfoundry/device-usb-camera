@@ -952,6 +952,7 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 }
 
 func (d *Driver) updateDevicePaths(device models.Device) {
+	oldPaths := device.Protocols[UsbProtocol][Paths]
 	var init []string
 	device.Protocols[UsbProtocol][Paths] = init
 	allDevices, _ := usbDevice.GetAllDevicePaths()
@@ -967,8 +968,14 @@ func (d *Driver) updateDevicePaths(device models.Device) {
 			}
 		}
 	}
-	if err := d.ds.UpdateDevice(device); err != nil {
-		d.lc.Errorf("failed to update paths for the device %s", device.Name)
+
+	if !slicesAreEqual(d.lc, device.Protocols[UsbProtocol][Paths], oldPaths) {
+		if err := d.ds.PatchDevice(dtos.UpdateDevice{
+			Name:      &device.Name,
+			Protocols: dtos.FromProtocolModelsToDTOs(device.Protocols),
+		}); err != nil {
+			d.lc.Errorf("failed to update paths for the device %s", device.Name)
+		}
 	}
 }
 
