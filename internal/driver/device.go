@@ -120,7 +120,7 @@ func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{
 
 	pixFormatValue, ok := params.(map[string]interface{})[PixelFormat]
 	if ok {
-		pixelFormat, ok := PixelFormatV4l2Mappings[fmt.Sprint(pixFormatValue)]
+		pixelFormat, ok := PixelFormatV4l2Mappings[pixFormatValue.(string)]
 		if !ok {
 			return fmt.Errorf("invalid input: error parsing pixelFormat for the device %s, error: %s", dev.name, err)
 		}
