@@ -99,18 +99,6 @@
 						"name",
 						"{{camera_name}}",
 						"CameraInfo"
-					],
-					"query": [
-						{
-							"key": "PathIndex",
-							"value": "{{path_index}}",
-							"disabled": true
-						},
-						{
-							"key": "StreamFormat",
-							"value": "{{stream_format}}",
-							"disabled": true
-						}
 					]
 				}
 			},

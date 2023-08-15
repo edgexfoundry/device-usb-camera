@@ -585,9 +585,8 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 			videoPath, err := getStreamFormatPath(path, streamFormat)
 			if err != nil {
 				continue
-			} else {
-				return videoPath, nil
 			}
+			return videoPath, nil
 		}
 		return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
 	}
