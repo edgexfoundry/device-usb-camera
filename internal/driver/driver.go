@@ -141,7 +141,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		} else if os.IsPermission(err) {
 			return fmt.Errorf("permission denied for %s: %s", RtspServerCmd, err.Error())
 		} else {
-			return fmt.Errorf("failed to validate file %s: %s", RtspServerCmd, err.Error())
+			return fmt.Errorf("unknown error occurred while checking for rtsp-server binary file %s: %s", RtspServerCmd, err.Error())
 		}
 	}
 
@@ -195,7 +195,6 @@ func (d *Driver) Start() error {
 
 func (d *Driver) StartRTSPCredentialServer() {
 	d.lc.Infof("Starting rtsp authentication server on %s", d.rtspAuthenticationServerUri)
-	defer d.wg.Done()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
