@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"path"
 	"strconv"
@@ -56,6 +57,7 @@ type Driver struct {
 	rtspAuthenticationServerUri string
 	mutex                       sync.Mutex
 	rtspAuthServer              *http.Server
+	enableRtspServer            bool
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
@@ -94,6 +96,15 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		return fmt.Errorf("failed to add API route %s, error: %s", ApiRefreshDevicePaths, err.Error())
 	}
 
+	var err error
+	d.enableRtspServer, err = strconv.ParseBool(d.ds.DriverConfigs()[EnableRtspServer])
+	if err != nil {
+		return fmt.Errorf("failed to parse EnableRtspServer config: %s", err.Error())
+	}
+	if !d.enableRtspServer {
+		return nil
+	}
+
 	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
 	if !ok {
 		rtspServerHostName = DefaultRtspServerHostName
@@ -122,6 +133,25 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		d.lc.Errorf("failed to register secret update callback: %v", err)
 	}
 
+	// check to see if rtsp-simple-server file/binary exists
+	_, err = os.Stat(RtspServerCmd)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("%s file cannot be found: %s", RtspServerCmd, err.Error())
+		} else if os.IsPermission(err) {
+			return fmt.Errorf("permission denied for %s: %s", RtspServerCmd, err.Error())
+		} else {
+			return fmt.Errorf("unknown error occurred while checking for rtsp-server binary file %s: %s", RtspServerCmd, err.Error())
+		}
+	}
+
+	rtspProc := exec.Command(RtspServerCmd)
+	rtspProc.Stdout = os.Stdout
+	err = rtspProc.Start()
+	if err != nil {
+		return fmt.Errorf("unable to start %s process: %s", RtspServerCmd, err.Error())
+	}
+
 	return nil
 }
 
@@ -140,8 +170,16 @@ func (d *Driver) Start() error {
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshAllDevicePaths()
 
+	if !d.enableRtspServer {
+		d.lc.Info("Rtsp server is disabled")
+		return nil
+	}
+
 	d.wg.Add(1)
-	go d.StartRTSPCredentialServer()
+	go func() {
+		defer d.wg.Done()
+		d.StartRTSPCredentialServer()
+	}()
 
 	for _, dev := range d.activeDevices {
 		if dev.autoStreaming {
@@ -151,12 +189,12 @@ func (d *Driver) Start() error {
 			}
 		}
 	}
+
 	return nil
 }
 
 func (d *Driver) StartRTSPCredentialServer() {
 	d.lc.Infof("Starting rtsp authentication server on %s", d.rtspAuthenticationServerUri)
-	defer d.wg.Done()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
@@ -280,71 +318,79 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 	case MetadataDeviceCapability:
 		data, err = getCapability(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataCurrentVideoInput:
 		data, err = cameraDevice.GetVideoInputIndex()
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeInt32, data)
 	case MetadataCameraStatus:
 		index := queryParams.Get(InputIndex)
 		if len(index) == 0 {
-			return cv, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
+			return nil, fmt.Errorf("mandatory query parameter %s not found", InputIndex)
 		}
 		data, err = getInputStatus(cameraDevice, index)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, data)
 	case MetadataImageFormats:
 		data, err = getImageFormats(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataFrameRateFormats:
 		data, err = getSupportedFrameRateFormats(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoGetFrameRate:
 		data, err = device.GetFrameRate(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataDataFormat:
 		data, err = getDataFormat(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataCroppingAbility:
 		data, err = getCropInfo(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case MetadataStreamingParameters:
 		data, err = getStreamingParameters(cameraDevice)
 		if err != nil {
-			return cv, errorWrapper.CommandError(command, err)
+			return nil, errorWrapper.CommandError(command, err)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoStreamUri:
+		if !d.enableRtspServer {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+				"rtsp server is not enabled, cannot get stream URI for device %s", device.name), nil)
+		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
 
 	case VideoStreamingStatus:
+		if !d.enableRtspServer {
+			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+				"rtsp server is not enabled, cannot get streaming status for device %s", device.name), nil)
+		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, device.streamingStatus)
 	default:
-		return cv, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("unsupported command %s", command), nil)
 	}
 	if err != nil {
-		return cv, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
+		return nil, errors.NewCommonEdgeX(errors.KindServerError, "failed to create CommandValue", err)
 	}
 	return cv, nil
 }
@@ -410,6 +456,10 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
 	case VideoStopStreaming:
+		if !d.enableRtspServer {
+			return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+				"rtsp server is not enabled, cannot stop streaming for device %s", device.name), nil)
+		}
 		device.StopStreaming()
 	case VideoSetFrameRate:
 		frameRateParam, edgexErr := params[i].ObjectValue()
@@ -453,6 +503,14 @@ func (d *Driver) Stop(force bool) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
+	// The wait group is used here as well as in the startStreaming functions.
+	// The call to Wait() waits for StopStreaming to return and startStreaming to end.
+	defer d.wg.Wait()
+
+	if !d.enableRtspServer {
+		return nil
+	}
+
 	if d.rtspAuthServer != nil {
 		err := d.rtspAuthServer.Shutdown(context.Background())
 		if err != nil {
@@ -462,10 +520,6 @@ func (d *Driver) Stop(force bool) error {
 
 	d.wg.Add(len(d.activeDevices))
 
-	// The wait group is used here as well as in the startStreaming functions.
-	// The call to Wait() waits for StopStreaming to return and startStreaming to end.
-	defer d.wg.Wait()
-
 	for _, device := range d.activeDevices {
 		go func(device *Device) {
 			device.StopStreaming()
@@ -473,6 +527,7 @@ func (d *Driver) Stop(force bool) error {
 		}(device)
 	}
 	return nil
+
 }
 
 func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, error) {
@@ -558,7 +613,9 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if device, ok := d.activeDevices[deviceName]; ok {
-		device.StopStreaming()
+		if d.enableRtspServer {
+			device.StopStreaming()
+		}
 		delete(d.activeDevices, deviceName)
 		d.lc.Debugf("Device %s is removed", deviceName)
 	}
@@ -844,6 +901,12 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 }
 
 func (d *Driver) startStreaming(device *Device) errors.EdgeX {
+	// check to see if rtsp server is enabled
+	if !d.enableRtspServer {
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
+			"rtsp server is not enabled, cannot start streaming for device %s", device.name), nil)
+	}
+
 	progressChan, errChan, err := device.StartStreaming()
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
