@@ -821,7 +821,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				}
@@ -873,7 +879,13 @@
 					"query": [
 						{
 							"key": "PathIndex",
-							"value": "{{path_index}}"
+							"value": "{{path_index}}",
+							"disabled": true
+						},
+						{
+							"key": "StreamFormat",
+							"value": "{{stream_format}}",
+							"disabled": true
 						}
 					]
 				},

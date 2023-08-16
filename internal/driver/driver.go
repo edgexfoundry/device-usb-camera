@@ -41,6 +41,25 @@ import (
 var driver *Driver
 var once sync.Once
 
+var (
+	streamFormatTypeMap = map[uint32]string{
+		v4l2.PixelFmtRGB24: RGB,
+		v4l2.PixelFmtGrey:  Greyscale,
+		v4l2.PixelFmtYUYV:  RGB,
+		v4l2.PixelFmtMJPEG: RGB,
+		v4l2.PixelFmtJPEG:  RGB,
+		v4l2.PixelFmtMPEG:  RGB,
+		v4l2.PixelFmtH264:  RGB,
+		v4l2.PixelFmtMPEG4: RGB,
+		PixFmtBYR2:         RGB,
+		PixFmtUYVY:         Greyscale,
+		PixFmtY8I:          Greyscale,
+		PixFmtY12I:         Greyscale,
+		PixFmtGrey12I:      Greyscale,
+		PixFmtDepthZ16:     Depth,
+	}
+)
+
 const (
 	// rtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
 	rtspAuthSecretName string = "rtspauth"
@@ -513,7 +532,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		}
 		d.lc.Infof("Device frame rate set to %s", fps)
 	case VideoSetPixelFormat:
-		params, edgexErr := params[i].ObjectValue()
+		params, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
@@ -603,31 +622,12 @@ func getStreamFormatPath(path string, streamFormat string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	currentType, _ := getStreamFormatType(formatDescriptions[0].PixelFormat)
+	currentType := streamFormatTypeMap[formatDescriptions[0].PixelFormat]
 	if currentType == streamFormat {
 		return path, nil
 	} else {
 		return "", errors.NewCommonEdgeX(errors.KindInvalidId, "Provided stream format does not match current stream format type.", nil)
 	}
-}
-
-func getStreamFormatType(key uint32) (string, bool) {
-	streamFormatTypeMap := map[uint32]string{
-		v4l2.PixelFmtRGB24: RGB,
-		v4l2.PixelFmtGrey:  Greyscale,
-		v4l2.PixelFmtYUYV:  RGB,
-		v4l2.PixelFmtMJPEG: RGB,
-		v4l2.PixelFmtJPEG:  RGB,
-		v4l2.PixelFmtMPEG:  RGB,
-		v4l2.PixelFmtH264:  RGB,
-		v4l2.PixelFmtMPEG4: RGB,
-		PixelFmtDepth:      Depth,
-		PixelFmtUYVY:       Greyscale,
-		PixelFmtGrey8:      Greyscale,
-		PixelFmtGrey12:     Greyscale,
-	}
-	value, ok := streamFormatTypeMap[key]
-	return value, ok
 }
 
 // AddDevice is a callback function that is invoked
