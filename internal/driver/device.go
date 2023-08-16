@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -91,6 +92,60 @@ func (dev *Device) StopStreaming() {
 	}
 }
 
+func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) error {
+	// Get the current video pixel format to populate the fields missing from the input
+	v4l2PixelFormat, err := usbDevice.GetPixFormat()
+	if err != nil {
+		dev.lc.Errorf("error getting current pixel format for the device %s, error: %s", dev.name, err)
+		return err
+	}
+
+	widthValue, ok := params.(map[string]interface{})[Width]
+	if ok {
+		width, err := strconv.ParseUint(widthValue.(string), 0, 32)
+		if err != nil {
+			return fmt.Errorf("invalid input: error parsing width for the device %s, error: %s", dev.name, err)
+		}
+		v4l2PixelFormat.Width = uint32(width)
+	}
+
+	heightValue, ok := params.(map[string]interface{})[Height]
+	if ok {
+		height, err := strconv.ParseUint(heightValue.(string), 0, 32)
+		if err != nil {
+			return fmt.Errorf("invalid input: error parsing height for the device %s, error: %s", dev.name, err)
+		}
+		v4l2PixelFormat.Height = uint32(height)
+	}
+
+	pixFormatValue, ok := params.(map[string]interface{})[PixelFormat]
+	if ok {
+		pixelFormat, ok := PixelFormatV4l2Mappings[pixFormatValue.(string)]
+		if !ok {
+			return fmt.Errorf("invalid input: error parsing pixelFormat for the device %s, error: %s", dev.name, err)
+		}
+
+		// Check if the given pixelFormat is supported for the device video streaming path
+		supported, err := isPixFormatSupported(pixelFormat, usbDevice)
+		if err != nil {
+			return err
+		}
+		if supported {
+			v4l2PixelFormat.PixelFormat = pixelFormat
+		} else {
+			return fmt.Errorf("invalid input: pixelFormat for the given path not supported by the device %s", dev.name)
+		}
+	}
+
+	err = usbDevice.SetPixFormat(v4l2PixelFormat)
+	if err != nil {
+		dev.lc.Errorf("error setting pixel format for the device %s, error: %s", dev.name, err)
+		return err
+	}
+
+	return nil
+}
+
 // SetFrameRate updates the fps on the device side of the service. Note that this won't update the rtsp output stream fps
 func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator uint32, frameRateDenominator uint32) (string, error) {
 	fps := fmt.Sprintf("%f", float32(frameRateNumerator)/float32(frameRateDenominator))
@@ -115,7 +170,7 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator 
 		return "", err
 	}
 	// this swaps user-friendly frame rate (frames per second) to
-	// the internally track frame interval (seconds per frame)
+	// the internally tracked frame interval (seconds per frame)
 	origStreamParam.Capture.TimePerFrame.Denominator = frameRateNumerator
 	origStreamParam.Capture.TimePerFrame.Numerator = frameRateDenominator
 	err = usbDevice.SetStreamParam(origStreamParam)
@@ -136,6 +191,46 @@ func (dev *Device) GetFrameRate(usbDevice *usbdevice.Device) (v4l2.Fract, error)
 	fps.Denominator = timePerFrame.Numerator
 	fps.Numerator = timePerFrame.Denominator
 	return fps, nil
+}
+
+func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, error) {
+	pixFmt, err := usbDevice.GetPixFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	result := VideoPixelFormat{
+		Width:        pixFmt.Width,
+		Height:       pixFmt.Height,
+		PixelFormat:  v4l2.PixelFormats[pixFmt.PixelFormat],
+		Field:        v4l2.Fields[pixFmt.Field],
+		BytesPerLine: pixFmt.BytesPerLine,
+		SizeImage:    pixFmt.SizeImage,
+		Colorspace:   v4l2.Colorspaces[pixFmt.Colorspace],
+		Priv:         pixFmt.Priv,
+		Flags:        pixFmt.Flags,
+		YcbcrEnc:     v4l2.YCbCrEncodings[pixFmt.YcbcrEnc],
+		HSVEnc:       v4l2.YCbCrEncodings[pixFmt.HSVEnc],
+		Quantization: v4l2.Quantizations[pixFmt.Quantization],
+		XferFunc:     v4l2.XferFunctions[pixFmt.XferFunc],
+	}
+
+	// Since the go4vl library has limited pre-defined Pixel Format descriptions
+	// get the missing pixel format description using GetFormatDescriptions().
+	if result.PixelFormat == "" {
+		descs, err := usbDevice.GetFormatDescriptions()
+		if err != nil {
+			return nil, err
+		}
+		for _, desc := range descs {
+			if pixFmt.PixelFormat == desc.PixelFormat {
+				result.PixelFormat = desc.Description
+				break
+			}
+		}
+	}
+
+	return result, nil
 }
 
 func (dev *Device) updateFFmpegOptions(optName, optVal string) {
@@ -160,4 +255,19 @@ func buildDeviceName(cardName, serialNumber string) string {
 		// replace all the reserved chars with an underscore, and trim any leftovers
 		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(cardName, "_"), "_"),
 		strings.Trim(rFC3986ReservedCharsRegex.ReplaceAllString(serialNumber, "_"), "_"))
+}
+
+func isPixFormatSupported(input uint32, d *usbdevice.Device) (bool, error) {
+	pixFormats, err := d.GetFormatDescriptions()
+	if err != nil {
+		return false, err
+	}
+
+	for _, pix := range pixFormats {
+		if input == pix.PixelFormat {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

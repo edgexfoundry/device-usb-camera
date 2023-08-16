@@ -88,10 +88,18 @@ deviceResources:
       readWrite: "W"
       defaultValue: "false"
   - name: "FrameRate"
-    description: "Set and get the stream frame rate"
+    description: "Get and set the stream frame rate"
     attributes: 
         getFunction: "VIDEO_GET_FRAMERATE"
         setFunction: "VIDEO_SET_FRAMERATE"
+    properties:
+      valueType: "Object"
+      readWrite: "RW"
+  - name: "PixelFormat"
+    description: "Get and set the video pixel format"
+    attributes:
+      getFunction: "VIDEO_GET_PIXELFORMAT"
+      setFunction: "VIDEO_SET_PIXELFORMAT"
     properties:
       valueType: "Object"
       readWrite: "RW"

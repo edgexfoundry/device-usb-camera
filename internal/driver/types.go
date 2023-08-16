@@ -31,3 +31,36 @@ type FrameRateFormat struct {
 	Description string
 	FrameRates  []FrameInfo
 }
+
+type VideoPixelFormat struct {
+	Width        uint32 `json:"Width"`
+	Height       uint32 `json:"Height"`
+	PixelFormat  string `json:"PixelFormat"`
+	Field        string `json:"Field"`
+	BytesPerLine uint32 `json:"BytesPerLine"`
+	SizeImage    uint32 `json:"SizeImage"`
+	Colorspace   string `json:"Colorspace"`
+	Priv         uint32 `json:"Priv"`
+	Flags        uint32 `json:"Flags"`
+	YcbcrEnc     string `json:"YcbcrEnc"`
+	HSVEnc       string `json:"HSVEnc"`
+	Quantization string `json:"Quantization"`
+	XferFunc     string `json:"XferFunc"`
+}
+
+var PixelFormatV4l2Mappings = map[string]uint32{
+	"RGB":   v4l2.PixelFmtRGB24,
+	"GREY":  v4l2.PixelFmtGrey,
+	"YUYV":  v4l2.PixelFmtYUYV,
+	"MJPG":  v4l2.PixelFmtMJPEG,
+	"JPEG":  v4l2.PixelFmtJPEG,
+	"MPEG":  v4l2.PixelFmtMPEG,
+	"H264":  v4l2.PixelFmtH264,
+	"MPEG4": v4l2.PixelFmtMPEG4,
+	"UYVY":  v4l2.PixelFmtUYVY,
+	// pixel formats not supported by go4vl pixel format definitions
+	"BYR2": PixFmtBYR2,
+	"Z16":  PixFmtDepthZ16,
+	"Y8I":  PixFmtY8I,
+	"Y12I": PixFmtY12I,
+}

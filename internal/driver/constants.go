@@ -31,6 +31,9 @@ const (
 	FrameRateValueDenominator       = "FrameRateValueDenominator"
 	FrameRateValueNumerator         = "FrameRateValueNumerator"
 	PathIndex                       = "PathIndex"
+	Width                           = "Width"
+	Height                          = "Height"
+	PixelFormat                     = "PixelFormat"
 
 	// API route specific to Device Service
 	ApiRefreshDevicePaths = "/refreshdevicepaths"
@@ -55,6 +58,8 @@ const (
 	VideoStreamingStatus        = "VIDEO_STREAMING_STATUS"
 	VideoGetFrameRate           = "VIDEO_GET_FRAMERATE"
 	VideoSetFrameRate           = "VIDEO_SET_FRAMERATE"
+	VideoGetPixelFormat         = "VIDEO_GET_PIXELFORMAT"
+	VideoSetPixelFormat         = "VIDEO_SET_PIXELFORMAT"
 
 	// FFmpeg options
 	FFmpegFrames      = "-frames:d"
@@ -78,4 +83,10 @@ const (
 	UdevSerialShort = "ID_SERIAL_SHORT"
 	UdevSerial      = "ID_SERIAL"
 	UdevV4lProduct  = "ID_V4L_PRODUCT"
+
+	// Pixel Formats not supported by go4vl pre-defined pixel format definitions
+	PixFmtBYR2     = 844257602
+	PixFmtDepthZ16 = 540422490
+	PixFmtY8I      = 541669465
+	PixFmtY12I     = 28026201
 )
