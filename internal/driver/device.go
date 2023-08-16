@@ -92,6 +92,17 @@ func (dev *Device) StopStreaming() {
 	}
 }
 
+func (dev *Device) updateTranscoderInputPath(fdPath string) error {
+	trans := dev.transcoder
+	err := trans.SetInputPath(fdPath)
+	if err != nil {
+		return errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("failed to set new path for transcoder for device %s", dev.name), err)
+	}
+	dev.lc.Debugf("Transcoder path succesfully set to %s", fdPath)
+	return nil
+}
+
 func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) error {
 	// Get the current video pixel format to populate the fields missing from the input
 	v4l2PixelFormat, err := usbDevice.GetPixFormat()

@@ -308,6 +308,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 			return responses, err
 		}
+		// flush query parameter
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
@@ -450,6 +451,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 			}
 			return err
 		}
+		// flush query parameter
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
@@ -477,7 +479,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 
 	switch command {
 	case VideoStartStreaming:
-		err = d.updateTranscoder(device, videoPath)
+		err = device.updateTranscoderInputPath(videoPath)
 		if err != nil {
 			return err
 		}
@@ -601,33 +603,29 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 			return "", errors.NewCommonEdgeX(errors.KindIOError, "Invalid stream format. Valid options are 'RGB', 'Greyscale', or 'Depth.'", nil)
 		}
 		for _, path := range device.paths {
-			videoPath, err := getStreamFormatPath(path, streamFormat)
-			if err != nil {
-				continue
+			if d.pathMatchesStreamFormat(path, streamFormat) {
+				return path, nil
 			}
-			return videoPath, nil
 		}
 		return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
 	}
 	return videoPath, nil
 }
 
-func getStreamFormatPath(path string, streamFormat string) (string, error) {
+func (d *Driver) pathMatchesStreamFormat(path, streamFormat string) bool {
 	formatDevice, err := usbDevice.Open(path)
 	if err != nil {
-		return "", err
+		d.lc.Errorf("Cannot open device at path %s", path)
+		return false
 	}
 	defer formatDevice.Close()
 	formatDescriptions, err := formatDevice.GetFormatDescriptions()
 	if err != nil {
-		return "", err
+		d.lc.Errorf("Cannot get formatDescriptions at path %s", path)
+		return false
 	}
 	currentType := streamFormatTypeMap[formatDescriptions[0].PixelFormat]
-	if currentType == streamFormat {
-		return path, nil
-	} else {
-		return "", errors.NewCommonEdgeX(errors.KindInvalidId, "Provided stream format does not match current stream format type.", nil)
-	}
+	return currentType == streamFormat
 }
 
 // AddDevice is a callback function that is invoked
@@ -940,16 +938,6 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 		autoStreaming:               autoStreaming,
 		streamingStatusResourceName: streamingStatusResourceName,
 	}, nil
-}
-
-func (d *Driver) updateTranscoder(device *Device, fdPath string) error {
-	trans := device.transcoder
-	err := trans.SetInputPath(fdPath)
-	if err != nil {
-		return errors.NewCommonEdgeX(errors.KindServerError,
-			fmt.Sprintf("failed to set new path for transcoder for device %s", device.name), err)
-	}
-	return nil
 }
 
 func (d *Driver) getAuthenticatedRTSPUri(name string) string {

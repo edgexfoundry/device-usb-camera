@@ -1030,7 +1030,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraStatus",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/CameraStatus?InputIndex=0",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -1046,7 +1046,11 @@
 					],
 					"query": [
 						{
-							"key": "InputIndex",
+                            "key": "InputIndex",
+                            "value": "0"
+						},
+                        {
+							"key": "PathIndex",
 							"value": "{{path_index}}",
 							"disabled": true
 						},
