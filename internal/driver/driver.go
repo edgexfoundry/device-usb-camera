@@ -329,7 +329,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 
 	videoPath, err := d.getPathName(device, queryParams)
 	if err != nil {
-		return cv, err
+		return nil, err
 	}
 
 	cameraDevice, err := usbDevice.Open(videoPath)
