@@ -24,7 +24,6 @@ type Capability struct {
 }
 
 type DataFormat struct {
-	Path                   string
 	Width                  uint32
 	Height                 uint32
 	PixelFormat            uint32
