@@ -203,10 +203,12 @@ func (d *Driver) Start() error {
 
 	for _, dev := range d.activeDevices {
 		if dev.autoStreaming {
+			dev.streamingStatus.TranscoderInputPath = dev.paths[0]
 			edgexErr := d.startStreaming(dev)
 			if edgexErr != nil {
 				d.lc.Errorf("failed to start video streaming for device %s, error: %s", dev.name, edgexErr)
 			}
+
 		}
 	}
 
@@ -483,6 +485,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		if err != nil {
 			return err
 		}
+		device.streamingStatus.TranscoderInputPath = videoPath
 		options, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -663,10 +666,12 @@ func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]model
 	d.activeDevices[deviceName] = activeDevice
 	d.lc.Debugf("a new Device is added: %s", deviceName)
 	if activeDevice.autoStreaming {
+		activeDevice.streamingStatus.TranscoderInputPath = paths[0]
 		edgexErr = d.startStreaming(activeDevice)
 		if edgexErr != nil {
 			return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
+
 	}
 	return activeDevice, nil
 }
@@ -858,7 +863,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	trans.MediaFile().SetOutputFormat(RtspUriScheme)
 
-	autoStreaming := false
+	autoStreaming := true
 	autoStreamingStr, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, AutoStreaming)
 	if edgexErr != nil {
 		d.lc.Warnf("Protocol property %s not found. Use default value: %v", AutoStreaming, autoStreaming)

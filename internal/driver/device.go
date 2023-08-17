@@ -50,15 +50,16 @@ type Device struct {
 }
 
 type streamingStatus struct {
-	IsStreaming        bool
-	Error              string
-	OutputFrames       string
-	InputFps           string
-	OutputFps          string
-	InputImageSize     string
-	OutputImageSize    string
-	OutputAspect       string
-	OutputVideoQuality string
+	TranscoderInputPath string
+	IsStreaming         bool
+	Error               string
+	OutputFrames        string
+	InputFps            string
+	OutputFps           string
+	InputImageSize      string
+	OutputImageSize     string
+	OutputAspect        string
+	OutputVideoQuality  string
 }
 
 func (dev *Device) StartStreaming() (<-chan string, <-chan error, error) {
@@ -99,6 +100,7 @@ func (dev *Device) updateTranscoderInputPath(fdPath string) error {
 		return errors.NewCommonEdgeX(errors.KindServerError,
 			fmt.Sprintf("failed to set new path for transcoder for device %s", dev.name), err)
 	}
+	dev.streamingStatus.TranscoderInputPath = fdPath
 	dev.lc.Debugf("Transcoder path succesfully set to %s", fdPath)
 	return nil
 }
