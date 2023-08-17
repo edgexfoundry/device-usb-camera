@@ -792,7 +792,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -850,7 +850,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat?PathIndex={{path_index}}",
+					"raw": "http://{{command_host}}:{{command_port}}/api/v3/device/name/{{camera_name}}/PixelFormat",
 					"protocol": "http",
 					"host": [
 						"{{command_host}}"
@@ -869,15 +869,10 @@
 							"key": "PathIndex",
 							"value": "{{path_index}}",
 							"disabled": true
-						},
-						{
-							"key": "StreamFormat",
-							"value": "{{stream_format}}",
-							"disabled": true
 						}
 					]
 				},
-				"description": "Test steps:\n\n1) Execute get pixel format api to get the current pixel format values for a video streaming path (PathIndex) of a camera  \n2) Execute set pixel format api with valid input for a camera's video streaming path\n\nNote: Valid input values are highly dependant on the camera."
+				"description": "Test steps:\n\n1) Execute get pixel format api to get the current pixel format values based on video streaming path (PathIndex) or stream format (RGB, Depth or Greyscale) of a camera  \n2) Execute set pixel format api with valid input for a camera's video streaming path\n\nNote: Valid input values are highly dependant on the camera."
 			},
 			"response": []
 		},

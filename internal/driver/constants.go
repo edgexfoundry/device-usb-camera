@@ -92,7 +92,5 @@ const (
 	PixFmtBYR2     = 844257602
 	PixFmtDepthZ16 = 540422490
 	PixFmtY8I      = 541669465
-	PixFmtY12I     = 28026201
-	PixFmtUYVY     = 1498831189
-	PixFmtGrey12I  = 1228026201
+	PixFmtY12I     = 1228026201
 )

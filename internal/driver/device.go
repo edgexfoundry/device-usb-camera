@@ -233,16 +233,11 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 	// Since the go4vl library has limited pre-defined Pixel Format descriptions
 	// get the missing pixel format description using GetFormatDescriptions().
 	if result.PixelFormat == "" {
-		descs, err := usbDevice.GetFormatDescriptions()
+		desc, err := getPixFormatDesc(usbDevice, pixFmt.PixelFormat)
 		if err != nil {
 			return nil, err
 		}
-		for _, desc := range descs {
-			if pixFmt.PixelFormat == desc.PixelFormat {
-				result.PixelFormat = desc.Description
-				break
-			}
-		}
+		result.PixelFormat = desc
 	}
 
 	return result, nil

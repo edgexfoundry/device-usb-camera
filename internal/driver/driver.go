@@ -51,11 +51,10 @@ var (
 		v4l2.PixelFmtMPEG:  RGB,
 		v4l2.PixelFmtH264:  RGB,
 		v4l2.PixelFmtMPEG4: RGB,
+		v4l2.PixelFmtUYVY:  Greyscale,
 		PixFmtBYR2:         RGB,
-		PixFmtUYVY:         Greyscale,
 		PixFmtY8I:          Greyscale,
 		PixFmtY12I:         Greyscale,
-		PixFmtGrey12I:      Greyscale,
 		PixFmtDepthZ16:     Depth,
 	}
 )
