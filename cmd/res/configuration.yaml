@@ -38,7 +38,7 @@ Device:
     Interval: "1h"
 
 Driver:
-  EnableRtspServer: "true"
+  DisableRtspServer: "false"
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
   RtspAuthenticationServer: "localhost:8000"
