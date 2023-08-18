@@ -24,17 +24,18 @@ type Capability struct {
 }
 
 type DataFormat struct {
-	Width        uint32
-	Height       uint32
-	PixelFormat  string
-	Field        string
-	BytesPerLine uint32
-	SizeImage    uint32
-	Colorspace   string
-	XferFunc     string
-	YcbcrEnc     string
-	Quantization string
-	FrameRates   []v4l2.Fract
+	Width                  uint32
+	Height                 uint32
+	PixelFormat            uint32
+	PixelFormatDescription string
+	Field                  string
+	BytesPerLine           uint32
+	SizeImage              uint32
+	Colorspace             string
+	XferFunc               string
+	YcbcrEnc               string
+	Quantization           string
+	FrameRates             []v4l2.Fract
 }
 
 type CaptureMode struct {
@@ -59,7 +60,7 @@ type ImageFormat struct {
 	BufType     v4l2.BufType
 	Flags       v4l2.FmtDescFlag
 	Description string
-	PixelFormat string
+	PixelFormat uint32
 	MbusCode    uint32
 	FrameSizes  []v4l2.FrameSizeEnum
 }
@@ -105,27 +106,29 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	result := DataFormat{}
-	result.Height = pixFmt.Height
-	result.Width = pixFmt.Width
-	result.PixelFormat = v4l2.PixelFormats[pixFmt.PixelFormat]
-	result.Field = v4l2.Fields[pixFmt.Field]
-	result.BytesPerLine = pixFmt.BytesPerLine
-	result.SizeImage = pixFmt.SizeImage
-	result.Colorspace = v4l2.Colorspaces[pixFmt.Colorspace]
+	pixDescription, _ := getPixFormatDesc(d, pixFmt.PixelFormat)
+	dataFormat := DataFormat{
+		Height:                 pixFmt.Height,
+		Width:                  pixFmt.Width,
+		PixelFormat:            pixFmt.PixelFormat,
+		PixelFormatDescription: pixDescription,
+		Field:                  v4l2.Fields[pixFmt.Field],
+		BytesPerLine:           pixFmt.BytesPerLine,
+		SizeImage:              pixFmt.SizeImage,
+		Colorspace:             v4l2.Colorspaces[pixFmt.Colorspace],
+	}
 
 	xfunc := v4l2.XferFunctions[pixFmt.XferFunc]
 	if pixFmt.XferFunc == v4l2.XferFuncDefault {
 		xfunc = v4l2.XferFunctions[v4l2.ColorspaceToXferFunc(pixFmt.XferFunc)]
 	}
-	result.XferFunc = xfunc
+	dataFormat.XferFunc = xfunc
 
 	ycbcr := v4l2.YCbCrEncodings[pixFmt.YcbcrEnc]
 	if pixFmt.YcbcrEnc == v4l2.YCbCrEncodingDefault {
 		ycbcr = v4l2.YCbCrEncodings[v4l2.ColorspaceToYCbCrEnc(pixFmt.YcbcrEnc)]
 	}
-	result.YcbcrEnc = ycbcr
+	dataFormat.YcbcrEnc = ycbcr
 
 	quant := v4l2.Quantizations[pixFmt.Quantization]
 	if pixFmt.Quantization == v4l2.QuantizationDefault {
@@ -135,7 +138,7 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 			quant = v4l2.Quantizations[v4l2.QuantizationFullRange]
 		}
 	}
-	result.Quantization = quant
+	dataFormat.Quantization = quant
 	intervalCount := 0
 	var frameRates []v4l2.Fract
 	for {
@@ -154,8 +157,9 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 			break
 		}
 	}
-	result.FrameRates = frameRates
-
+	dataFormat.FrameRates = frameRates
+	result := make(map[string]DataFormat)
+	result[d.Name()] = dataFormat
 	return result, nil
 }
 
@@ -164,7 +168,9 @@ func getCropInfo(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return crop, nil
+	result := make(map[string]v4l2.CropCapability)
+	result[d.Name()] = crop
+	return result, nil
 }
 
 func getStreamingParameters(d *usbdevice.Device) (interface{}, error) {
@@ -173,22 +179,25 @@ func getStreamingParameters(d *usbdevice.Device) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := StreamingParameters{}
+	streamingParameters := StreamingParameters{}
 
 	tpf := DescNotSpecified
 	if sp.Capture.Capability == v4l2.StreamParamTimePerFrame {
 		tpf = DescTimePerFrame
 	}
-	result.Capability = StreamingCapability{tpf, sp.Capture.Capability}
+	streamingParameters.Capability = StreamingCapability{tpf, sp.Capture.Capability}
 
 	hiqual := DescNotSpecified
 	if sp.Capture.CaptureMode == v4l2.StreamParamModeHighQuality {
 		hiqual = DescHighQuality
 	}
-	result.CaptureMode = CaptureMode{hiqual, sp.Capture.CaptureMode}
+	streamingParameters.CaptureMode = CaptureMode{hiqual, sp.Capture.CaptureMode}
 
-	result.TimePerFrame = sp.Capture.TimePerFrame
-	result.ReadBuffers = sp.Capture.ReadBuffers
+	streamingParameters.TimePerFrame = sp.Capture.TimePerFrame
+	streamingParameters.ReadBuffers = sp.Capture.ReadBuffers
+
+	result := make(map[string]StreamingParameters)
+	result[d.Name()] = streamingParameters
 	return result, nil
 }
 
@@ -206,17 +215,21 @@ func getImageFormats(d *usbdevice.Device) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		pixDescription, _ := getPixFormatDesc(d, desc.PixelFormat)
 		r.ImageFormats = append(r.ImageFormats, ImageFormat{
 			Index:       desc.Index,
 			BufType:     desc.StreamType,
 			Flags:       desc.Flags,
-			Description: desc.Description,
-			PixelFormat: v4l2.PixelFormats[desc.PixelFormat],
+			Description: pixDescription,
+			PixelFormat: desc.PixelFormat,
 			MbusCode:    desc.MBusCode,
 			FrameSizes:  fss,
 		})
 	}
-	return r, nil
+	resultMap := make(map[string]result)
+	resultMap[d.Name()] = r
+
+	return resultMap, nil
 }
 
 func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
@@ -231,7 +244,7 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 	var r result
 	for _, desc := range descs {
 		var format FrameRateFormat
-		format.Description = desc.String()
+		format.Description, _ = getPixFormatDesc(d, desc.PixelFormat)
 		fss, err := v4l2.GetFormatFrameSizes(d.Fd(), desc.PixelFormat)
 		if err != nil {
 			return nil, err
@@ -266,5 +279,34 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 		}
 		r.FrameRateFormats = append(r.FrameRateFormats, format)
 	}
-	return r, nil
+	resultMap := make(map[string]result)
+	resultMap[d.Name()] = r
+	return resultMap, nil
+}
+
+func GetFrameRate(d *usbdevice.Device) (interface{}, error) {
+	streamParam, err := d.GetStreamParam()
+	if err != nil {
+		return nil, err
+	}
+	timePerFrame := streamParam.Capture.TimePerFrame
+	var fps v4l2.Fract
+	fps.Denominator = timePerFrame.Numerator
+	fps.Numerator = timePerFrame.Denominator
+	result := make(map[string]v4l2.Fract)
+	result[d.Name()] = fps
+	return result, nil
+}
+
+func getPixFormatDesc(usbDevice *usbdevice.Device, pixFmt uint32) (string, error) {
+	descs, err := usbDevice.GetFormatDescriptions()
+	if err != nil {
+		return "", err
+	}
+	for _, desc := range descs {
+		if pixFmt == desc.PixelFormat {
+			return desc.Description, nil
+		}
+	}
+	return "", nil
 }

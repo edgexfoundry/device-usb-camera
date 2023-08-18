@@ -27,6 +27,7 @@ type FrameInfo struct {
 	Width       uint32
 	Rates       []v4l2.Fract
 }
+
 type FrameRateFormat struct {
 	Description string
 	FrameRates  []FrameInfo

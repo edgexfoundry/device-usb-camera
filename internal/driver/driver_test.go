@@ -30,7 +30,7 @@ func createDriverWithMockService() (*Driver, *sdkMocks.DeviceServiceSDK) {
 func NewDriver() *Driver {
 	return &Driver{
 		activeDevices: map[string]*Device{
-			"testDeviceRealsense": &Device{
+			"testDeviceRealsense": {
 				paths: []string{
 					"/dev/video0",
 					"/dev/video2",
