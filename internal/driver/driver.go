@@ -141,23 +141,28 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	}
 
 	// check to see if rtsp-simple-server file/binary exists
-	_, err = os.Stat(RtspServerCmd)
+	rtspExecutable := d.ds.DriverConfigs()[RtspServerExe]
+	if len(rtspExecutable) == 0 {
+		// to ensure backwards compatiablity
+		rtspExecutable = RtspServerExeDefault
+	}
+	_, err = os.Stat(rtspExecutable)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("%s file cannot be found: %s", RtspServerCmd, err.Error())
+			return fmt.Errorf("%s file cannot be found: %s", RtspServerExe, err.Error())
 		} else if os.IsPermission(err) {
-			return fmt.Errorf("permission denied for %s: %s", RtspServerCmd, err.Error())
+			return fmt.Errorf("permission denied for %s: %s", RtspServerExe, err.Error())
 		} else {
-			return fmt.Errorf("unknown error occurred while checking for rtsp-server binary file %s: %s", RtspServerCmd, err.Error())
+			return fmt.Errorf("unknown error occurred while checking for rtsp-server binary file %s: %s", rtspExecutable, err.Error())
 		}
 	}
 
-	rtspProc := exec.Command(RtspServerCmd)
+	rtspProc := exec.Command(rtspExecutable)
 	rtspProc.Stdout = os.Stdout
 	rtspProc.Stderr = os.Stderr
 	err = rtspProc.Start()
 	if err != nil {
-		return fmt.Errorf("unable to start %s process: %s", RtspServerCmd, err.Error())
+		return fmt.Errorf("unable to start %s process: %s", rtspExecutable, err.Error())
 	}
 
 	return nil
