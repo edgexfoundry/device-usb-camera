@@ -97,14 +97,14 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	}
 
 	var err error
-	// if DisableRtspServer config id blank disableRtspServer should be false
+	// if DisableRtspServer config parameter is empty then it should be set to false
 	disableRtspServer := d.ds.DriverConfigs()[DisableRtspServer]
 	if len(disableRtspServer) == 0 {
 		d.disableRtspServer = false
 	} else {
-		d.disableRtspServer, err = strconv.ParseBool(d.ds.DriverConfigs()[DisableRtspServer])
+		d.disableRtspServer, err = strconv.ParseBool(disableRtspServer)
 		if err != nil {
-			return fmt.Errorf("failed to parse EnableRtspServer config: %s", err.Error())
+			return fmt.Errorf("failed to parse DisableRtspServer config: %s", err.Error())
 		}
 	}
 
