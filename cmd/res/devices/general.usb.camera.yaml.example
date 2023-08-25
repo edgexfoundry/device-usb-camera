@@ -5,5 +5,6 @@ deviceList:
     labels: [ "device-usb-camera-example", ]
     protocols:
       USB:
-        Paths: ["/dev/video0",]
+        Paths:
+          - "/dev/video0"
         AutoStreaming: "false"
