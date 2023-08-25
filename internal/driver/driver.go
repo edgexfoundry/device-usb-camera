@@ -97,9 +97,10 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	}
 
 	var err error
-	// if DisableRtspServer config parameter is empty then it should be set to false
+	// if DisableRtspServer config parameter is empty, then it should be
+	// set to false to retain backwards compatibility
 	disableRtspServer := d.ds.DriverConfigs()[DisableRtspServer]
-	if len(disableRtspServer) == 0 {
+	if disableRtspServer == "" {
 		d.disableRtspServer = false
 	} else {
 		d.disableRtspServer, err = strconv.ParseBool(disableRtspServer)
@@ -142,7 +143,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 
 	// check to see if rtsp-simple-server file/binary exists
 	rtspExecutable := d.ds.DriverConfigs()[RtspServerExe]
-	if len(rtspExecutable) == 0 {
+	if rtspExecutable == "" {
 		// to ensure backwards compatiablity
 		rtspExecutable = RtspServerExeDefault
 	}
