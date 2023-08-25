@@ -6,5 +6,5 @@
 #     labels: [ "device-usb-camera-example" ]
 #     protocols:
 #       USB:
-#         Path: "/dev/video0"
+#         Paths: ["/dev/video0",]
 #         AutoStreaming: "false"
