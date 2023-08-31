@@ -1,10 +1,12 @@
 deviceList:
-  - name: "example-camera"
+  - name: "Intel-Realsense"
     profileName: "USB-Camera-General"
-    description: "Example Camera"
+    description: "Example Realsense Camera"
     labels: [ "device-usb-camera-example", ]
     protocols:
       USB:
-        Paths:
+        Paths: 
           - "/dev/video0"
+          - "/dev/video2"
+          - "/dev/video4"
         AutoStreaming: "false"
