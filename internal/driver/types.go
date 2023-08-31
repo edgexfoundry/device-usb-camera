@@ -8,6 +8,14 @@ package driver
 
 import "github.com/vladimirvivien/go4vl/v4l2"
 
+type RTSPServerMode string
+
+const (
+	RTSPServerModeInternal RTSPServerMode = "internal"
+	RTSPServerModeExternal RTSPServerMode = "external"
+	RTSPServerModeNone     RTSPServerMode = "none"
+)
+
 type RTSPAuthRequest struct {
 	IP       string `json:"ip"`
 	User     string `json:"user"`

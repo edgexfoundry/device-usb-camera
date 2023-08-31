@@ -16,7 +16,7 @@ const (
 	AutoStreaming                   = "AutoStreaming"
 	InputIndex                      = "InputIndex"
 	UrlRawQuery                     = "urlRawQuery"
-	DisableRtspServer               = "DisableRtspServer"
+	RtspServerMode                  = "RtspServerMode"
 	RtspServerExe                   = "RtspServerExecutable"
 	RtspServerExeDefault            = "./rtsp-simple-server"
 	RtspServerHostName              = "RtspServerHostName"

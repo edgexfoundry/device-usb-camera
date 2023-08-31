@@ -76,7 +76,7 @@ type Driver struct {
 	rtspAuthenticationServerUri string
 	mutex                       sync.Mutex
 	rtspAuthServer              *http.Server
-	disableRtspServer           bool
+	rtspServerMode              RTSPServerMode
 }
 
 // NewProtocolDriver initializes the singleton Driver and returns it to the caller
@@ -116,20 +116,36 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	}
 
 	var err error
-	// if DisableRtspServer config parameter is empty, then it should be
-	// set to false to retain backwards compatibility
-	disableRtspServer := d.ds.DriverConfigs()[DisableRtspServer]
-	if disableRtspServer == "" {
-		d.disableRtspServer = false
+	// if RtspServerMode config parameter is empty, then it should default to
+	// "internal" to retain backwards-compatibility
+	d.rtspServerMode = RTSPServerMode(strings.ToLower(d.ds.DriverConfigs()[RtspServerMode]))
+	if d.rtspServerMode == "" {
+		d.rtspServerMode = RTSPServerModeInternal
 	} else {
-		d.disableRtspServer, err = strconv.ParseBool(disableRtspServer)
-		if err != nil {
-			return fmt.Errorf("failed to parse DisableRtspServer config: %s", err.Error())
+		if d.rtspServerMode != RTSPServerModeInternal && d.rtspServerMode != RTSPServerModeExternal {
+			return fmt.Errorf("%s value of \"%s\" is invalid. valid options are \"internal\", \"external\", and \"none\"",
+				RtspServerMode, d.rtspServerMode)
 		}
 	}
 
-	if d.disableRtspServer {
-		return nil
+	if d.rtspServerMode == RTSPServerModeNone {
+		return nil // nothing left to do
+	}
+
+	rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
+	if !ok {
+		rtspAuthenticationServerUri = DefaultRtspAuthenticationServer
+		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
+	}
+	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
+	d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
+
+	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
+		d.lc.Errorf("failed to register secret update callback: %v", err)
+	}
+
+	if d.rtspServerMode != RTSPServerModeInternal {
+		return nil // nothing left to do
 	}
 
 	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
@@ -148,22 +164,10 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.lc.Infof("RTSP TCP port: %s", rtspPort)
 	d.rtspTcpPort = rtspPort
 
-	rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
-	if !ok {
-		rtspAuthenticationServerUri = DefaultRtspAuthenticationServer
-		d.lc.Warnf("service config %s not found. Use the default value: %s", RtspAuthenticationServer, DefaultRtspAuthenticationServer)
-	}
-	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
-	d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
-
-	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
-		d.lc.Errorf("failed to register secret update callback: %v", err)
-	}
-
 	// check to see if rtsp-simple-server file/binary exists
 	rtspExecutable := d.ds.DriverConfigs()[RtspServerExe]
 	if rtspExecutable == "" {
-		// to ensure backwards compatiablity
+		// to ensure backwards compatibility
 		rtspExecutable = RtspServerExeDefault
 	}
 	_, err = os.Stat(rtspExecutable)
@@ -203,8 +207,8 @@ func (d *Driver) Start() error {
 	// Make sure the paths of existing devices are up-to-date.
 	go d.RefreshAllDevicePaths()
 
-	if d.disableRtspServer {
-		d.lc.Info("Rtsp server is disabled")
+	if d.rtspServerMode == RTSPServerModeNone {
+		d.lc.Info("RTSP server is disabled")
 		return nil
 	}
 
@@ -421,13 +425,13 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoStreamUri:
-		if d.disableRtspServer {
+		if d.rtspServerMode == RTSPServerModeNone {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 				"rtsp server is not enabled, cannot get stream URI for device %s", device.name), nil)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
 	case VideoStreamingStatus:
-		if d.disableRtspServer {
+		if d.rtspServerMode == RTSPServerModeNone {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 				"rtsp server is not enabled, cannot get streaming status for device %s", device.name), nil)
 		}
@@ -512,7 +516,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
 	case VideoStopStreaming:
-		if d.disableRtspServer {
+		if d.rtspServerMode == RTSPServerModeNone {
 			return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 				"rtsp server is not enabled, cannot stop streaming for device %s", device.name), nil)
 		}
@@ -573,7 +577,7 @@ func (d *Driver) Stop(force bool) error {
 	// The call to Wait() waits for StopStreaming to return and startStreaming to end.
 	defer d.wg.Wait()
 
-	if d.disableRtspServer {
+	if d.rtspServerMode == RTSPServerModeNone {
 		return nil
 	}
 
@@ -709,7 +713,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if device, ok := d.activeDevices[deviceName]; ok {
-		if !d.disableRtspServer {
+		if d.rtspServerMode != RTSPServerModeNone {
 			device.StopStreaming()
 		}
 		delete(d.activeDevices, deviceName)
@@ -876,7 +880,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	trans.MediaFile().SetOutputFormat(RtspUriScheme)
 
-	autoStreaming := true
+	autoStreaming := false
 	autoStreamingStr, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, AutoStreaming)
 	if edgexErr != nil {
 		d.lc.Warnf("Protocol property %s not found. Use default value: %v", AutoStreaming, autoStreaming)
@@ -998,7 +1002,7 @@ func (d *Driver) getDevice(name string) (*Device, errors.EdgeX) {
 
 func (d *Driver) startStreaming(device *Device) errors.EdgeX {
 	// check to see if rtsp server is enabled
-	if d.disableRtspServer {
+	if d.rtspServerMode == RTSPServerModeNone {
 		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
 			"rtsp server is not enabled, cannot start streaming for device %s", device.name), nil)
 	}

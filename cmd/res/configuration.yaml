@@ -38,7 +38,8 @@ Device:
     Interval: "1h"
 
 Driver:
-  DisableRtspServer: "false"
+  # RtspServerMode can be "internal", "external", or "none". Default is "internal" if left blank.
+  RtspServerMode: "internal"
   RtspServerExecutable: "./rtsp-simple-server"
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
