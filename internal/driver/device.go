@@ -50,15 +50,16 @@ type Device struct {
 }
 
 type streamingStatus struct {
-	IsStreaming        bool
-	Error              string
-	OutputFrames       string
-	InputFps           string
-	OutputFps          string
-	InputImageSize     string
-	OutputImageSize    string
-	OutputAspect       string
-	OutputVideoQuality string
+	TranscoderInputPath string
+	IsStreaming         bool
+	Error               string
+	OutputFrames        string
+	InputFps            string
+	OutputFps           string
+	InputImageSize      string
+	OutputImageSize     string
+	OutputAspect        string
+	OutputVideoQuality  string
 }
 
 func (dev *Device) StartStreaming() (<-chan string, <-chan error, error) {
@@ -90,6 +91,18 @@ func (dev *Device) StopStreaming() {
 		dev.lc.Errorf("Failed to stop video streaming transcoder for device %s, error: %s", dev.name, err)
 		return
 	}
+}
+
+func (dev *Device) updateTranscoderInputPath(fdPath string) error {
+	trans := dev.transcoder
+	err := trans.SetInputPath(fdPath)
+	if err != nil {
+		return errors.NewCommonEdgeX(errors.KindServerError,
+			fmt.Sprintf("failed to set new path for transcoder for device %s", dev.name), err)
+	}
+	dev.streamingStatus.TranscoderInputPath = fdPath
+	dev.lc.Debugf("Transcoder path succesfully set to %s", fdPath)
+	return nil
 }
 
 func (dev *Device) SetPixelFormat(usbDevice *usbdevice.Device, params interface{}) error {
@@ -154,10 +167,12 @@ func (dev *Device) SetFrameRate(usbDevice *usbdevice.Device, frameRateNumerator 
 		return "", err
 	}
 	found := false
-	for _, frameRate := range dataFormat.(DataFormat).FrameRates {
-		if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
-			found = true
-			break
+	for _, format := range dataFormat.(map[string]DataFormat) {
+		for _, frameRate := range format.FrameRates {
+			if frameRateNumerator == frameRate.Numerator && frameRateDenominator == frameRate.Denominator {
+				found = true
+				break
+			}
 		}
 	}
 	if !found {
@@ -218,16 +233,11 @@ func (dev *Device) GetPixelFormat(usbDevice *usbdevice.Device) (interface{}, err
 	// Since the go4vl library has limited pre-defined Pixel Format descriptions
 	// get the missing pixel format description using GetFormatDescriptions().
 	if result.PixelFormat == "" {
-		descs, err := usbDevice.GetFormatDescriptions()
+		desc, err := getPixFormatDesc(usbDevice, pixFmt.PixelFormat)
 		if err != nil {
 			return nil, err
 		}
-		for _, desc := range descs {
-			if pixFmt.PixelFormat == desc.PixelFormat {
-				result.PixelFormat = desc.Description
-				break
-			}
-		}
+		result.PixelFormat = desc
 	}
 
 	return result, nil

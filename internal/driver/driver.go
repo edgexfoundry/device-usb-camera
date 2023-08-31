@@ -34,11 +34,30 @@ import (
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
 
 	usbDevice "github.com/vladimirvivien/go4vl/device"
+	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
 var driver *Driver
 var once sync.Once
+
+var (
+	streamFormatTypeMap = map[uint32]string{
+		v4l2.PixelFmtRGB24: RGB,
+		v4l2.PixelFmtGrey:  Greyscale,
+		v4l2.PixelFmtYUYV:  RGB,
+		v4l2.PixelFmtMJPEG: RGB,
+		v4l2.PixelFmtJPEG:  RGB,
+		v4l2.PixelFmtMPEG:  RGB,
+		v4l2.PixelFmtH264:  RGB,
+		v4l2.PixelFmtMPEG4: RGB,
+		v4l2.PixelFmtUYVY:  Greyscale,
+		PixFmtBYR2:         RGB,
+		PixFmtY8I:          Greyscale,
+		PixFmtY12I:         Greyscale,
+		PixFmtDepthZ16:     Depth,
+	}
+)
 
 const (
 	// rtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
@@ -197,10 +216,12 @@ func (d *Driver) Start() error {
 
 	for _, dev := range d.activeDevices {
 		if dev.autoStreaming {
+			dev.streamingStatus.TranscoderInputPath = dev.paths[0]
 			edgexErr := d.startStreaming(dev)
 			if edgexErr != nil {
 				d.lc.Errorf("failed to start video streaming for device %s, error: %s", dev.name, edgexErr)
 			}
+
 		}
 	}
 
@@ -292,11 +313,17 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 				fmt.Sprintf("command for USB camera resource %s is not specified, please check device profile",
 					req.DeviceResourceName), nil)
 		}
-
 		cv, err := d.ExecuteReadCommands(device, req, command)
 		if err != nil {
+			// flush query parameter for remaining reqs
+			for _, req := range reqs {
+				if _, ok := req.Attributes[UrlRawQuery]; ok {
+					req.Attributes[UrlRawQuery] = ""
+				}
+			}
 			return responses, err
 		}
+		// flush query parameter
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
@@ -364,7 +391,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeObject, data)
 	case VideoGetFrameRate:
-		data, err = device.GetFrameRate(cameraDevice)
+		data, err = GetFrameRate(cameraDevice)
 		if err != nil {
 			return nil, errorWrapper.CommandError(command, err)
 		}
@@ -399,7 +426,6 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 				"rtsp server is not enabled, cannot get stream URI for device %s", device.name), nil)
 		}
 		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, req.Type, device.rtspUri)
-
 	case VideoStreamingStatus:
 		if d.disableRtspServer {
 			return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf(
@@ -430,20 +456,25 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 					req.DeviceResourceName), nil)
 		}
 
-		err := d.ExecuteWriteCommands(device, req, i, params, command)
+		err := d.ExecuteWriteCommands(device, req, params[i], command)
 		if err != nil {
+			// flush query parameter for remaining reqs
+			for _, req := range reqs {
+				if _, ok := req.Attributes[UrlRawQuery]; ok {
+					req.Attributes[UrlRawQuery] = ""
+				}
+			}
 			return err
 		}
 		// flush query parameter
 		if _, ok := req.Attributes[UrlRawQuery]; ok {
 			req.Attributes[UrlRawQuery] = ""
 		}
-
 	}
 	return nil
 }
 
-func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, i int, params []*sdkModels.CommandValue, command interface{}) error {
+func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandRequest, param *sdkModels.CommandValue, command interface{}) error {
 	queryParams, edgexErr := getQueryParameters(req)
 	if edgexErr != nil {
 		return errors.NewCommonEdgeXWrapper(edgexErr)
@@ -463,7 +494,12 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 
 	switch command {
 	case VideoStartStreaming:
-		options, edgexErr := params[i].ObjectValue()
+		err = device.updateTranscoderInputPath(videoPath)
+		if err != nil {
+			return err
+		}
+		device.streamingStatus.TranscoderInputPath = videoPath
+		options, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
@@ -482,7 +518,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		}
 		device.StopStreaming()
 	case VideoSetFrameRate:
-		frameRateParam, edgexErr := params[i].ObjectValue()
+		frameRateParam, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
@@ -514,7 +550,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 		}
 		d.lc.Infof("Device frame rate set to %s", fps)
 	case VideoSetPixelFormat:
-		params, edgexErr := params[i].ObjectValue()
+		params, edgexErr := param.ObjectValue()
 		if edgexErr != nil {
 			return errors.NewCommonEdgeXWrapper(edgexErr)
 		}
@@ -563,10 +599,12 @@ func (d *Driver) Stop(force bool) error {
 func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, error) {
 	var videoPath string
 	pathIndex := queryParams.Get(PathIndex)
-	if len(pathIndex) == 0 {
-		// currently defaults to using the first available stream
+	streamFormat := queryParams.Get(StreamFormat)
+	if pathIndex == "" && streamFormat == "" { // most common case
 		videoPath = device.paths[0]
-	} else {
+	} else if pathIndex != "" && streamFormat != "" { // both cannot be provided
+		return "", errors.NewCommonEdgeX(errors.KindIOError, "Cannot provide both PathIndex and StreamFormat query parameters to command", nil)
+	} else if pathIndex != "" { // use path index video path value
 		pathIndexConv, err := strconv.Atoi(pathIndex)
 		if err != nil {
 			return "", err
@@ -576,8 +614,34 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 				fmt.Sprintf("Video streaming path does not exist for the device %v at PathIndex %d", device.name, pathIndexConv), nil)
 		}
 		videoPath = device.paths[pathIndexConv]
+	} else if streamFormat != "" { // use stream format video path value
+		if streamFormat != RGB && streamFormat != Greyscale && streamFormat != Depth {
+			return "", errors.NewCommonEdgeX(errors.KindIOError, "Invalid stream format. Valid options are 'RGB', 'Greyscale', or 'Depth.'", nil)
+		}
+		for _, path := range device.paths {
+			if d.pathMatchesStreamFormat(path, streamFormat) {
+				return path, nil
+			}
+		}
+		return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
 	}
 	return videoPath, nil
+}
+
+func (d *Driver) pathMatchesStreamFormat(path, streamFormat string) bool {
+	formatDevice, err := usbDevice.Open(path)
+	if err != nil {
+		d.lc.Errorf("Cannot open device at path %s", path)
+		return false
+	}
+	defer formatDevice.Close()
+	formatDescriptions, err := formatDevice.GetFormatDescriptions()
+	if err != nil {
+		d.lc.Errorf("Cannot get formatDescriptions at path %s", path)
+		return false
+	}
+	currentType := streamFormatTypeMap[formatDescriptions[0].PixelFormat]
+	return currentType == streamFormat
 }
 
 // AddDevice is a callback function that is invoked
@@ -615,10 +679,12 @@ func (d *Driver) addDeviceInternal(deviceName string, protocols map[string]model
 	d.activeDevices[deviceName] = activeDevice
 	d.lc.Debugf("a new Device is added: %s", deviceName)
 	if activeDevice.autoStreaming {
+		activeDevice.streamingStatus.TranscoderInputPath = paths[0]
 		edgexErr = d.startStreaming(activeDevice)
 		if edgexErr != nil {
 			return nil, errors.NewCommonEdgeXWrapper(edgexErr)
 		}
+
 	}
 	return activeDevice, nil
 }
@@ -810,7 +876,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	trans.MediaFile().SetOutputFormat(RtspUriScheme)
 
-	autoStreaming := false
+	autoStreaming := true
 	autoStreamingStr, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, AutoStreaming)
 	if edgexErr != nil {
 		d.lc.Warnf("Protocol property %s not found. Use default value: %v", AutoStreaming, autoStreaming)
