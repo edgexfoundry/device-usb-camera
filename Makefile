@@ -35,6 +35,9 @@ docker:
 	docker build . \
 		--build-arg ADD_BUILD_TAGS=$(ADD_BUILD_TAGS) \
 		--label "git_sha=$(GIT_SHA)" \
+		--build-arg http_proxy=$(HTTP_PROXY) \
+		--build-arg https_proxy=$(HTTPS_PROXY) \
+		--build-arg no_proxy=$(NO_PROXY) \
 		-t edgexfoundry/device-usb-camera:$(GIT_SHA) \
 		-t edgexfoundry/device-usb-camera:$(VERSION)-dev
 
