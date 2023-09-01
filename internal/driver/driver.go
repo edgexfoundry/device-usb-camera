@@ -22,8 +22,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
@@ -33,6 +31,7 @@ import (
 	"github.com/edgexfoundry/device-sdk-go/v3/pkg/interfaces"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v3/pkg/models"
 
+	"github.com/labstack/echo/v4"
 	usbDevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
@@ -75,7 +74,7 @@ type Driver struct {
 	rtspTcpPort                 string
 	rtspAuthenticationServerUri string
 	mutex                       sync.Mutex
-	rtspAuthServer              *http.Server
+	rtspAuthServer              *echo.Echo
 	rtspServerMode              RTSPServerMode
 }
 
@@ -235,38 +234,35 @@ func (d *Driver) Start() error {
 func (d *Driver) StartRTSPCredentialServer() {
 	d.lc.Infof("Starting rtsp authentication server on %s", d.rtspAuthenticationServerUri)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/rtspauth", d.RTSPCredentialsHandler)
+	e := echo.New()
+	e.HideBanner = true
+	e.Server.ReadHeaderTimeout = 5 * time.Second // G112: A configured ReadHeaderTimeout in the http.Server averts a potential Slowloris Attack
+	e.Router().Add(http.MethodPost, "/rtspauth", d.RTSPCredentialsHandler)
+	d.rtspAuthServer = e
 
-	d.rtspAuthServer = &http.Server{
-		Addr:              d.rtspAuthenticationServerUri,
-		Handler:           router,
-		ReadHeaderTimeout: 5 * time.Second, // G112: A configured ReadHeaderTimeout in the http.Server averts a potential Slowloris Attack
-	}
-
-	err := d.rtspAuthServer.ListenAndServe()
+	err := e.Start(d.rtspAuthenticationServerUri)
 	if err != nil && err != http.ErrServerClosed {
 		d.lc.Errorf("RTSP Auth Web server failed: %v", err)
+		d.rtspAuthServer = nil
 	}
-	d.rtspAuthServer = nil
 }
 
 // RTSPCredentialsHandler is the http handler for handling rtsp authentication requests. It expects the
 // request to follow the format defined by https://github.com/aler9/mediamtx#authentication
-func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(r.Body)
+func (d *Driver) RTSPCredentialsHandler(c echo.Context) error {
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		d.lc.Errorf("rtsp authentication: could not read body: %s", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		c.Response().WriteHeader(http.StatusBadRequest)
+		return nil
 	}
 
 	var rtspAuthRequest RTSPAuthRequest
 	err = json.Unmarshal(body, &rtspAuthRequest)
 	if err != nil {
 		d.lc.Errorf("rtsp authentication: could not unmarshal body into json: %s", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		c.Response().WriteHeader(http.StatusBadRequest)
+		return nil
 	}
 
 	if rtspAuthRequest.User == "" || rtspAuthRequest.Password == "" {
@@ -276,27 +272,28 @@ func (d *Driver) RTSPCredentialsHandler(w http.ResponseWriter, r *http.Request) 
 		// empty users and passwords. This happens because a RTSP client doesn't provide credentials until it
 		// is asked to. In order to receive the credentials, the authentication server must reply with status code 401,
 		// then the client will send credentials.
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		return nil
 	}
 	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
 	if edgexErr != nil {
 		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthSecretName)
-		w.WriteHeader(http.StatusInternalServerError)
-		if _, err = w.Write([]byte("RTSP Authentication has not been fully configured!")); err != nil {
+		c.Response().WriteHeader(http.StatusInternalServerError)
+		if _, err = c.Response().Write([]byte("RTSP Authentication has not been fully configured!")); err != nil {
 			d.lc.Errorf("Error writing message: %v", err.Error())
 		}
-		return
+		return nil
 	}
 
 	if credential.Username != rtspAuthRequest.User ||
 		credential.Password != rtspAuthRequest.Password {
 		d.lc.Warn("rtsp authentication: user or password do not match")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		return nil
 	}
 
 	d.lc.Debug("rtsp authentication: passwords match")
+	return nil
 }
 
 func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]models.ProtocolProperties,

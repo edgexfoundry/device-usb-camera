@@ -35,3 +35,7 @@ prime/
 stage/
 parts/
 squashfs-root/
+
+cmd/mediamtx
+cmd/mediamtx.yml
+cmd/rtsp-simple-server
