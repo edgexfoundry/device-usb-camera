@@ -219,9 +219,7 @@ func (d *Driver) StartRTSPCredentialServer() {
 	e := echo.New()
 	e.HideBanner = true
 	e.Server.ReadHeaderTimeout = 5 * time.Second // G112: A configured ReadHeaderTimeout in the http.Server averts a potential Slowloris Attack
-	router := echo.NewRouter(e)
-	router.Add(http.MethodPost, "/rtspauth", d.RTSPCredentialsHandler)
-
+	e.Router().Add(http.MethodPost, "/rtspauth", d.RTSPCredentialsHandler)
 	d.rtspAuthServer = e
 
 	err := e.Start(d.rtspAuthenticationServerUri)
@@ -861,7 +859,7 @@ func (d *Driver) newDevice(name string, protocols map[string]models.ProtocolProp
 	}
 	trans.MediaFile().SetOutputFormat(RtspUriScheme)
 
-	autoStreaming := true
+	autoStreaming := false
 	autoStreamingStr, edgexErr := d.getProtocolProperty(protocols, UsbProtocol, AutoStreaming)
 	if edgexErr != nil {
 		d.lc.Warnf("Protocol property %s not found. Use default value: %v", AutoStreaming, autoStreaming)
