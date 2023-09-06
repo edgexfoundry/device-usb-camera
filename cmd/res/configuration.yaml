@@ -18,6 +18,8 @@ Service:
 # Clients:
 #   core-metadata:
 #     Host: "localhost"
+#   core-data:
+#     Host: "localhost"
 # Registry:
 #   Host: "localhost"
 
