@@ -821,9 +821,12 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]str
 	}
 	value, ok := protocols[UsbProtocol][Paths]
 	if !ok {
-		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
-			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
-				Paths, UsbProtocol), nil)
+		value, ok = protocols[UsbProtocol][Path]
+		if !ok {
+			return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+				fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
+					Paths, UsbProtocol), nil)
+		}
 	}
 	if value != nil {
 		// Depending on where the function is called from, protocols could contain
@@ -1096,7 +1099,10 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 }
 
 func (d *Driver) updateDevicePaths(device models.Device) {
-	oldPaths := device.Protocols[UsbProtocol][Paths]
+	oldPaths, ok := device.Protocols[UsbProtocol][Paths]
+	if !ok {
+		oldPaths, ok = device.Protocols[UsbProtocol][Path]
+	}
 	var init []string
 	device.Protocols[UsbProtocol][Paths] = init
 	allDevices, _ := usbDevice.GetAllDevicePaths()

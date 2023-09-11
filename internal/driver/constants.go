@@ -11,6 +11,7 @@ const (
 	SetFunction                     = "setFunction"
 	UsbProtocol                     = "USB"
 	Paths                           = "Paths"
+	Path                            = "Path"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
 	AutoStreaming                   = "AutoStreaming"

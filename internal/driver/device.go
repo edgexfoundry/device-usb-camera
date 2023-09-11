@@ -40,6 +40,7 @@ type Device struct {
 	lc                          logger.LoggingClient
 	name                        string
 	paths                       []string
+	path                        string
 	serialNumber                string
 	rtspUri                     string
 	transcoder                  *transcoder.Transcoder
