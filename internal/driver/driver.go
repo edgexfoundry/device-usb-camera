@@ -120,15 +120,11 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.rtspServerMode = RTSPServerMode(strings.ToLower(d.ds.DriverConfigs()[RtspServerMode]))
 	if d.rtspServerMode == "" {
 		d.rtspServerMode = RTSPServerModeInternal
-	} else {
-		if d.rtspServerMode != RTSPServerModeInternal && d.rtspServerMode != RTSPServerModeExternal {
-			return fmt.Errorf("%s value of \"%s\" is invalid. valid options are \"internal\", \"external\", and \"none\"",
-				RtspServerMode, d.rtspServerMode)
-		}
-	}
-
-	if d.rtspServerMode == RTSPServerModeNone {
+	} else if d.rtspServerMode == RTSPServerModeNone {
 		return nil // nothing left to do
+	} else if d.rtspServerMode != RTSPServerModeInternal && d.rtspServerMode != RTSPServerModeExternal {
+		return fmt.Errorf("%s value of \"%s\" is invalid. valid options are \"internal\", \"external\", and \"none\"",
+			RtspServerMode, d.rtspServerMode)
 	}
 
 	rtspAuthenticationServerUri, ok := d.ds.DriverConfigs()[RtspAuthenticationServer]
