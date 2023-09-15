@@ -33,35 +33,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	usbDevice "github.com/vladimirvivien/go4vl/device"
-	"github.com/vladimirvivien/go4vl/v4l2"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
 
 var driver *Driver
 var once sync.Once
-
-var (
-	streamFormatTypeMap = map[uint32]string{
-		v4l2.PixelFmtRGB24: RGB,
-		v4l2.PixelFmtGrey:  Greyscale,
-		v4l2.PixelFmtYUYV:  RGB,
-		v4l2.PixelFmtMJPEG: RGB,
-		v4l2.PixelFmtJPEG:  RGB,
-		v4l2.PixelFmtMPEG:  RGB,
-		v4l2.PixelFmtH264:  RGB,
-		v4l2.PixelFmtMPEG4: RGB,
-		v4l2.PixelFmtUYVY:  Greyscale,
-		PixFmtBYR2:         RGB,
-		PixFmtY8I:          Greyscale,
-		PixFmtY12I:         Greyscale,
-		PixFmtDepthZ16:     Depth,
-	}
-)
-
-const (
-	// rtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
-	rtspAuthSecretName string = "rtspauth"
-)
 
 type Driver struct {
 	ds                          interfaces.DeviceServiceSDK
@@ -139,7 +115,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.lc.Infof("RtspAuthenticationServer: %s", rtspAuthenticationServerUri)
 	d.rtspAuthenticationServerUri = rtspAuthenticationServerUri
 
-	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(rtspAuthSecretName, d.secretUpdated); err != nil {
+	if err := d.ds.SecretProvider().RegisterSecretUpdatedCallback(RtspAuthSecretName, d.secretUpdated); err != nil {
 		d.lc.Errorf("failed to register secret update callback: %v", err)
 	}
 
@@ -275,9 +251,9 @@ func (d *Driver) RTSPCredentialsHandler(c echo.Context) error {
 		c.Response().WriteHeader(http.StatusUnauthorized)
 		return nil
 	}
-	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
+	credential, edgexErr := d.tryGetCredentials(RtspAuthSecretName)
 	if edgexErr != nil {
-		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthSecretName)
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", RtspAuthSecretName)
 		c.Response().WriteHeader(http.StatusInternalServerError)
 		if _, err = c.Response().Write([]byte("RTSP Authentication has not been fully configured!")); err != nil {
 			d.lc.Errorf("Error writing message: %v", err.Error())
@@ -619,9 +595,9 @@ func (d *Driver) getPathName(device *Device, queryParams url.Values) (string, er
 		if streamFormat != RGB && streamFormat != Greyscale && streamFormat != Depth {
 			return "", errors.NewCommonEdgeX(errors.KindIOError, "Invalid stream format. Valid options are 'RGB', 'Greyscale', or 'Depth.'", nil)
 		}
-		for _, path := range device.paths {
-			if d.pathMatchesStreamFormat(path, streamFormat) {
-				return path, nil
+		for _, p := range device.paths {
+			if d.pathMatchesStreamFormat(p, streamFormat) {
+				return p, nil
 			}
 		}
 		return "", errors.NewCommonEdgeX(errors.KindIOError, fmt.Sprintf("Invalid stream format for device %s.", device.name), nil)
@@ -641,7 +617,7 @@ func (d *Driver) pathMatchesStreamFormat(path, streamFormat string) bool {
 		d.lc.Errorf("Cannot get formatDescriptions at path %s", path)
 		return false
 	}
-	currentType := streamFormatTypeMap[formatDescriptions[0].PixelFormat]
+	currentType := StreamFormatTypeMap[formatDescriptions[0].PixelFormat]
 	return currentType == streamFormat
 }
 
@@ -727,8 +703,8 @@ func (d *Driver) RefreshAllDevicePaths() {
 	}
 }
 
-// 3.0 version of the service supports Path which is a string instead of Paths which is []string which leads to breaking change.
-// updatePathToPaths takes care of this breaking change. Path will be removed in the next release.
+// Deprecated: 3.0 version of the service supports Path which is a string instead of Paths which is []string which leads to breaking change.
+// updatePathToPaths takes care of this breaking change.
 func (d *Driver) updatePathToPaths(cd models.Device) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -988,9 +964,9 @@ func (d *Driver) getAuthenticatedRTSPUri(name string) string {
 		Host:   fmt.Sprintf("%s:%s", d.rtspHostName, d.rtspTcpPort),
 	}
 	rtspAuthenticatedUri.Path = path.Join(Stream, name)
-	credential, edgexErr := d.tryGetCredentials(rtspAuthSecretName)
+	credential, edgexErr := d.tryGetCredentials(RtspAuthSecretName)
 	if edgexErr != nil {
-		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", rtspAuthSecretName)
+		d.lc.Warnf("Failed to retrieve credentials for rtsp authentication from the secret store. Have you stored credentials yet for secretName %s?", RtspAuthSecretName)
 	} else {
 		rtspAuthenticatedUri.User = url.UserPassword(credential.Username, credential.Password)
 	}

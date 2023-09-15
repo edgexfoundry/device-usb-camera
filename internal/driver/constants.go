@@ -95,4 +95,13 @@ const (
 	PixFmtDepthZ16 = 540422490
 	PixFmtY8I      = 541669465
 	PixFmtY12I     = 1228026201
+
+	RedactedStr = "//<redacted>@"
+
+	RTSPServerModeInternal RTSPServerMode = "internal"
+	RTSPServerModeExternal RTSPServerMode = "external"
+	RTSPServerModeNone     RTSPServerMode = "none"
+
+	// RtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
+	RtspAuthSecretName string = "rtspauth"
 )
