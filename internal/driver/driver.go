@@ -727,10 +727,33 @@ func (d *Driver) RefreshAllDevicePaths() {
 	}
 }
 
+// 3.0 version of the service supports Path which is a string instead of Paths which is []string which leads to breaking change.
+// updatePathToPaths takes care of this breaking change. Path will be removed in the next release.
+func (d *Driver) updatePathToPaths(cd models.Device) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	if value, ok := cd.Protocols[UsbProtocol][Path]; ok {
+		if value != nil {
+			cd.Protocols[UsbProtocol][Paths] = []string{value.(string)}
+			delete(cd.Protocols[UsbProtocol], "Path")
+
+			if err := d.ds.PatchDevice(dtos.UpdateDevice{
+				Name:      &cd.Name,
+				Protocols: dtos.FromProtocolModelsToDTOs(cd.Protocols),
+			}); err != nil {
+				d.lc.Errorf("failed to update the device %s, error: %s", cd.Name, err.Error())
+			}
+		}
+	}
+}
+
 // RefreshDevicePaths checks whether the existing device matches the connected device.
 // If there is a mismatch between them, scan all paths to find the matching device
 // and update the existing device with the correct path.
 func (d *Driver) RefreshDevicePaths(cd models.Device) {
+	d.updatePathToPaths(cd)
+
 	paths, err := d.getPaths(cd.Protocols)
 	if err != nil {
 		d.lc.Errorf("Failed to get paths for device %s", cd.Name)
@@ -743,6 +766,7 @@ func (d *Driver) RefreshDevicePaths(cd models.Device) {
 		// If the serial number is different, it means that the path of the device has changed.
 		if sn != cd.Protocols[UsbProtocol][SerialNumber] || !d.isVideoCaptureDevice(fdPath) {
 			// Delete the paths and start fresh
+			//cd.Protocols[UsbProtocol][Path] = nil
 			cd.Protocols[UsbProtocol][Paths] = nil
 			go d.updateDevicePaths(cd)
 			break
@@ -821,12 +845,9 @@ func (d *Driver) getPaths(protocols map[string]models.ProtocolProperties) ([]str
 	}
 	value, ok := protocols[UsbProtocol][Paths]
 	if !ok {
-		value, ok = protocols[UsbProtocol][Path]
-		if !ok {
-			return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
-				fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
-					Paths, UsbProtocol), nil)
-		}
+		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid,
+			fmt.Sprintf("property %s of protocol %s is missing. Please check device configuration",
+				Paths, UsbProtocol), nil)
 	}
 	if value != nil {
 		// Depending on where the function is called from, protocols could contain
@@ -1099,10 +1120,7 @@ func (d *Driver) isVideoCaptureDevice(path string) bool {
 }
 
 func (d *Driver) updateDevicePaths(device models.Device) {
-	oldPaths, ok := device.Protocols[UsbProtocol][Paths]
-	if !ok {
-		oldPaths, ok = device.Protocols[UsbProtocol][Path]
-	}
+	oldPaths := device.Protocols[UsbProtocol][Paths]
 	var init []string
 	device.Protocols[UsbProtocol][Paths] = init
 	allDevices, _ := usbDevice.GetAllDevicePaths()

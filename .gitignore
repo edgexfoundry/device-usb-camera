@@ -39,3 +39,4 @@ squashfs-root/
 cmd/mediamtx
 cmd/mediamtx.yml
 cmd/rtsp-simple-server
+cmd/rtsp-simple-server.yml
