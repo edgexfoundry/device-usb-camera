@@ -10,6 +10,12 @@ import "github.com/vladimirvivien/go4vl/v4l2"
 
 type RTSPServerMode string
 
+const (
+	RTSPServerModeInternal RTSPServerMode = "internal"
+	RTSPServerModeExternal RTSPServerMode = "external"
+	RTSPServerModeNone     RTSPServerMode = "none"
+)
+
 type RTSPAuthRequest struct {
 	IP       string `json:"ip"`
 	User     string `json:"user"`
@@ -96,9 +102,3 @@ var StreamFormatTypeMap = map[uint32]string{
 	PixFmtY12I:         Greyscale,
 	PixFmtDepthZ16:     Depth,
 }
-
-const (
-	RTSPServerModeInternal RTSPServerMode = "internal"
-	RTSPServerModeExternal RTSPServerMode = "external"
-	RTSPServerModeNone     RTSPServerMode = "none"
-)
