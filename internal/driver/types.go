@@ -96,3 +96,9 @@ var StreamFormatTypeMap = map[uint32]string{
 	PixFmtY12I:         Greyscale,
 	PixFmtDepthZ16:     Depth,
 }
+
+const (
+	RTSPServerModeInternal RTSPServerMode = "internal"
+	RTSPServerModeExternal RTSPServerMode = "external"
+	RTSPServerModeNone     RTSPServerMode = "none"
+)
