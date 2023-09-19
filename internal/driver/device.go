@@ -45,21 +45,8 @@ type Device struct {
 	transcoder                  *transcoder.Transcoder
 	autoStreaming               bool
 	mutex                       sync.Mutex
-	streamingStatus             streamingStatus
+	streamingStatus             StreamingStatus
 	streamingStatusResourceName string
-}
-
-type streamingStatus struct {
-	TranscoderInputPath string
-	IsStreaming         bool
-	Error               string
-	OutputFrames        string
-	InputFps            string
-	OutputFps           string
-	InputImageSize      string
-	OutputImageSize     string
-	OutputAspect        string
-	OutputVideoQuality  string
 }
 
 func (dev *Device) StartStreaming() (<-chan string, <-chan error, error) {

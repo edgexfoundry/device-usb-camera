@@ -57,6 +57,19 @@ type VideoPixelFormat struct {
 	XferFunc     string `json:"XferFunc"`
 }
 
+type StreamingStatus struct {
+	TranscoderInputPath string
+	IsStreaming         bool
+	Error               string
+	OutputFrames        string
+	InputFps            string
+	OutputFps           string
+	InputImageSize      string
+	OutputImageSize     string
+	OutputAspect        string
+	OutputVideoQuality  string
+}
+
 var PixelFormatV4l2Mappings = map[string]uint32{
 	"RGB":   v4l2.PixelFmtRGB24,
 	"GREY":  v4l2.PixelFmtGrey,
@@ -72,4 +85,20 @@ var PixelFormatV4l2Mappings = map[string]uint32{
 	"Z16":  PixFmtDepthZ16,
 	"Y8I":  PixFmtY8I,
 	"Y12I": PixFmtY12I,
+}
+
+var StreamFormatTypeMap = map[uint32]string{
+	v4l2.PixelFmtRGB24: RGB,
+	v4l2.PixelFmtGrey:  Greyscale,
+	v4l2.PixelFmtYUYV:  RGB,
+	v4l2.PixelFmtMJPEG: RGB,
+	v4l2.PixelFmtJPEG:  RGB,
+	v4l2.PixelFmtMPEG:  RGB,
+	v4l2.PixelFmtH264:  RGB,
+	v4l2.PixelFmtMPEG4: RGB,
+	v4l2.PixelFmtUYVY:  Greyscale,
+	PixFmtBYR2:         RGB,
+	PixFmtY8I:          Greyscale,
+	PixFmtY12I:         Greyscale,
+	PixFmtDepthZ16:     Depth,
 }

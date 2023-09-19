@@ -11,6 +11,7 @@ const (
 	SetFunction                     = "setFunction"
 	UsbProtocol                     = "USB"
 	Paths                           = "Paths"
+	Path                            = "Path"
 	SerialNumber                    = "SerialNumber"
 	CardName                        = "CardName"
 	AutoStreaming                   = "AutoStreaming"
@@ -94,4 +95,7 @@ const (
 	PixFmtDepthZ16 = 540422490
 	PixFmtY8I      = 541669465
 	PixFmtY12I     = 1228026201
+
+	// RtspAuthSecretName defines the secretName used for storing RTSP credentials in the secret store.
+	RtspAuthSecretName string = "rtspauth"
 )
