@@ -3,9 +3,9 @@ module github.com/edgexfoundry/device-usb-camera
 go 1.21
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v3 v3.1.0-dev.25
-	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.1.0-dev.36
-	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.1.0-dev.12
+	github.com/edgexfoundry/device-sdk-go/v3 v3.1.0-dev.28
+	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.1.0-dev.40
+	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.1.0-dev.15
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/stretchr/testify v1.8.4
 	github.com/vladimirvivien/go4vl v0.0.5
@@ -19,9 +19,9 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.3 // indirect
-	github.com/edgexfoundry/go-mod-configuration/v3 v3.1.0-dev.5 // indirect
-	github.com/edgexfoundry/go-mod-messaging/v3 v3.1.0-dev.20 // indirect
-	github.com/edgexfoundry/go-mod-registry/v3 v3.1.0-dev.5 // indirect
+	github.com/edgexfoundry/go-mod-configuration/v3 v3.1.0-dev.6 // indirect
+	github.com/edgexfoundry/go-mod-messaging/v3 v3.1.0-dev.21 // indirect
+	github.com/edgexfoundry/go-mod-registry/v3 v3.1.0-dev.6 // indirect
 	github.com/edgexfoundry/go-mod-secrets/v3 v3.1.0-dev.6 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.5.0 // indirect
@@ -31,7 +31,7 @@ require (
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.1 // indirect
+	github.com/go-playground/validator/v10 v10.15.4 // indirect
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
