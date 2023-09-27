@@ -115,10 +115,6 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		d.lc.Errorf("failed to register secret update callback: %v", err)
 	}
 
-	if d.rtspServerMode != RTSPServerModeInternal {
-		return nil // nothing left to do
-	}
-
 	rtspServerHostName, ok := d.ds.DriverConfigs()[RtspServerHostName]
 	if !ok {
 		rtspServerHostName = DefaultRtspServerHostName
@@ -134,6 +130,10 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	}
 	d.lc.Infof("RTSP TCP port: %s", rtspPort)
 	d.rtspTcpPort = rtspPort
+
+	if d.rtspServerMode != RTSPServerModeInternal {
+		return nil // nothing left to do
+	}
 
 	// check to see if rtsp-simple-server file/binary exists
 	rtspExecutable := d.ds.DriverConfigs()[RtspServerExe]
