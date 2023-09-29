@@ -255,7 +255,6 @@ github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpE
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
@@ -274,8 +273,8 @@ github.com/vladimirvivien/go4vl v0.0.5 h1:jHuo/CZOAzYGzrSMOc7anOMNDr03uWH5c1B5kQ
 github.com/vladimirvivien/go4vl v0.0.5/go.mod h1:FP+/fG/X1DUdbZl9uN+l33vId1QneVn+W80JMc17OL8=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
-github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf h1:oRBFepu2nOiSfYsR0NpxWrWll1bIQKoBrgvzZVQUKlw=
-github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf/go.mod h1:fVs4qpwtgjOHD31cTmdHppcr/6vD8QHrAVAu2jTSVFI=
+github.com/xfrr/goffmpeg v1.0.0 h1:trxuLNb9ys50YlV7gTVNAII9J0r00WWqCGTE46Gc3XU=
+github.com/xfrr/goffmpeg v1.0.0/go.mod h1:zjLRiirHnip+/hVAT3lVE3QZ6SGynr0hcctUMNNISdQ=
 github.com/zeebo/errs v1.3.0 h1:hmiaKqgYZzcVgRL1Vkc1Mn2914BbzB0IBxs+ebeutGs=
 github.com/zeebo/errs v1.3.0/go.mod h1:sgbWHsvVuTPHcqJJGQ1WhI5KbWlHYz+2+2C/LSEtCw4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
