@@ -9,7 +9,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/stretchr/testify v1.8.4
 	github.com/vladimirvivien/go4vl v0.0.5
-	github.com/xfrr/goffmpeg v0.0.0-20210624103149-5ca2d3062daf
+	github.com/xfrr/goffmpeg v1.0.0
 )
 
 require (
