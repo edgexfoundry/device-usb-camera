@@ -13,6 +13,55 @@
 - [go-mod-secrets](https://github.com/edgexfoundry/go-mod-secrets/blob/main/CHANGELOG.md) (indirect dependency)
 - [go-mod-configuration](https://github.com/edgexfoundry/go-mod-configuration/blob/main/CHANGELOG.md) (indirect dependency)
 
+
+## [v3.1.0] Napa - 2023-11-15 (Only compatible with the 3.x releases)
+
+
+### ✨  Features
+
+- Remove snap packaging ([#303](https://github.com/edgexfoundry/device-usb-camera/issues/303)) ([03955ee…](https://github.com/edgexfoundry/device-usb-camera/commit/03955ee09018b338b3036f15f61b85e23fce302f))
+```text
+
+BREAKING CHANGE: Remove snap packaging ([#303](https://github.com/edgexfoundry/device-usb-camera/issues/303))
+
+```
+- Add proxy to build script for device-usb-service ([#271](https://github.com/edgexfoundry/device-usb-camera/issues/271)) ([9c60bf2…](https://github.com/edgexfoundry/device-usb-camera/commit/9c60bf2a2901989854b2c85f44f5dcfef240ae3a))
+- Update example device files to modify Path to Paths ([#273](https://github.com/edgexfoundry/device-usb-camera/issues/273)) ([c79013a…](https://github.com/edgexfoundry/device-usb-camera/commit/c79013aec5a343747aa63ac8b71198bf6f18d439))
+- Replace gorilla/mux with labstack/echo ([f8ecbd8…](https://github.com/edgexfoundry/device-usb-camera/commit/f8ecbd8d4d63b7bcc2b85a63da9a0733cd08c83a))
+- Select stream for api commands ([#266](https://github.com/edgexfoundry/device-usb-camera/issues/266)) ([860b2ed…](https://github.com/edgexfoundry/device-usb-camera/commit/860b2ed41c63812ea8e78996a55d34ef8e22b126))
+- Implement get/set pixel format commands. ([#269](https://github.com/edgexfoundry/device-usb-camera/issues/269)) ([bd38f51…](https://github.com/edgexfoundry/device-usb-camera/commit/bd38f515c46efcd7844d1c84f55761450580435e))
+- Ability to disable RTSP server on startup via configuration ([#268](https://github.com/edgexfoundry/device-usb-camera/issues/268)) ([01aee5a…](https://github.com/edgexfoundry/device-usb-camera/commit/01aee5a5c41b4c067632ab994dacfc003f161152))
+- FrameRate command v4l2  ([#265](https://github.com/edgexfoundry/device-usb-camera/issues/265)) ([040a5a6…](https://github.com/edgexfoundry/device-usb-camera/commit/040a5a62acea184fdd41387d4dec6344494c5d71))
+- Extend discovery to support Intel real sense cameras ([#264](https://github.com/edgexfoundry/device-usb-camera/issues/264)) ([7adbeca…](https://github.com/edgexfoundry/device-usb-camera/commit/7adbecab942a7b2115c6abd3dbc7641bc9f3f60a))
+
+
+### ♻ Code Refactoring
+
+- Remove obsolete comments from config file ([112e1b9…](https://github.com/edgexfoundry/device-usb-camera/commit/112e1b9cf2668be9d28d0b14de1c86b2cf9c2860))
+- Use PatchDevice calls instead of UpdateDevice ([#267](https://github.com/edgexfoundry/device-usb-camera/issues/267)) ([b4dc3cb…](https://github.com/edgexfoundry/device-usb-camera/commit/b4dc3cb9544d3c22b48762096c31369c64ea3d88))
+
+
+### 🐛 Bug Fixes
+
+- StreamURI values not parsed in external rtsp mode ([#295](https://github.com/edgexfoundry/device-usb-camera/issues/295)) ([e7b533f…](https://github.com/edgexfoundry/device-usb-camera/commit/e7b533f3809ba105fdba8a5d8e1cd0c48f559aa2))
+- Both path and paths need to be supported to address the breaking change until the next release ([#290](https://github.com/edgexfoundry/device-usb-camera/issues/290)) ([884b56a…](https://github.com/edgexfoundry/device-usb-camera/commit/884b56a83e36e909b2a30449d5f2d1a1922bafa9))
+- None mode being seen as invalid option to RtspServerMode ([#285](https://github.com/edgexfoundry/device-usb-camera/issues/285)) ([3411f34…](https://github.com/edgexfoundry/device-usb-camera/commit/3411f3448a827245a794d39550b14b422bb5508f))
+- Support external RTSP servers using RtspServerMode ([#270](https://github.com/edgexfoundry/device-usb-camera/issues/270)) ([0836578…](https://github.com/edgexfoundry/device-usb-camera/commit/0836578907f2cd94d12620694e96f53e92936738))
+- Rtsp auth server router not initialized properly ([#279](https://github.com/edgexfoundry/device-usb-camera/issues/279)) ([5f6ddc4…](https://github.com/edgexfoundry/device-usb-camera/commit/5f6ddc471072d7de5768bf3a6831573b01813ed1))
+- Fix panic when device is missing CardName or SerialNumber ([#261](https://github.com/edgexfoundry/device-usb-camera/issues/261)) ([c5a4cd9…](https://github.com/edgexfoundry/device-usb-camera/commit/c5a4cd989dc0c8e35e999c28e138c1d6f5ac110b))
+
+
+### 👷 Build
+
+- Upgrade to go-1.21, Linter1.54.2 and Alpine 3.18 ([a8ab136…](https://github.com/edgexfoundry/device-usb-camera/commit/a8ab1367151eaf50e49974ac128f64ea73f920ad))
+
+
+### 🤖 Continuous Integration
+
+- Add automated release workflow on tag creation ([2d62c07…](https://github.com/edgexfoundry/device-usb-camera/commit/2d62c0759d64d9cdfd28b4a42bd6d38812466757))
+- Ci: Remove repo specific PR template ([9ab6e28…](https://github.com/edgexfoundry/device-usb-camera/commit/9ab6e2811064ccdf3c5396bd5c3b70225bedc7cc))
+
+
 ## [3.0.0] Minnesota - 2023-05-31 (Only compatible with the 3.x releases)
 
 ### Features ✨
