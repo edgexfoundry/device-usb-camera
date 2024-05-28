@@ -36,7 +36,7 @@ RUN curl -o LICENSE-rtsp-simple-server https://raw.githubusercontent.com/aler9/r
 
 RUN ${MAKE}
 
-FROM aler9/rtsp-simple-server:v0.21.6 AS rtsp
+FROM aler9/rtsp-simple-server:v1.8.2 AS rtsp
 
 FROM alpine:3.18
 
@@ -54,14 +54,14 @@ COPY --from=builder /device-usb-camera/LICENSE /
 COPY --from=builder /device-usb-camera/LICENSE-rtsp-simple-server /
 COPY --from=builder /device-usb-camera/Attribution.txt /
 COPY --from=builder /device-usb-camera/docker-entrypoint.sh /
-COPY --from=rtsp /rtsp-simple-server.yml /
-COPY --from=rtsp /rtsp-simple-server /
+COPY --from=rtsp /mediamtx.yml /
+COPY --from=rtsp /mediamtx /
 
 # disable unused rtsp-simple-server listeners
-RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g' rtsp-simple-server.yml
-RUN sed -i 's/hlsDisable: no/hlsDisable: yes/g' rtsp-simple-server.yml
-RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' rtsp-simple-server.yml
-RUN sed -i 's,externalAuthenticationURL:,externalAuthenticationURL: http://localhost:8000/rtspauth,g' rtsp-simple-server.yml
+RUN sed -i 's/rtmp: no/rtmp: yes/g' mediamtx.yml
+RUN sed -i 's/hls: no/hls: yes/g' mediamtx.yml
+RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' mediamtx.yml
+RUN sed -i 's,authHTTPAddress:,authHTTPAddress: http://localhost:8000/rtspauth,g' mediamtx.yml
 
 EXPOSE 59983
 # RTSP port of rtsp-simple-server:
