@@ -135,7 +135,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 		return nil // nothing left to do
 	}
 
-	// check to see if rtsp-simple-server file/binary exists
+	// check to see if mediamtx file/binary exists
 	rtspExecutable := d.ds.DriverConfigs()[RtspServerExe]
 	if rtspExecutable == "" {
 		// to ensure backwards compatibility

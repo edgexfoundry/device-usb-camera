@@ -32,7 +32,7 @@ Device:
 Driver:
   # RtspServerMode can be "internal", "external", or "none". Default is "internal" if left blank.
   RtspServerMode: "internal"
-  RtspServerExecutable: "./rtsp-simple-server"
+  RtspServerExecutable: "./mediamtx"
   RtspServerHostName: "localhost"
   RtspTcpPort: "8554"
   RtspAuthenticationServer: "localhost:8000"

@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2024 IOTech Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,11 +33,11 @@ RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 COPY . .
 
-RUN curl -o LICENSE-rtsp-simple-server https://raw.githubusercontent.com/aler9/rtsp-simple-server/main/LICENSE
+RUN curl -o LICENSE-mediamtx https://raw.githubusercontent.com/bluenviron/mediamtx/main/LICENSE
 
 RUN ${MAKE}
 
-FROM aler9/rtsp-simple-server:v0.21.6 AS rtsp
+FROM bluenviron/mediamtx:1.8.2 AS rtsp
 
 FROM alpine:3.18
 
@@ -51,20 +52,20 @@ RUN apk --no-cache upgrade
 WORKDIR /
 COPY --from=builder /device-usb-camera/cmd /
 COPY --from=builder /device-usb-camera/LICENSE /
-COPY --from=builder /device-usb-camera/LICENSE-rtsp-simple-server /
+COPY --from=builder /device-usb-camera/LICENSE-mediamtx /
 COPY --from=builder /device-usb-camera/Attribution.txt /
 COPY --from=builder /device-usb-camera/docker-entrypoint.sh /
-COPY --from=rtsp /rtsp-simple-server.yml /
-COPY --from=rtsp /rtsp-simple-server /
+COPY --from=rtsp /mediamtx.yml /
+COPY --from=rtsp /mediamtx /
 
-# disable unused rtsp-simple-server listeners
-RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g' rtsp-simple-server.yml
-RUN sed -i 's/hlsDisable: no/hlsDisable: yes/g' rtsp-simple-server.yml
-RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' rtsp-simple-server.yml
-RUN sed -i 's,externalAuthenticationURL:,externalAuthenticationURL: http://localhost:8000/rtspauth,g' rtsp-simple-server.yml
+# disable unused rtsp-server listeners
+RUN sed -i 's/rtmp: no/rtmp: yes/g' mediamtx.yml
+RUN sed -i 's/hls: no/hls: yes/g' mediamtx.yml
+RUN sed -i 's/protocols: \[udp, multicast, tcp\]/protocols: \[tcp\]/g' mediamtx.yml
+RUN sed -i 's,authHTTPAddress:,authHTTPAddress: http://localhost:8000/rtspauth,g' mediamtx.yml
 
 EXPOSE 59983
-# RTSP port of rtsp-simple-server:
+# RTSP port of the internal rtsp-server:
 EXPOSE 8554
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
