@@ -19,7 +19,7 @@ const (
 	UrlRawQuery                     = "urlRawQuery"
 	RtspServerMode                  = "RtspServerMode"
 	RtspServerExe                   = "RtspServerExecutable"
-	RtspServerExeDefault            = "./rtsp-simple-server"
+	RtspServerExeDefault            = "./mediamtx"
 	RtspServerHostName              = "RtspServerHostName"
 	DefaultRtspServerHostName       = "localhost"
 	RtspTcpPort                     = "RtspTcpPort"
