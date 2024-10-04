@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-ARG BASE=golang:1.21-alpine3.18
+ARG BASE=golang:1.23-alpine3.20
 FROM ${BASE} AS builder
 
 ARG ADD_BUILD_TAGS=""
@@ -39,7 +39,7 @@ RUN ${MAKE}
 
 FROM bluenviron/mediamtx:1.8.2 AS rtsp
 
-FROM alpine:3.18
+FROM alpine:3.20
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2023: Intel Corporation'
