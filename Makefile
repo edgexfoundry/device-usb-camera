@@ -6,6 +6,11 @@ CGO_CFLAGS="-O2 -pipe -fno-plt"
 CGO_CXXFLAGS="-O2 -pipe -fno-plt"
 CGO_LDFLAGS="-Wl,-O1,–sort-common,–as-needed,-z,relro,-z,now"
 
+# change the following boolean flag to enable or disable the Full RELRO (RELocation Read Only) for linux ELF (Executable and Linkable Format) binaries
+ENABLE_FULL_RELRO:="true"
+# change the following boolean flag to enable or disable PIE for linux binaries which is needed for ASLR (Address Space Layout Randomization) on Linux, the ASLR support on Windows is enabled by default
+ENABLE_PIE:="true"
+
 MICROSERVICES=cmd/device-usb-camera
 .PHONY: $(MICROSERVICES)
 
@@ -21,6 +26,14 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-usb-camera.Version=$(VERSION
                    -trimpath -mod=readonly
 
 ARCH=$(shell uname -m)
+
+ifeq ($(ENABLE_FULL_RELRO), "true")
+	GOFLAGS += -ldflags "-bindnow"
+endif
+
+ifeq ($(ENABLE_PIE), "true")
+	GOFLAGS += -buildmode=pie
+endif
 
 build: $(MICROSERVICES)
 
