@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"testing"
 
-	sdkMocks "github.com/edgexfoundry/device-sdk-go/v3/pkg/interfaces/mocks"
+	sdkMocks "github.com/edgexfoundry/device-sdk-go/v4/pkg/interfaces/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v4/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v4/models"
 )
 
 func createDriverWithMockService() (*Driver, *sdkMocks.DeviceServiceSDK) {

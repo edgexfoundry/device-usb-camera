@@ -7,8 +7,8 @@
 package driver
 
 import (
-	"github.com/edgexfoundry/go-mod-bootstrap/v3/bootstrap/secret"
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
+	"github.com/edgexfoundry/go-mod-bootstrap/v4/bootstrap/secret"
+	"github.com/edgexfoundry/go-mod-core-contracts/v4/errors"
 )
 
 // Credentials encapsulates Username and Password pair.
