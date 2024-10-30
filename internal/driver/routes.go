@@ -9,7 +9,7 @@ package driver
 import (
 	"net/http"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v4/common"
 )
 
 func (d *Driver) RefreshExistingDevicePathsRoute(writer http.ResponseWriter, request *http.Request) {
