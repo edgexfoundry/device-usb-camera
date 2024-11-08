@@ -7,9 +7,9 @@ CGO_CXXFLAGS="-O2 -pipe -fno-plt"
 CGO_LDFLAGS="-Wl,-O1,–sort-common,–as-needed,-z,relro,-z,now"
 
 # change the following boolean flag to enable or disable the Full RELRO (RELocation Read Only) for linux ELF (Executable and Linkable Format) binaries
-ENABLE_FULL_RELRO:="true"
+ENABLE_FULL_RELRO=true
 # change the following boolean flag to enable or disable PIE for linux binaries which is needed for ASLR (Address Space Layout Randomization) on Linux, the ASLR support on Windows is enabled by default
-ENABLE_PIE:="true"
+ENABLE_PIE=true
 
 MICROSERVICES=cmd/device-usb-camera
 .PHONY: $(MICROSERVICES)
@@ -20,18 +20,19 @@ VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
 # This pulls the version of the SDK from the go.mod file
 SDKVERSION=$(shell cat ./go.mod | grep 'github.com/edgexfoundry/device-sdk-go/v4 v' | awk '{print $$2}')
 
+ifeq ($(ENABLE_FULL_RELRO), true)
+	ENABLE_FULL_RELRO_GOFLAGS = -bindnow
+endif
+
 GIT_SHA=$(shell git rev-parse HEAD)
 GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-usb-camera.Version=$(VERSION) \
-                  -X github.com/edgexfoundry/device-sdk-go/v4/internal/common.SDKVersion=$(SDKVERSION)" \
+                  -X github.com/edgexfoundry/device-sdk-go/v4/internal/common.SDKVersion=$(SDKVERSION) \
+                  $(ENABLE_FULL_RELRO_GOFLAGS)" \
                    -trimpath -mod=readonly
 
 ARCH=$(shell uname -m)
 
-ifeq ($(ENABLE_FULL_RELRO), "true")
-	GOFLAGS += -ldflags "-bindnow"
-endif
-
-ifeq ($(ENABLE_PIE), "true")
+ifeq ($(ENABLE_PIE), true)
 	GOFLAGS += -buildmode=pie
 endif
 
