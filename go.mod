@@ -6,7 +6,7 @@ require (
 	github.com/edgexfoundry/device-sdk-go/v4 v4.0.0-dev.9
 	github.com/edgexfoundry/go-mod-bootstrap/v4 v4.0.0-dev.11
 	github.com/edgexfoundry/go-mod-core-contracts/v4 v4.0.0-dev.14
-	github.com/labstack/echo/v4 v4.13.0
+	github.com/labstack/echo/v4 v4.13.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vladimirvivien/go4vl v0.0.5
 	github.com/xfrr/goffmpeg v1.0.0
