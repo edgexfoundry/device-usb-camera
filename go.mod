@@ -6,7 +6,7 @@ require (
 	github.com/edgexfoundry/device-sdk-go/v4 v4.0.0-dev.11
 	github.com/edgexfoundry/go-mod-bootstrap/v4 v4.0.0-dev.12
 	github.com/edgexfoundry/go-mod-core-contracts/v4 v4.0.0-dev.14
-	github.com/labstack/echo/v4 v4.13.2
+	github.com/labstack/echo/v4 v4.13.3
 	github.com/stretchr/testify v1.10.0
 	github.com/vladimirvivien/go4vl v0.0.5
 	github.com/xfrr/goffmpeg v1.0.0
@@ -115,7 +115,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
