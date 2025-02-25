@@ -13,6 +13,33 @@
 - [go-mod-secrets](https://github.com/edgexfoundry/go-mod-secrets/blob/main/CHANGELOG.md) (indirect dependency)
 - [go-mod-configuration](https://github.com/edgexfoundry/go-mod-configuration/blob/main/CHANGELOG.md) (indirect dependency)
 
+## [4.0.0] Odessa - 2025-03-12 (Only compatible with the 4.x releases)
+
+### ✨  Features
+
+- Enable PIE support for ASLR and full RELRO ([b564a46…](https://github.com/edgexfoundry/device-usb-camera/commit/b564a465dfea8c8ec571d2cffd941f169125aea6))
+
+### ♻ Code Refactoring
+
+- Update go module to v4 ([4b33c2f…](https://github.com/edgexfoundry/device-usb-camera/commit/4b33c2f9ffa11068aaf0c605ac38bd5117ff6be8))
+```text
+
+BREAKING CHANGE: update go module to v4
+
+```
+
+### 🐛 Bug Fixes
+
+- Only one ldflags flag is allowed ([b5d676e…](https://github.com/edgexfoundry/device-usb-camera/commit/b5d676e8a6843cf9a3cc18782c7c5b0a2db22662)
+
+### 📖 Documentation
+
+- Remove the Camera Management example as it is no longer supported([5c0f9d1...]https://github.com/edgexfoundry/edgex-docs/pull/1379/commits/5c0f9d14c9a8d07e08ef574a13b3455cdb4e9b8e)
+
+### 👷 Build
+
+- Upgrade to go-1.23, Linter1.61.0 and Alpine 3.20 ([7acaef5…](https://github.com/edgexfoundry/device-usb-camera/commit/7acaef573cac51ec1a31cc75251856ef56295b26))
+- Update RTSP server image and version ([655e03c…](https://github.com/edgexfoundry/device-usb-camera/commit/655e03c27f2ff945cb952fa065b06381bbbf9253))
 
 ## [v3.1.0] Napa - 2023-11-15 (Only compatible with the 3.x releases)
 
