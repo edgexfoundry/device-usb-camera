@@ -86,7 +86,7 @@ func (d *Driver) Initialize(sdk interfaces.DeviceServiceSDK) error {
 	d.activeDevices = make(map[string]*Device)
 	d.wg = new(sync.WaitGroup)
 
-	if err := d.ds.AddRoute(common.ApiBase+ApiRefreshDevicePaths, d.RefreshExistingDevicePathsRoute, http.MethodPost); err != nil {
+	if err := d.ds.AddCustomRoute(common.ApiBase+ApiRefreshDevicePaths, interfaces.Unauthenticated, echo.WrapHandler(http.HandlerFunc(d.RefreshExistingDevicePathsRoute)), http.MethodPost); err != nil {
 		return fmt.Errorf("failed to add API route %s, error: %s", ApiRefreshDevicePaths, err.Error())
 	}
 
