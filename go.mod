@@ -8,6 +8,7 @@ require (
 	github.com/edgexfoundry/go-mod-core-contracts/v4 v4.1.0-dev.12
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/stretchr/testify v1.11.1
+	github.com/spf13/cast v1.9.2
 	github.com/vladimirvivien/go4vl v0.0.5
 	github.com/xfrr/goffmpeg v1.0.0
 )
@@ -96,7 +97,6 @@ require (
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/speps/go-hashids v2.0.0+incompatible // indirect
-	github.com/spf13/cast v1.9.2 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect

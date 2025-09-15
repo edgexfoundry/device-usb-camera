@@ -1,6 +1,7 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
 // Copyright (C) 2022-2023 Intel Corporation
+// Copyright (C) 2025 IOTEch Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -90,7 +91,7 @@ func getCapability(d *usbdevice.Device) (interface{}, error) {
 }
 
 func getInputStatus(d *usbdevice.Device, index string) (uint32, error) {
-	i, err := strconv.ParseUint(fmt.Sprintf("%v", index), 10, 32)
+	i, err := strconv.ParseUint(index, 10, 32)
 	if err != nil {
 		return 0, fmt.Errorf("could not convert the given %s %s to Uint32", InputIndex, index)
 	}
