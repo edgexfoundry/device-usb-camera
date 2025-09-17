@@ -1,7 +1,7 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
 // Copyright (C) 2022-2023 Intel Corporation
-// Copyright (C) 2023 IOTech Ltd
+// Copyright (C) 2023-2025 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -32,6 +32,7 @@ import (
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v4/pkg/models"
 
 	"github.com/labstack/echo/v4"
+	"github.com/spf13/cast"
 	usbDevice "github.com/vladimirvivien/go4vl/device"
 	"github.com/xfrr/goffmpeg/transcoder"
 )
@@ -328,7 +329,7 @@ func (d *Driver) ExecuteReadCommands(device *Device, req sdkModels.CommandReques
 	}
 	defer cameraDevice.Close()
 
-	switch command := fmt.Sprintf("%v", command); command {
+	switch command := cast.ToString(command); command {
 	case MetadataDeviceCapability:
 		data, err = getCapability(cameraDevice)
 		if err != nil {
@@ -1120,7 +1121,7 @@ func (d *Driver) updateDevicePaths(device models.Device) {
 
 func getQueryParameters(req sdkModels.CommandRequest) (url.Values, errors.EdgeX) {
 	urlRawQuery := req.Attributes[UrlRawQuery]
-	queryParams, err := url.ParseQuery(fmt.Sprintf("%v", urlRawQuery))
+	queryParams, err := url.ParseQuery(cast.ToString(urlRawQuery))
 	if err != nil {
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("invalid query parameters: %s", urlRawQuery), err)
 	}
