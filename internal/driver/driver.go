@@ -517,6 +517,7 @@ func (d *Driver) ExecuteWriteCommands(device *Device, req sdkModels.CommandReque
 			d.lc.Errorf("Could not parse denominator %d to uint32", frameRateNumerator)
 			return err
 		}
+		// #nosec G115 following code is safe as both frameRateNumerator and frameRateDenominator are parsed with bitSize 32
 		fps, err := device.SetFrameRate(cameraDevice, uint32(frameRateNumerator), uint32(frameRateDenominator))
 		if err != nil {
 			d.lc.Errorf("Could not set the FPS to %f for device %s due to error: %s", fps, device.name, err)

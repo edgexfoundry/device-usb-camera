@@ -144,7 +144,7 @@ func getDataFormat(d *usbdevice.Device) (interface{}, error) {
 	var frameRates []v4l2.Fract
 	for {
 		fd := d.Fd()
-		index := uint32(intervalCount)
+		index := uint32(intervalCount) // #nosec G115
 		encoding := pixFmt.PixelFormat
 		if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, pixFmt.Width, pixFmt.Height); err == nil {
 			intervalCount += 1
@@ -263,7 +263,7 @@ func getSupportedFrameRateFormats(d *usbdevice.Device) (interface{}, error) {
 			frameInfo.Index = frameSize.Index
 			for {
 				fd := d.Fd()
-				index := uint32(intervalCount)
+				index := uint32(intervalCount) // #nosec G115
 				if interval, err := v4l2.GetFormatFrameInterval(fd, index, encoding, width, height); err == nil {
 					frameInfo.Rates = append(frameInfo.Rates, v4l2.Fract{
 						// this swaps the internally tracked frame interval (seconds per frame)

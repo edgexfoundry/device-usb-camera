@@ -16,5 +16,5 @@
 
 edgeXBuildGoApp (
     project: 'device-usb-camera',
-    goVersion: '1.23'
+    goVersion: '1.25'
 )
