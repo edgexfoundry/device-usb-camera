@@ -37,7 +37,7 @@ RUN curl -o LICENSE-mediamtx https://raw.githubusercontent.com/bluenviron/mediam
 
 RUN ${MAKE}
 
-FROM bluenviron/mediamtx:1.8.2 AS rtsp
+FROM bluenviron/mediamtx:1.15.3 AS rtsp
 
 FROM alpine:3.22
 
