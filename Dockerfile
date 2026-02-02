@@ -39,7 +39,7 @@ RUN ${MAKE}
 
 FROM bluenviron/mediamtx:1.15.3 AS rtsp
 
-FROM alpine:3.22
+FROM alpine:3.23.2
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2023: Intel Corporation'
